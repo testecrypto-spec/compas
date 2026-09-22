@@ -4345,7 +4345,7 @@ function diagMicro(){
     const c=S.ctx||Audio_.ctx,p=S.flux&&S.flux.getAudioTracks()[0],r=(p&&p.getSettings&&p.getSettings())||{};
     return "<br><small style='opacity:.7'>Diagnostic : audio "+(c?c.state+" "+c.sampleRate+" Hz":"absent")+
       " · entrée "+(r.sampleRate||"?")+" Hz · piste "+(p?p.readyState+(p.muted?" muette":"")+(p.enabled?"":" désactivée"):"absente")+
-      " · blocs reçus "+(S.nProc||0)+" · session "+((navigator.audioSession&&navigator.audioSession.type)||"n/d")+"</small>";
+      " · blocs reçus "+(S.nProc||0)+" · pic "+(S.vuSon>0?Math.round(dB(S.vuSon))+" dB":"0")+" · réglage "+((S.strat||0)+1)+" · session "+((navigator.audioSession&&navigator.audioSession.type)||"n/d")+"</small>";
   }catch(e){return "";}
 }
 function couperMicro(silencieux){
@@ -4377,9 +4377,8 @@ function surveilleMicro(tentative){
       return;
     }
     avisMicro("Aucun son n'arrive encore"+(nomMicro()?" du micro <b>"+nomMicro().replace(/[<>&]/g,"")+"</b>":"")+
-      (tentative?". Même après avoir tout rouvert. Ferme complètement Compás (balaye l'app vers le haut dans le sélecteur d'apps), déconnecte les AirPods le temps d'un essai, puis rouvre.":
-      ". Joue quelques notes : si la jauge reste à zéro, touche « Tout rouvrir ». Sinon, débranche les écouteurs sans fil, ou vérifie qu'aucune autre application ne tient le micro.")+
-      ' <button type="button" id="btnMicroRelance" class="mini">Tout rouvrir</button>'+diagMicro());
+      ". Touche « Chercher un réglage qui marche » et parle ou joue pendant les essais (une dizaine de secondes)."+
+      ' <button type="button" id="btnMicroRelance" class="mini">Chercher un réglage qui marche</button>'+diagMicro());
     const rb=$("#btnMicroRelance");
     if(rb)rb.addEventListener("click",function(){
       if(S.running){avisMicro("Attends la fin du passage avant de rouvrir le son.");return;}
@@ -4389,41 +4388,93 @@ function surveilleMicro(tentative){
 }
 // tout reprendre depuis zéro, dans le geste : session, contexte neuf, puis un micro neuf
 // (sur iOS, un flux déjà branché sur un contexte fermé ne livre plus rien dans le suivant)
-async function rouvreMicro(){
-  avisMicro("Je rouvre le son et le micro…");
-  try{if(S.flux)S.flux.getTracks().forEach(t=>{t.removeEventListener("ended",perduMicro);t.removeEventListener("mute",perduMicro);t.stop();});}catch(e){}
-  detacheMicro();S.flux=null;S.micro=false;
-  sessionAudio(true);
-  try{if(typeof Veille!=="undefined")Veille.arrete();}catch(e){}
-  refaisContexte();
-  await ouvreMicro(true);
+// quatre façons d'ouvrir le micro : selon la version d'iOS, l'une ou l'autre ne livre que des zéros
+const STRATS_MICRO=[
+  {ec:false,apres:false,nom:"brut, son ouvert avant"},
+  {ec:false,apres:true,nom:"brut, son ouvert après"},
+  {ec:true,apres:true,nom:"standard, son ouvert après"},
+  {ec:true,apres:false,nom:"standard, son ouvert avant"}];
+function contraintesMicro(st){return st.ec?{audio:true}:{audio:{echoCancellation:false,noiseSuppression:false,autoGainControl:false}};}
+function stratSauvee(){try{const v=localStorage.getItem("compas-strat-micro");const i=v===null?0:+v;return STRATS_MICRO[i]?i:0;}catch(e){return 0;}}
+function sauveStrat(i){try{localStorage.setItem("compas-strat-micro",String(i));}catch(e){}}
+const attente=ms=>new Promise(ok=>setTimeout(ok,ms));
+function lacheFlux(f){
+  try{if(f)f.getTracks().forEach(t=>{t.removeEventListener("ended",perduMicro);t.removeEventListener("mute",perduMicro);t.stop();});}catch(e){}
 }
-async function ouvreMicro(tentative){
-  const b=$("#btnMicro");
+// l'enregistreur du système reçoit-il du son, lui ? (sépare un micro muet d'un défaut du moteur audio)
+async function testEnregistreur(){
+  if(!window.MediaRecorder||!S.flux)return "indisponible";
   try{
-    S.flux=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:false,noiseSuppression:false,autoGainControl:false}});
+    const r=new MediaRecorder(S.flux),parts=[];
+    r.ondataavailable=e=>{if(e.data&&e.data.size)parts.push(e.data);};
+    const fin=new Promise(ok=>r.onstop=ok);
+    r.start();await attente(1500);r.stop();await fin;
+    const ab=await new Blob(parts,{type:r.mimeType||"audio/mp4"}).arrayBuffer();
+    const buf=await new Promise((ok,ko)=>{const p=S.ctx.decodeAudioData(ab,ok,ko);if(p&&p.then)p.then(ok,ko);});
+    const d=buf.getChannelData(0);let m=0;for(let i=0;i<d.length;i++){const v=Math.abs(d[i]);if(v>m)m=v;}
+    return m>1e-6?"son capté ("+Math.round(dB(m))+" dB)":"silence aussi";
+  }catch(e){return "échec ("+(e&&e.name||"erreur")+")";}
+}
+// on essaie les quatre façons l'une après l'autre et on garde la première qui entend quelque chose
+async function rouvreMicro(){
+  const res=[];
+  for(let k=0;k<STRATS_MICRO.length;k++){
+    avisMicro("Essai "+(k+1)+" sur 4… <b>parle ou joue sans t'arrêter</b> pendant les essais.");
+    const ancien=S.flux;
+    detacheMicro();S.micro=false;
+    sessionAudio(true);
+    try{if(typeof Veille!=="undefined")Veille.arrete();}catch(e){}
+    if(!STRATS_MICRO[k].apres)refaisContexte();     // contexte neuf pendant que l'ancienne capture tourne encore
+    lacheFlux(ancien);S.flux=null;
+    const ok=await ouvreMicro(true,k,true);
+    if(!ok){res.push((k+1)+" : erreur");continue;}
+    S.vuSon=0;await attente(1600);
+    const pic=S.vuSon;
+    res.push((k+1)+" : "+(pic>1e-7?Math.round(dB(pic))+" dB":"zéro")+" ("+(S.nProc||0)+" blocs)");
+    if(pic>1e-7){
+      sauveStrat(k);
+      avisMicro("Le micro entend enfin ! Réglage « "+STRATS_MICRO[k].nom+" » retenu pour les prochaines fois."+
+        "<br><small style='opacity:.7'>Essais : "+res.join(" · ")+"</small>");
+      return;
+    }
+  }
+  const rec=await testEnregistreur();
+  avisMicro("Aucune des 4 façons d'ouvrir le micro ne reçoit de son."+
+    (rec.indexOf("son capté")===0?" Pourtant l'enregistreur de l'iPad, lui, entend : c'est le moteur audio de Safari qui bloque.":
+     " L'enregistreur de l'iPad n'entend rien non plus : c'est le micro lui-même qui est coupé pour Compás.")+
+    ' <button type="button" id="btnMicroRelance" class="mini">Recommencer les essais</button>'+
+    "<br><small style='opacity:.7'>Essais : "+res.join(" · ")+" · enregistreur : "+rec+"</small>"+diagMicro());
+  const rb=$("#btnMicroRelance");if(rb)rb.addEventListener("click",function(){if(!S.running)rouvreMicro();});
+}
+async function ouvreMicro(tentative,idx,discret){
+  const b=$("#btnMicro");
+  if(idx===undefined)idx=stratSauvee();
+  const st=STRATS_MICRO[idx];
+  try{
+    S.flux=await navigator.mediaDevices.getUserMedia(contraintesMicro(st));
     const piste=S.flux.getAudioTracks()[0];
     const reg=(piste&&piste.getSettings&&piste.getSettings())||{};
     let ctx=Audio_.ctx;
-    // le contexte tourne à une autre fréquence que l'entrée : on le rouvre (autorisé, la capture est active)
-    if(ctx&&!S.running&&reg.sampleRate&&Math.abs(ctx.sampleRate-reg.sampleRate)>1)ctx=refaisContexte();
+    if(!S.running&&(st.apres||(ctx&&reg.sampleRate&&Math.abs(ctx.sampleRate-reg.sampleRate)>1)))ctx=refaisContexte();
     ctx=ctxAudio();
     brancheMicro(ctx);
-    S.micro=true;S.micRefait=false;
+    S.micro=true;S.micRefait=false;S.strat=idx;
     b.disabled=false;b.textContent="Micro actif — toucher pour couper";
     if(piste){
       piste.addEventListener("ended",perduMicro);
       piste.addEventListener("mute",perduMicro);
     }
-    avisMicro("J'écoute…");
-    surveilleMicro(tentative);
+    if(!discret){avisMicro("J'écoute…");surveilleMicro(tentative);}
+    return true;
   }catch(err){
     S.micro=false;b.disabled=false;b.textContent="Activer le micro";
+    if(discret)return false;
     sessionAudio(false);
     const nom=err&&err.name?err.name:"erreur";
     avisMicro(nom==="NotAllowedError"
       ? "L'accès au micro a été refusé. Sur iPad : Réglages → Safari → Micro (ou, pour l'application installée sur l'écran d'accueil, supprime-la de l'écran d'accueil et réinstalle-la pour que la question soit reposée)."
       : "Le micro n'est pas accessible dans cette page ("+nom+"). Autorise le micro pour Compás quand l'iPad le demande, ou dans les réglages de Safari (rubrique Microphone), puis touche à nouveau « Activer le micro ». Tout le reste fonctionne sans lui.");
+    return false;
   }
 }
 function activeMicro(){
@@ -4431,8 +4482,6 @@ function activeMicro(){
   if(S.micro){couperMicro();return;}
   b.disabled=true;b.textContent="Micro…";
   avisMicro("");
-  // tout ce qui touche au son se fait ici, encore dans le geste : session d'enregistrement,
-  // lecteur de veille arrêté (il imposerait une session « lecture seule »), contexte neuf
   sessionAudio(true);
   if(!S.running){
     try{if(typeof Veille!=="undefined")Veille.arrete();}catch(e){}
@@ -4441,7 +4490,7 @@ function activeMicro(){
   return ouvreMicro(false);
 }
 $("#btnMicro").addEventListener("click",activeMicro);
-window.S_micro=()=>S.micro;window.S_flux=()=>S.flux;window.refaisContexte=refaisContexte;
+window.S_micro=()=>S.micro;window.S_flux=()=>S.flux;window.refaisContexte=refaisContexte;window.rouvreMicro=rouvreMicro;
 
 function analyse(ev){
   S.nProc=(S.nProc||0)+1;

@@ -259,6 +259,10 @@ footer{color:var(--muted);font-size:.82rem;margin-top:1.6rem;max-width:70ch}
 
   /* grille rasgueado */
   .grille{display:flex;gap:2px;flex-wrap:wrap;margin:6px 0 4px}
+  .grille{row-gap:10px;column-gap:8px}
+  .bloc-temps{display:flex;flex-direction:column;gap:3px}
+  .bloc-temps .cases{display:flex;gap:2px}
+  .num-temps{font-size:.7rem;color:var(--tapa-doux);padding-left:3px}
   .pas{position:relative;width:46px;height:56px;border:1px solid var(--trait);border-radius:2px;display:flex;flex-direction:column;align-items:center;justify-content:center;background:var(--ebano);cursor:pointer;color:var(--tapa-doux);font-family:"Bodoni Moda",Georgia,serif;font-size:1.4rem;line-height:1;padding:0}
   .pas .sens{font-family:"Archivo",sans-serif;font-size:.62rem;color:var(--bronce);margin-top:3px}
   .pas.vide{color:var(--tapa-doux);opacity:.45}
@@ -939,7 +943,7 @@ footer{color:var(--muted);font-size:.82rem;margin-top:1.6rem;max-width:70ch}
     </div>
     <div>
       <label for="duree">Le patron s'étend sur</label>
-      <select id="duree"><option value="1" selected>1 temps</option><option value="2">2 temps</option><option value="3">3 temps</option><option value="4">4 temps</option></select>
+      <select id="duree"><option value="1" selected>1 temps</option><option value="2">2 temps</option><option value="3">3 temps</option><option value="4">4 temps</option><option value="6">6 temps</option><option value="8">8 temps</option><option value="12">12 temps (un compás)</option></select>
     </div>
     <div>
       <label for="ancrage">Ancrage sur le temps</label>
@@ -961,7 +965,35 @@ footer{color:var(--muted);font-size:.82rem;margin-top:1.6rem;max-width:70ch}
     </div>
     <p class="aide">Clique une case pour la choisir, puis un doigt. Le trait doré marque chaque temps ; le point rouge, la frappe qui tombe pile sur le temps.</p>
     <p id="glosePatron" class="glose"></p>
+    <div class="actions"><button type="button" id="btnPatronVide">Partir d'une grille vide</button></div>
   </div>
+
+  <details class="exo-ajout" id="rasAjout">
+    <summary>Ajouter ce patron à mes rasgueados</summary>
+    <p class="aide">Compose ton exercice sur la grille (subdivision, nombre de temps, doigts, sens, accents), puis enregistre-le : il apparaît dans « Modèle de départ », rubrique « Mes rasgueados », avec son tempo. Il reste dans cet appareil.</p>
+    <div class="reglages">
+      <div>
+        <label for="rasNom">Nom du rasgueado</label>
+        <input type="text" id="rasNom" class="champ" placeholder="Remate de soleá" autocomplete="off">
+      </div>
+    </div>
+    <label for="rasNote" class="exo-label">Consigne ou remarque</label>
+    <textarea id="rasNote" class="champ" rows="2" placeholder="Accent sur le retour de l'index, poignet immobile…"></textarea>
+    <div class="actions">
+      <button class="primaire" id="rasEnregistrer" type="button">Enregistrer comme nouveau rasgueado</button>
+      <button id="rasMettreAJour" type="button" hidden>Mettre à jour</button>
+      <button id="rasSupprimer" type="button" hidden>Supprimer</button>
+    </div>
+    <h3>Sauvegarder ou transmettre</h3>
+    <p class="aide">Exporte tes rasgueados dans un fichier pour les garder à l'abri ou les passer sur un autre appareil.</p>
+    <div class="actions">
+      <button id="rasExporter" type="button">Exporter mes rasgueados</button>
+      <label class="bouton-fichier secondaire">Importer un fichier de rasgueados
+        <input type="file" id="rasImporter" accept=".json,application/json">
+      </label>
+    </div>
+  </details>
+  <p class="aide exo-retour" id="rasRetour" aria-live="polite"></p>
 </section>
 </div>
 
@@ -3350,15 +3382,135 @@ const posMax=()=>P.golpes.length?Math.max(...P.golpes.map(g=>g.pos)):0;
 const decalage=()=>P.ancrage==="fin"?posMax():0;
 
 const selModele=$("#patron");
-MODELES.forEach(m=>{const o=document.createElement("option");o.value=m.id;o.textContent=m.nom;selModele.appendChild(o);});
+/* ---- mes rasgueados : patrons composés sur la grille, gardés dans l'appareil ---- */
+const CLE_RAS="compas-rasgueados";
+const RP={perso:[]};
+const SUBS_OK=[1,2,3,4,5,6,8],DUREES_OK=[1,2,3,4,6,8,12];
+function rasValide(r){
+  if(!r||typeof r!=="object")return null;
+  const sub=+r.sub,duree=+r.duree;
+  if(SUBS_OK.indexOf(sub)<0||DUREES_OK.indexOf(duree)<0||!Array.isArray(r.golpes))return null;
+  const vus={};
+  const golpes=r.golpes.map(g=>({pos:parseInt(g&&g.pos,10),doigt:String(g&&g.doigt),sens:String(g&&g.sens),acc:!!(g&&g.acc)}))
+    .filter(g=>g.pos>=0&&g.pos<sub*duree&&"piame".indexOf(g.doigt)>=0&&g.doigt.length===1&&["↓","↑","•"].indexOf(g.sens)>=0&&!vus[g.pos]&&(vus[g.pos]=1))
+    .sort((a,b)=>a.pos-b.pos);
+  if(!golpes.length)return null;
+  return {id:(typeof r.id==="string"&&/^r-/.test(r.id))?r.id:nouvelIdRas(),nom:String(r.nom||"Rasgueado sans nom").slice(0,120),
+    sub,duree,ancrage:r.ancrage==="fin"?"fin":"debut",golpes,glose:String(r.glose||"").slice(0,2000),
+    tempo:Math.max(30,Math.min(240,parseInt(r.tempo,10)||0))||null,cree:r.cree||Date.now(),modifie:r.modifie||Date.now()};
+}
+function nouvelIdRas(){return "r-"+Date.now().toString(36)+Math.random().toString(36).slice(2,6);}
+function chargeRasPerso(){
+  try{const d=JSON.parse(localStorage.getItem(CLE_RAS)||"null");if(d&&Array.isArray(d.rasgueados))RP.perso=d.rasgueados.map(rasValide).filter(Boolean);}catch(e){}
+}
+function sauveRasPerso(){
+  try{localStorage.setItem(CLE_RAS,JSON.stringify({format:"compas-rasgueados",v:1,rasgueados:RP.perso}));return true;}catch(e){return false;}
+}
+const rasPerso=id=>RP.perso.find(r=>r.id===id)||null;
+function remplitModeles(){
+  const v=selModele.value;
+  selModele.innerHTML="";
+  const g1=document.createElement("optgroup");g1.label="Modèles";
+  MODELES.forEach(m=>{const o=document.createElement("option");o.value=m.id;o.textContent=m.nom;g1.appendChild(o);});
+  selModele.appendChild(g1);
+  if(RP.perso.length){
+    const g2=document.createElement("optgroup");g2.label="Mes rasgueados ("+RP.perso.length+")";
+    RP.perso.forEach(r=>{const o=document.createElement("option");o.value=r.id;o.textContent=r.nom;g2.appendChild(o);});
+    selModele.appendChild(g2);
+  }
+  const o=document.createElement("option");o.value="vide";o.textContent="— grille vide —";selModele.appendChild(o);
+  if(v&&[...selModele.options].some(x=>x.value===v))selModele.value=v;
+}
+chargeRasPerso();remplitModeles();
 
 function chargeModele(id){
-  const m=MODELES.find(x=>x.id===id)||MODELES[0];
+  if(id==="vide"){
+    P.golpes=[];P.glose="Grille vide : choisis la subdivision et le nombre de temps, puis place tes frappes.";P.nom="Rasgueado libre";
+    P.sub=+$("#sub").value;P.duree=+$("#duree").value;P.ancrage=$("#ancrage").value;
+    selModele.value="vide";S.choisi=0;dessineGrille();majBoutonsRas();return;
+  }
+  const m=rasPerso(id)||MODELES.find(x=>x.id===id)||MODELES[0];
   P.sub=m.sub;P.duree=m.duree;P.ancrage=m.ancrage;
   P.golpes=m.golpes.map(g=>({...g}));P.glose=m.glose;P.nom=m.nom;
   $("#sub").value=String(m.sub);$("#duree").value=String(m.duree);$("#ancrage").value=m.ancrage;
-  S.choisi=null;dessineGrille();
+  if(rasPerso(id)&&m.tempo){$("#bpm").value=String(m.tempo);const tv=$("#tBpmVal");if(tv)tv.textContent=String(m.tempo);}
+  S.choisi=null;dessineGrille();majBoutonsRas();
 }
+function retourRas(t){$("#rasRetour").textContent=t;}
+function majBoutonsRas(){
+  const r=rasPerso(selModele.value);
+  $("#rasMettreAJour").hidden=!r;$("#rasSupprimer").hidden=!r;
+  if(r){$("#rasMettreAJour").textContent="Mettre à jour « "+r.nom+" »";$("#rasSupprimer").textContent="Supprimer « "+r.nom+" »";}
+}
+function enregistreRas(maj){
+  if(!P.golpes.length){retourRas("La grille est vide : place au moins une frappe avant d'enregistrer.");return;}
+  const glose=$("#rasNote").value.trim();
+  const champs={nom:$("#rasNom").value.trim()||"Rasgueado sans nom",sub:P.sub,duree:P.duree,ancrage:P.ancrage,
+    golpes:P.golpes.map(g=>({pos:g.pos,doigt:g.doigt,sens:g.sens,acc:!!g.acc})),glose,
+    tempo:parseInt($("#bpm").value,10)||70,modifie:Date.now()};
+  let r;
+  if(maj){
+    r=rasPerso(selModele.value);
+    if(!r){retourRas("Choisis d'abord un de tes rasgueados dans « Modèle de départ ».");return;}
+    Object.assign(r,champs);
+  }else{
+    r=rasValide(Object.assign({id:nouvelIdRas(),cree:Date.now()},champs));
+    RP.perso.push(r);
+  }
+  if(!sauveRasPerso()){retourRas("L'appareil a refusé l'enregistrement (stockage plein ou navigation privée).");return;}
+  remplitModeles();selModele.value=r.id;P.nom=r.nom;P.glose=r.glose||P.glose;dessineGrille();majBoutonsRas();
+  retourRas(maj?"« "+r.nom+" » est mis à jour.":"« "+r.nom+" » rejoint « Mes rasgueados », avec son tempo de "+r.tempo+".");
+}
+$("#rasEnregistrer").addEventListener("click",()=>enregistreRas(false));
+$("#rasMettreAJour").addEventListener("click",()=>enregistreRas(true));
+$("#rasSupprimer").addEventListener("click",()=>{
+  const r=rasPerso(selModele.value);if(!r)return;
+  if(!confirm("Supprimer le rasgueado « "+r.nom+" » ?"))return;
+  RP.perso=RP.perso.filter(x=>x.id!==r.id);sauveRasPerso();
+  remplitModeles();selModele.value=MODELES[0].id;majBoutonsRas();
+  retourRas("« "+r.nom+" » est supprimé. La grille garde le patron tant que tu n'en choisis pas un autre.");
+  if(typeof sauve==="function")sauve();
+});
+$("#btnPatronVide").addEventListener("click",()=>chargeModele("vide"));
+$("#rasAjout").addEventListener("toggle",()=>{
+  if(!$("#rasAjout").open)return;
+  const r=rasPerso(selModele.value);
+  $("#rasNom").value=r?r.nom:"";$("#rasNote").value=r?(r.glose||""):"";
+});
+$("#rasExporter").addEventListener("click",async()=>{
+  if(!RP.perso.length){retourRas("Tu n'as pas encore de rasgueado à toi à exporter.");return;}
+  const txt=JSON.stringify({format:"compas-rasgueados",v:1,rasgueados:RP.perso},null,1);
+  const nom="compas-rasgueados-"+new Date().toISOString().slice(0,10)+".json";
+  try{
+    const f=new File([txt],nom,{type:"application/json"});
+    if(navigator.standalone===true&&navigator.canShare&&navigator.canShare({files:[f]})){
+      await navigator.share({files:[f],title:"Rasgueados Compás"});
+      retourRas(RP.perso.length+" rasgueado(s) exporté(s).");return;
+    }
+  }catch(err){if(err&&err.name==="AbortError")return;}
+  const a=document.createElement("a");
+  a.href=URL.createObjectURL(new Blob([txt],{type:"application/json"}));a.download=nom;
+  document.body.appendChild(a);a.click();
+  setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove();},1500);
+  retourRas(RP.perso.length+" rasgueado(s) exporté(s) dans « "+nom+" ».");
+});
+$("#rasImporter").addEventListener("change",async e=>{
+  const f=e.target.files&&e.target.files[0];e.target.value="";
+  if(!f)return;
+  let d=null;
+  try{d=JSON.parse(await f.text());}catch(err){retourRas("Ce fichier n'est pas un fichier de rasgueados lisible.");return;}
+  const liste=Array.isArray(d)?d:(d&&Array.isArray(d.rasgueados)?d.rasgueados:null);
+  if(!liste){retourRas("Ce fichier ne contient pas de rasgueados.");return;}
+  let aj=0,mj=0,refus=0;
+  liste.forEach(x=>{
+    const r=rasValide(x);if(!r){refus++;return;}
+    const i=RP.perso.findIndex(y=>y.id===r.id);
+    if(i>=0){RP.perso[i]=r;mj++;}else{RP.perso.push(r);aj++;}
+  });
+  if(!sauveRasPerso()){retourRas("L'appareil a refusé l'enregistrement (stockage plein ou navigation privée).");return;}
+  remplitModeles();majBoutonsRas();
+  retourRas(aj+" rasgueado(s) ajouté(s)"+(mj?", "+mj+" mis à jour":"")+(refus?", "+refus+" ignoré(s)":"")+".");
+});
 
 function dessineGrille(){
   const gr=$("#grille"),rg=$("#reglure");
@@ -3373,11 +3525,16 @@ function dessineGrille(){
     c.innerHTML=g?((g.acc?'<span class="marque-acc">&gt;</span>':'')+g.doigt+'<span class="sens">'+(g.sens==="•"?"·":g.sens)+'</span>'):"·";
     c.title=g?(NOMS[g.doigt]+(g.acc?", accentué":"")):"silence";
     c.addEventListener("click",()=>{S.choisi=i;dessineGrille();});
-    gr.appendChild(c);
-    const s=document.createElement("span");
-    s.textContent=(i%P.sub===0)?String(Math.floor(i/P.sub)+1):"";
-    rg.appendChild(s);
+    // un bloc par temps : ses cases, puis son numéro dessous (le retour à la ligne tombe entre deux temps)
+    if(i%P.sub===0){
+      const bl=document.createElement("div");bl.className="bloc-temps";
+      const cs=document.createElement("div");cs.className="cases";bl.appendChild(cs);
+      const nu=document.createElement("span");nu.className="num-temps";nu.textContent=String(Math.floor(i/P.sub)+1);bl.appendChild(nu);
+      gr.appendChild(bl);
+    }
+    gr.lastChild.firstChild.appendChild(c);
   }
+  rg.hidden=true;
   $("#glosePatron").textContent=P.glose;
   majVitesse();
   if(typeof sauve==="function")sauve();
@@ -4790,7 +4947,7 @@ function demarre(){
   }else if(S.mode==="rasgueado"){
     if(!P.golpes.length){$("#etat").textContent="Place au moins une frappe sur la grille.";return;}
     S.groupe=parseInt($("#groupe").value,10);
-    S.decompte=Math.max(S.groupe===12?4:S.groupe,P.duree+1);
+    S.decompte=Math.max(S.groupe===12?4:S.groupe,P.ancrage==="fin"?P.duree+1:Math.min(P.duree+1,5));
   }else{
     let n=0;R.mesures.forEach(m=>m.forEach(c=>{if(c.actif!==false)n+=c.att.filter(Boolean).length;}));
     if(!n){$("#etat").textContent="Aucune frappe active : écris ou réactive au moins une cellule.";return;}
@@ -5490,7 +5647,7 @@ function restaure(){
   $("#clicDecompte").checked=!!d.clicDecompte;
   $("#tBpmVal").textContent=$("#bpm").value;
   $("#seuilVal").textContent="−"+Math.abs($("#seuil").value);$("#latenceVal").textContent=$("#latence").value;placeSeuil();
-  if(d.patronId&&MODELES.some(m=>m.id===d.patronId))selModele.value=d.patronId;
+  if(d.patronId&&(MODELES.some(m=>m.id===d.patronId)||rasPerso(d.patronId)||d.patronId==="vide"))selModele.value=d.patronId;majBoutonsRas();
   if(d.P&&Array.isArray(d.P.golpes)){
     Object.assign(P,d.P);
     $("#sub").value=String(P.sub);$("#duree").value=String(P.duree);$("#ancrage").value=P.ancrage;

@@ -571,6 +571,16 @@ footer{color:var(--muted);font-size:.82rem;margin-top:1.6rem;max-width:70ch}
 .poignee-fantome span{position:absolute;left:8px;top:2px;white-space:nowrap;background:var(--oro);color:var(--sur-oro);font-size:.78rem;font-weight:600;padding:2px 6px;border-radius:2px}
 .cejilla-m{display:flex;gap:6px}.cejilla-m select{min-width:8rem}.cejilla-m button{flex:none;width:44px;padding:0;font-size:1.2rem}
 .son-reel{margin-top:8px;display:flex;align-items:center;gap:8px;font-size:.85rem;color:var(--muted);cursor:pointer}
+.mix-m{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px 18px;margin-top:12px;padding:10px 12px;border:1px solid var(--edge);border-radius:3px}
+.mix-m label{display:flex;flex-direction:column;gap:4px;font-size:.85rem;color:var(--muted)}
+.mix-m label span{float:right}
+.mix-m input[type=range]{width:100%;accent-color:var(--oro)}
+.mix-m select{width:100%}
+.mix-etat{min-height:1.2em;margin:6px 0 0;font-weight:600}
+.mix-etat.en-silence{color:var(--carmin)}
+.mix-m label{display:grid;grid-template-columns:1fr auto;align-items:center}
+.mix-m label input,.mix-m label select{grid-column:1 / -1}
+.mix-m label span{font-variant-numeric:tabular-nums;color:var(--text)}
 
 /* ---------- bibliothèque d'exercices ---------- */
 .entraineur .champ{width:100%;background:var(--ebano);color:var(--tapa);border:1px solid var(--trait);border-radius:2px;padding:9px 11px;font:inherit;font-size:.95rem}
@@ -1545,16 +1555,32 @@ footer{color:var(--muted);font-size:.82rem;margin-top:1.6rem;max-width:70ch}
           </div>
         </div>
         <p class="aide" id="mCalInfo">Choisis un palo : les silences se calculent pour que le passage tombe à sa place dans le compás. Tu peux ensuite les ajuster temps par temps.</p>
-        <div class="actions"><button type="button" id="mEcouterPalo" class="primaire">Écouter la boucle</button></div>
       </details>
 
       <div class="notes-barre" role="toolbar" aria-label="Lecture et corrections">
         <button type="button" id="mNotesLecture" class="primaire">Écouter le passage</button>
+        <button type="button" id="mEcouterPalo" class="primaire">Écouter la boucle</button>
         <button type="button" id="mGomme" aria-pressed="false">Gomme</button>
         <button type="button" id="mAnnuler" disabled>Annuler</button>
         <button type="button" id="mNotesRetablir" hidden>Tout rétablir</button>
         <button type="button" id="mPdf">Exporter en PDF</button>
       </div>
+      <div class="mix-m" role="group" aria-label="Volumes pendant l'écoute">
+        <label>Musique <span id="mVolNotesVal">100</span><input type="range" id="mVolNotes" min="0" max="100" step="1" value="100"></label>
+        <label>Clic <span id="mVolClicVal">60</span><input type="range" id="mVolClic" min="0" max="100" step="1" value="60"></label>
+        <label>Palo <span id="mVolPaloVal">80</span><input type="range" id="mVolPalo" min="0" max="100" step="1" value="80"></label>
+        <label>Clic et palo
+          <select id="mDisparait">
+            <option value="0">jouent tout le temps</option>
+            <option value="1-1">1 mesure avec, 1 sans</option>
+            <option value="2-2">2 mesures avec, 2 sans</option>
+            <option value="4-2">4 mesures avec, 2 sans</option>
+            <option value="4-4">4 mesures avec, 4 sans</option>
+            <option value="2-4">2 mesures avec, 4 sans</option>
+          </select>
+        </label>
+      </div>
+      <p class="aide mix-etat" id="mMixEtat" aria-live="polite"></p>
       <p class="aide" id="mNotesEtat" aria-live="polite"></p>
       <div class="partition-m" id="mPartition" tabindex="0" aria-label="Transcription en notes"></div>
       <div class="note-outils" id="mNoteOutils" role="toolbar" aria-label="Corriger la note choisie" hidden>
@@ -7511,7 +7537,7 @@ function basculeClic(on){
 $("#mEcouterGrille").addEventListener("click",()=>{
   if(typeof arretePalo==="function")arretePalo();
   if(M.joue&&TP.clic){basculeClic(false);pause();return;}
-  basculeClic(true);
+  basculeClic(true);if(typeof appliqueMix==="function")appliqueMix();
   if(!M.joue){M.boucle=true;$("#mBoucle").checked=true;M.pos=M.a;lecture();}
 });
 function clicsGrille(){
@@ -7525,7 +7551,11 @@ function clicsGrille(){
       if(quand<now-0.02||quand>now+0.25)return;
       rep.clics[j]=true;
       const k=j-i0,debut=k>=0&&k%num===0;
-      Audio_.click(Math.max(quand,now),debut?0.75:0.5,debut);
+      // volume du clic et clic qui disparaît puis revient (réglages de la partition)
+      const nMes=Math.floor(Math.max(0,k)/num),mix=typeof MIX!=="undefined"?MIX:{clic:0.6};
+      const joue=typeof accompagne!=="function"||accompagne(nMes);
+      if(debut&&typeof etatMix==="function")setTimeout(()=>etatMix(joue,nMes),Math.max(0,(quand-now)*1000));
+      if(joue&&mix.clic>0)Audio_.click(Math.max(quand,now),(debut?0.75:0.5)*mix.clic*1.4,debut);
     });
   });
 }
@@ -8093,7 +8123,7 @@ setInterval(majBoutonsLecture,300);
 $("#mNotesLecture").addEventListener("click",()=>{
   if(PL.actif)arretePalo();
   if(M.joue){pause();basculeClic(false);return;}
-  basculeClic(false);M.boucle=true;$("#mBoucle").checked=true;M.pos=M.a;lecture();
+  basculeClic(false);appliqueMix();M.boucle=true;$("#mBoucle").checked=true;M.pos=M.a;lecture();
 });
 async function lancePalo(){
   const C=NT.C;if(!C)return;
@@ -8102,7 +8132,7 @@ async function lancePalo(){
   $("#mEcouterPalo").textContent="Préparation…";
   const r=await prepare(C.tS,C.tE,j);
   if(!r||j!==M.jeton)return;
-  PL.rendu=r;PL.actif=true;PL.k=0;PL.fait={};PL.sources=[];
+  PL.rendu=r;PL.actif=true;PL.k=0;PL.fait={};PL.sources=[];appliqueMix();
   PL.T0=contexte().currentTime+0.15;
   PL.timer=setInterval(tickPalo,40);tickPalo();
   const boucle=()=>{if(!PL.actif)return;teteNotes();PL.raf=requestAnimationFrame(boucle);};
@@ -8113,16 +8143,46 @@ function arretePalo(){
   if(!PL.actif)return;
   PL.actif=false;clearInterval(PL.timer);cancelAnimationFrame(PL.raf);
   PL.sources.forEach(s=>{try{s.stop();}catch(e){}});PL.sources=[];
+  etatMix(true,0);$("#mMixEtat").textContent="";
   teteNotes();majBoutonsLecture();
 }
-function frappePalo(quand,tp,premier){
+/* ---- les volumes (musique, clic, palo) et l'accompagnement qui disparaît puis revient ---- */
+const MIX={notes:1,clic:0.6,palo:0.8,dispar:"0"};
+(function(){
+  try{const m=JSON.parse(localStorage.getItem("compas-mix-notes")||"null");if(m)Object.assign(MIX,m);}catch(e){}
+  const lie=(id,cle)=>{const el=$(id),val=$(id+"Val");el.value=Math.round(MIX[cle]*100);val.textContent=el.value;
+    el.addEventListener("input",()=>{MIX[cle]=el.value/100;val.textContent=el.value;appliqueMix();garde();});};
+  const garde=()=>{try{localStorage.setItem("compas-mix-notes",JSON.stringify(MIX));}catch(e){}};
+  lie("#mVolNotes","notes");lie("#mVolClic","clic");lie("#mVolPalo","palo");
+  $("#mDisparait").value=MIX.dispar;
+  $("#mDisparait").addEventListener("change",()=>{MIX.dispar=$("#mDisparait").value;garde();});
+})();
+function appliqueMix(){try{contexte();if(M.bus)M.bus.gain.value=0.95*MIX.notes;}catch(e){}}
+// la mesure n (comptée depuis le début de l'écoute) a-t-elle son accompagnement ?
+function accompagne(n){
+  if(!MIX.dispar||MIX.dispar==="0")return true;
+  const [a,s]=MIX.dispar.split("-").map(x=>parseInt(x,10));
+  return (n%(a+s))<a;
+}
+function etatMix(joue,n){
+  const z=$("#mMixEtat");
+  if(!MIX.dispar||MIX.dispar==="0"){z.textContent="";z.classList.remove("en-silence");return;}
+  z.textContent=joue?"Mesure "+(n+1)+" : clic et palo jouent.":"Mesure "+(n+1)+" : clic et palo se taisent. Garde le compás dans ta tête.";
+  z.classList.toggle("en-silence",!joue);
+}
+function frappePalo(quand,tp,premier,nMes){
+  const joue=accompagne(nMes);
+  if(premier)setTimeout(()=>etatMix(joue,nMes),Math.max(0,(quand-contexte().currentTime)*1000));
+  if(!joue)return;
   const p=NT.C.palo,v=typeof state!=="undefined"?state.vols:{fuertes:0.85,sordas:0.8,cajon:0.75,click:0.4};
-  if(!p){Audio_.click(quand,premier?0.7:0.45,premier);return;}
+  if(MIX.clic>0)Audio_.click(quand,(premier?0.75:0.5)*MIX.clic*1.4,premier);
+  if(!p||MIX.palo<=0)return;
+  const g=MIX.palo*1.1;
   if(tp.acc){
-    palmaHit("F",quand,v.fuertes*0.9);
+    palmaHit("F",quand,v.fuertes*0.9*g);
     const der=p.accents[p.accents.length-1]===tp.compte;
-    if(der)Audio_.cajonTapa(quand,v.cajon*0.8);else Audio_.cajonGolpe(quand,v.cajon*0.8);
-  }else palmaHit("s",quand,v.sordas*0.8);
+    if(der)Audio_.cajonTapa(quand,v.cajon*0.8*g);else Audio_.cajonGolpe(quand,v.cajon*0.8*g);
+  }else palmaHit("s",quand,v.sordas*0.8*g);
 }
 function tickPalo(){
   if(!PL.actif)return;
@@ -8145,7 +8205,8 @@ function tickPalo(){
       const quand=PL.T0+k*Lb+tp.tv/vit,cle=k+":"+i;
       if(PL.fait[cle]||quand<now-0.02||quand>now+0.3)return;
       PL.fait[cle]=true;
-      frappePalo(Math.max(quand,now),tp,i%C.num===0);
+      const nMes=k*C.mesures.length+Math.floor(i/C.num);
+      frappePalo(Math.max(quand,now),tp,i%C.num===0,nMes);
     });
   }
 }

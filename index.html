@@ -640,6 +640,43 @@ footer{color:var(--muted);font-size:.82rem;margin-top:1.6rem;max-width:70ch}
 .entraineur .nb-mes input{flex:1;min-width:0;text-align:center;font-variant-numeric:tabular-nums}
 .entraineur .nb-mes button{flex:none;width:44px;padding:0;font-size:1.2rem;line-height:1}
 
+/* ---------- devoirs ---------- */
+.d-badge{display:inline-block;min-width:1.3em;margin-left:6px;padding:0 .35em;border-radius:999px;background:var(--carmin);color:#fff;font-size:.72rem;line-height:1.45;text-align:center;font-weight:600;vertical-align:1px}
+.d-rappel{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin:10px auto 0;max-width:1100px;padding:10px 14px;border:1px solid var(--oro);border-radius:4px;background:color-mix(in srgb,var(--oro) 12%,var(--bg));color:var(--text);font-size:.92rem}
+.d-rappel[hidden]{display:none}
+.d-rappel span{flex:1;min-width:200px}
+.d-rappel button{font:inherit;font-size:.85rem;cursor:pointer;border-radius:999px;padding:.35rem .9rem;border:1px solid var(--oro);background:var(--oro);color:#1B1220}
+.d-rappel button.d-fermer{background:none;color:var(--text);border-color:var(--edge)}
+.d-carte{border:1px solid var(--edge);border-radius:4px;background:var(--bg);padding:16px;margin-bottom:12px}
+.d-carte.fait{border-color:color-mix(in srgb,var(--verde) 60%,var(--edge))}
+.d-tete{display:flex;justify-content:space-between;align-items:baseline;gap:6px 14px;flex-wrap:wrap}
+.d-titre{font-weight:600;font-size:1.05rem;color:var(--text)}
+.d-statut{font-size:.85rem;font-weight:600;white-space:nowrap}
+.d-statut.fait{color:var(--verde)} .d-statut.afaire{color:var(--oro)}
+.d-sous{font-size:.84rem;color:var(--muted);margin:3px 0 0}
+.d-jours{display:flex;gap:3px;margin:12px 0 2px;max-width:420px}
+.d-jours i{flex:1;height:20px;border-radius:3px;border:1px solid var(--edge);background:transparent}
+.d-jours i.ok{background:var(--oro);border-color:var(--oro)}
+.d-jours i.auj{border-style:dashed;border-color:var(--text)}
+.d-jours i.ok.auj{border-style:solid}
+.d-jours i.avant{opacity:.25}
+.d-jours-leg{font-size:.74rem;color:var(--muted);display:flex;justify-content:space-between;max-width:420px}
+.d-bloc{margin-top:12px;font-size:.9rem;line-height:1.45;color:var(--text)}
+.d-bloc h4{font-size:.74rem;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin:0 0 5px;font-weight:600}
+.d-bloc ul{margin:0;padding:0;list-style:none}
+.d-bloc li{display:flex;gap:8px;margin:0 0 5px}
+.d-bloc li i{flex:none;width:9px;height:9px;border-radius:50%;margin-top:.45em}
+.d-bloc li i.mauvais{background:var(--carmin)} .d-bloc li i.moyen{background:var(--oro)} .d-bloc li i.bon{background:var(--verde)}
+.d-conseil{border-left:2px solid var(--oro);padding:2px 0 2px 10px}
+.d-carte .j-actions{margin-top:14px}
+.d-carte .j-actions button.prim{background:var(--oro);border-color:var(--oro);color:#1B1220;font-weight:600}
+.devoirs .j-reglages input{width:100%;box-sizing:border-box;font:inherit;padding:.5rem .6rem;background:var(--bg);color:var(--text);border:1px solid var(--edge);border-radius:4px}
+.d-veille-ligne{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;flex-wrap:wrap;padding:12px 0;border-bottom:1px solid var(--edge)}
+.d-veille-ligne:last-child{border-bottom:0}
+.d-veille-ligne .d-bloc{margin-top:6px}
+.d-veille-ligne > div{flex:1;min-width:220px}
+.d-veille-ligne .j-actions button{font-size:.82rem;padding:.35rem .9rem}
+
 /* ---------- journal de travail ---------- */
 .journal{font-variant-numeric:tabular-nums}
 .j-plateau{border:1px solid var(--edge);background:var(--panel);border-radius:4px;padding:22px;margin-bottom:22px}
@@ -746,7 +783,9 @@ footer{color:var(--muted);font-size:.82rem;margin-top:1.6rem;max-width:70ch}
   <button type="button" role="tab" id="ongletFigures" data-vue="rythme" aria-controls="vueEntraineur" aria-selected="false" tabindex="-1">Figures rythmiques</button>
   <button type="button" role="tab" id="ongletMorceaux" data-vue="morceaux" aria-controls="vueMorceaux" aria-selected="false" tabindex="-1">Morceaux</button>
   <button type="button" role="tab" id="ongletJournal" data-vue="journal" aria-controls="vueJournal" aria-selected="false" tabindex="-1">Journal</button>
+  <button type="button" role="tab" id="ongletDevoirs" data-vue="devoirs" aria-controls="vueDevoirs" aria-selected="false" tabindex="-1">Devoirs<span class="d-badge" id="dBadge" hidden></span></button>
 </nav>
+<div id="rappelDevoirs" class="d-rappel" hidden></div>
 <div id="vueMetronome">
 
 <div class="main">
@@ -1638,6 +1677,37 @@ footer{color:var(--muted);font-size:.82rem;margin-top:1.6rem;max-width:70ch}
   </div>
 </section>
 <div id="ancreMorceau" hidden></div>
+</div>
+<div id="vueDevoirs" class="journal devoirs" hidden>
+<section class="j-plateau">
+  <h2>Tes devoirs du jour</h2>
+  <p class="j-aide" id="dResume"></p>
+  <div id="dListe"></div>
+</section>
+
+<section class="j-plateau">
+  <h2 id="dVeilleTitre">Travaillé hier</h2>
+  <p class="j-aide" id="dVeilleAide"></p>
+  <div id="dVeille"></div>
+</section>
+
+<section class="j-plateau">
+  <h2>Ajouter un devoir</h2>
+  <p class="j-aide">Parmi les exercices que tu as déjà joués au micro. Un devoir se coche tout seul : il est fait dès qu'un passage mesuré de cet exercice entre dans le journal, le jour même.</p>
+  <div class="j-reglages">
+    <div><label for="dChoix">Exercice</label><select id="dChoix"></select></div>
+    <div><label for="dObjectif">Tempo visé (facultatif)</label><input type="number" id="dObjectif" min="30" max="240" step="1" inputmode="numeric" placeholder="par exemple 120"></div>
+  </div>
+  <div class="j-actions"><button type="button" id="dAjouter">Ajouter aux devoirs</button></div>
+</section>
+
+<section class="j-plateau">
+  <h2>Rappel quotidien</h2>
+  <p class="j-aide">Compás te montre tes devoirs dès que tu l'ouvres. Pour être prévenu app fermée, ajoute un rappel quotidien au Calendrier de l'iPad : une app web installée ne peut pas sonner toute seule.</p>
+  <div class="j-reglages"><div><label for="dHeure">Heure du rappel</label><input type="time" id="dHeure" value="18:00"></div></div>
+  <div class="j-actions"><button type="button" id="dIcs">Ajouter le rappel au calendrier</button></div>
+  <p class="j-aide" id="dRetour" aria-live="polite"></p>
+</section>
 </div>
 <div id="vueJournal" class="journal" hidden>
 <section class="j-plateau">
@@ -6128,7 +6198,10 @@ function entreeJournal(x){
     palo:(mode!=="morceau"&&S.palo)?S.palo.nom:null,
     r:x.r,v:x.v,a:x.a,fr:x.fr,att:A.length,dec:Math.round(x.dec),jit:Math.round(x.jit),
     dur:Math.round(Math.max(0,t1-t0)+(S.dureeTemps||0)),partiel:!!S.partiel,
-    diag:S.diagTexte||null,silences:S.sil?(S.sil.on+"-"+S.sil.off+" "+S.sil.quoi):null};
+    diag:S.diagTexte||null,silences:S.sil?(S.sil.on+"-"+S.sil.off+" "+S.sil.quoi):null,
+    pts:S.diagPoints||null,
+    ras:mode==="rasgueado"?selModele.value:null,
+    pat:mode==="rasgueado"?{sub:P.sub,duree:P.duree,ancrage:P.ancrage,nom:P.nom,glose:P.glose,golpes:P.golpes.map(g=>({pos:g.pos,doigt:g.doigt,sens:g.sens,acc:!!g.acc}))}:null};
 }
 // depuis le journal : on remet l'exercice et son tempo
 function rejoueSeance(s){
@@ -6268,6 +6341,7 @@ function titrePassage(){
   return e&&codeCompact(e.code)===compactMesures(R.num,R.den,R.mesures)?e.titre:"Partition libre — "+R.num+"/"+R.den;
 }
 function compteRendu(){
+  S.diagPoints=null;
   const z=$("#compteRendu");if(!z)return null;
   const A=S.attendus,T=A.filter(a=>a.dev!==null);
   if(T.length<4){z.hidden=true;return null;}
@@ -6391,6 +6465,7 @@ function compteRendu(){
   });
   z.appendChild(ul);
   z.hidden=false;
+  S.diagPoints=L.map(x=>({t:x.t,n:x.n,x:x.x}));
   return court.filter(Boolean).join(" · ");
 }
 
@@ -6415,6 +6490,24 @@ window.Entraineur={
   arrete:()=>{if(S.running){arrete();$("#gros").innerHTML="&nbsp;";$("#legendeGros").innerHTML="&nbsp;";$("#etat").textContent="Passage interrompu.";}},
   majPalo:()=>majPalo(),
   depuisMetronome:m=>depuisMetronome(m),
+  // un devoir : on remet l'exercice (figure, rasgueado ou morceau) et son tempo
+  travaille:s=>{
+    if(s.mode==="morceau"){if(window.Vues)Vues.montre("morceaux");return;}
+    if(s.mode==="rasgueado"){
+      if(window.Vues)Vues.montre("rasgueado");
+      if(s.ras&&[...selModele.options].some(o=>o.value===s.ras)&&s.ras!=="vide"){selModele.value=s.ras;chargeModele(s.ras);}
+      else if(s.pat&&Array.isArray(s.pat.golpes)){
+        Object.assign(P,{sub:s.pat.sub,duree:s.pat.duree,ancrage:s.pat.ancrage,nom:s.pat.nom||P.nom,glose:s.pat.glose||"",golpes:s.pat.golpes.map(g=>({...g}))});
+        $("#sub").value=String(P.sub);$("#duree").value=String(P.duree);$("#ancrage").value=P.ancrage;S.choisi=null;dessineGrille();
+      }
+      if(s.bpm){const v=Math.round(clamp(s.bpm,30,240));$("#bpm").value=String(v);$("#tBpmVal").textContent=String(v);majVitesse();}
+      sauve();
+      const z=document.getElementById("blocMicro")||document.getElementById("voletRas");if(z)z.scrollIntoView({block:"start"});
+      return;
+    }
+    if(window.Vues)Vues.montre("rythme");rejoueSeance(s);
+    const z=document.getElementById("blocMicro");if(z)z.scrollIntoView({block:"start"});
+  },
   rejoue:s=>{if(window.Vues)Vues.montre("rythme");rejoueSeance(s);const b=document.getElementById("blocBiblio");if(b)b.scrollIntoView({block:"start"});},
   redessine:()=>{if(!$("#resultats").classList.contains("masque"))nuage();},
   // lecture seule, pour vérifier le calendrier des frappes attendues
@@ -9197,15 +9290,233 @@ window.Journal={
   // pour la bibliothèque : combien de passages, et le dernier
   resume:cle=>{const l=J.seances.filter(s=>s.cle===cle);if(!l.length)return null;return {n:l.length,dernier:l[l.length-1]};},
   pret:()=>J.pret,
+  seances:()=>J.seances.slice(),
   dateCourte:t=>dateCourte(t)
 };
 charge();
 })();
 </script>
+<script>(function(){
+"use strict";
+/* =================================================================
+   DEVOIRS — les exercices en cours, vérifiés chaque jour à partir du journal
+   ================================================================= */
+const $=s=>document.querySelector(s);
+const CLE="compas-devoirs";
+const D={liste:[],heure:"18:00",masqueLe:null};
+const pad=n=>(n<10?"0":"")+n;
+const cleJour=d=>{d=new Date(d);return d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate());};
+const aujourdhui=()=>cleJour(Date.now());
+const JOURS=["dimanche","lundi","mardi","mercredi","jeudi","vendredi","samedi"];
+const MOIS=["janvier","février","mars","avril","mai","juin","juillet","août","septembre","octobre","novembre","décembre"];
+function dateLongue(k){const [a,m,j]=k.split("-").map(Number);const d=new Date(a,m-1,j);return JOURS[d.getDay()]+" "+j+" "+MOIS[m-1];}
+function decaleJour(k,n){const [a,m,j]=k.split("-").map(Number);return cleJour(new Date(a,m-1,j+n));}
+function esc(t){return String(t==null?"":t).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));}
+
+function charge(){
+  try{const d=JSON.parse(localStorage.getItem(CLE)||"null");
+    if(d&&Array.isArray(d.devoirs))D.liste=d.devoirs.filter(x=>x&&typeof x.cle==="string"&&typeof x.titre==="string");
+    if(d&&typeof d.heure==="string")D.heure=d.heure;
+    if(d&&typeof d.masqueLe==="string")D.masqueLe=d.masqueLe;
+  }catch(e){}
+}
+function sauve(){try{localStorage.setItem(CLE,JSON.stringify({v:1,devoirs:D.liste,heure:D.heure,masqueLe:D.masqueLe}));}catch(e){}}
+const seances=()=>(window.Journal&&Journal.seances)?Journal.seances():[];
+const deCle=(l,cle)=>l.filter(s=>s.cle===cle);
+const faitLe=(l,jour)=>l.some(s=>cleJour(s.t)===jour);
+
+/* ---- ce qu'il faut améliorer et comment progresser ---- */
+const CONSEILS={
+  "Placement":"Si tu es toujours du même côté du temps, refais « Corriger la latence ». Sinon, reprends au clic seul, un peu plus lent, en visant le cœur du clic.",
+  "Dérive":"Joue des passages plus courts (8 ou 16 temps) et garde le clic jusqu'au bout : le tempo doit tenir sans que tu y penses.",
+  "Pulso par pulso":"Isole le pulso fautif : joue le compás en ne pensant qu'à lui, puis remets tout.",
+  "Temps par temps":"Isole le temps fautif : répète-le seul en boucle, puis remets-le dans la mesure.",
+  "Par doigté":"Travaille le geste signalé seul, vingt frappes lentes et égales, avant de reprendre le patron entier.",
+  "Compás intérieur":"Raccourcis les silences, puis allonge-les petit à petit : le retour doit tomber pile."
+};
+function pointsDe(s){return (s&&Array.isArray(s.pts))?s.pts.filter(p=>p.n!=="bon"):[];}
+function noteTxt(s){return s.r!=null?"rythme "+s.r+(s.v!=null?" · volume "+s.v:"")+(s.a!=null?" · accents "+s.a:""):"";}
+function tempoDe(s){return s.mode==="morceau"?(s.vit!=null?s.vit+" %":null):(s.bpm||null);}
+function suggestion(dv,l){
+  if(!l.length)return {x:"Pas encore joué : fais un premier passage au micro, à un tempo où tout est propre.",niveau:"moyen"};
+  const der=l[l.length-1];
+  if(der.mode==="morceau"){
+    const v=der.vit||100,ok=l.slice(-3).filter(s=>s.r>=85).length;
+    if(der.r!=null&&der.r<60)return {x:"Ralentis la lecture vers "+Math.max(50,v-10)+" % : trop d'écarts pour progresser à "+v+" %.",niveau:"mauvais"};
+    if(ok>=3&&v<100)return {x:"Trois passages solides à "+v+" % : passe à "+Math.min(100,v+5)+" %.",niveau:"bon"};
+    return {x:"Reste à "+v+" % jusqu'à trois passages à 85 ou plus.",niveau:"moyen"};
+  }
+  const bpm=der.bpm||0,obj=dv.objectif||0;
+  const memes=l.filter(s=>s.bpm===bpm&&Date.now()-s.t<14*864e5);
+  const bons=memes.filter(s=>s.r>=85&&(s.v==null||s.v>=65));
+  const joursBons=new Set(bons.map(s=>cleJour(s.t))).size;
+  if(der.r!=null&&der.r<60){const b=Math.max(30,Math.round(bpm*0.9));return {x:"Redescends à "+b+" : à "+bpm+", il y a trop d'écarts pour que la répétition serve.",niveau:"mauvais"};}
+  if(obj&&bpm>=obj&&bons.length>=2)return {x:"Objectif atteint : "+bpm+" tenu proprement. Fixe un nouvel objectif, ou retire ce devoir.",niveau:"bon"};
+  if(bons.length>=3&&joursBons>=2){
+    const pas=bpm<80?4:bpm<140?5:6,n=obj?Math.min(obj,bpm+pas):bpm+pas;
+    return {x:"Tu tiens "+bpm+" sur plusieurs jours : monte à "+n+(obj?" (objectif "+obj+")":"")+".",niveau:"bon"};
+  }
+  const manque=Math.max(0,3-bons.length);
+  return {x:"Reste à "+bpm+" : "+(manque?"encore "+manque+" passage"+(manque>1?"s":"")+" à 85 ou plus":"confirme sur un deuxième jour")+" avant de monter"+(obj?" vers "+obj:"")+".",niveau:"moyen"};
+}
+function serie(l){
+  let k=aujourdhui(),n=0;
+  if(!faitLe(l,k))k=decaleJour(k,-1);
+  while(faitLe(l,k)){n++;k=decaleJour(k,-1);}
+  return n;
+}
+
+/* ---- rendu ---- */
+function carte(dv,tout){
+  const l=deCle(tout,dv.cle),auj=aujourdhui(),fait=faitLe(l,auj);
+  const duJour=l.filter(s=>cleJour(s.t)===auj),der=l[l.length-1]||null;
+  const debut=cleJour(dv.cree||Date.now());
+  const c=document.createElement("div");c.className="d-carte"+(fait?" fait":"");
+  let jours="",faits7=0,dus7=0;
+  for(let i=13;i>=0;i--){
+    const k=decaleJour(auj,-i),ok=faitLe(l,k),avant=k<debut;
+    if(i<7&&!avant&&!(i===0&&!ok)){dus7++;if(ok)faits7++;}
+    jours+='<i class="'+(ok?"ok ":"")+(i===0?"auj ":"")+(avant&&!ok?"avant":"")+'" title="'+esc(dateLongue(k))+(ok?" : fait":"")+'"></i>';
+  }
+  const hier=decaleJour(auj,-1),rateHier=hier>=debut&&!faitLe(l,hier);
+  const sr=serie(l);
+  let sous=[];
+  if(dv.objectif)sous.push("objectif "+dv.objectif);
+  if(der&&tempoDe(der))sous.push("dernier tempo "+tempoDe(der));
+  sous.push(sr?sr+" jour"+(sr>1?"s":"")+" de suite":"série à relancer");
+  if(dus7)sous.push(faits7+" jour"+(faits7>1?"s":"")+" sur "+dus7+" cette semaine");
+  const pts=pointsDe(der),sg=suggestion(dv,l);
+  const meilleur=duJour.length?duJour.reduce((a,b)=>(b.r||0)>(a.r||0)?b:a):null;
+  c.innerHTML=
+    '<div class="d-tete"><span class="d-titre">'+esc(dv.titre)+'</span>'+
+    '<span class="d-statut '+(fait?"fait":"afaire")+'">'+(fait?"Fait aujourd'hui ✓":"À faire aujourd'hui")+'</span></div>'+
+    '<p class="d-sous">'+esc(sous.join(" · "))+(fait&&meilleur?" — aujourd'hui : "+duJour.length+" passage"+(duJour.length>1?"s":"")+", meilleur "+esc(noteTxt(meilleur)):"")+'</p>'+
+    '<div class="d-jours" aria-label="Les 14 derniers jours">'+jours+'</div>'+
+    '<div class="d-jours-leg"><span>il y a 13 jours</span><span>aujourd\'hui</span></div>'+
+    (rateHier?'<p class="d-sous" style="color:var(--carmin)">Pas travaillé hier'+(sr===0&&!fait?" : reprends aujourd'hui pour relancer la série.":".")+'</p>':"")+
+    (der?'<div class="d-bloc"><h4>À améliorer (dernier passage, '+esc(Journal.dateCourte?Journal.dateCourte(der.t):"")+(tempoDe(der)?" à "+esc(tempoDe(der)):"")+')</h4>'+
+      (pts.length?'<ul>'+pts.slice(0,3).map(p=>'<li><i class="'+esc(p.n)+'"></i><span><b>'+esc(p.t)+'.</b> '+esc(p.x)+'</span></li>').join("")+'</ul>'
+        :(der.pts?'<p style="margin:0">Rien de saillant : '+esc(noteTxt(der))+'.</p>':'<p style="margin:0">'+esc(der.diag||noteTxt(der)||"—")+'</p>'))+'</div>':"")+
+    '<div class="d-bloc"><h4>Pour progresser</h4><p class="d-conseil" style="margin:0">'+esc(sg.x)+(pts[0]&&CONSEILS[pts[0].t]?" "+esc(CONSEILS[pts[0].t]):"")+'</p></div>'+
+    '<div class="j-actions"><button type="button" class="prim" data-act="jouer">Travailler maintenant</button>'+
+    '<button type="button" data-act="objectif">'+(dv.objectif?"Changer l'objectif":"Fixer un tempo visé")+'</button>'+
+    '<button type="button" data-act="retirer">Retirer des devoirs</button></div>';
+  c.querySelector('[data-act="jouer"]').addEventListener("click",()=>travaille(dv,der));
+  c.querySelector('[data-act="retirer"]').addEventListener("click",()=>{
+    if(!confirm("Retirer « "+dv.titre+" » de tes devoirs ? Son historique reste dans le journal."))return;
+    D.liste=D.liste.filter(x=>x.id!==dv.id);sauve();rend();
+  });
+  c.querySelector('[data-act="objectif"]').addEventListener("click",()=>{
+    const v=prompt("Tempo visé pour « "+dv.titre+" » (laisse vide pour aucun) :",dv.objectif||"");
+    if(v===null)return;
+    const n=parseInt(v,10);dv.objectif=(n>=30&&n<=240)?n:null;sauve();rend();
+  });
+  return c;
+}
+function travaille(dv,der){
+  const s=der||dv.ref||{};
+  if(window.Entraineur&&Entraineur.travaille)Entraineur.travaille(Object.assign({mode:dv.mode},dv.ref||{},s));
+}
+function exercicesConnus(tout){
+  const m=new Map();
+  tout.forEach(s=>m.set(s.cle,s));   // la dernière séance de chaque exercice
+  return [...m.values()].sort((a,b)=>b.t-a.t);
+}
+function ajoute(s,objectif){
+  if(D.liste.some(x=>x.cle===s.cle))return false;
+  D.liste.push({id:"d-"+Date.now().toString(36)+Math.random().toString(36).slice(2,5),cle:s.cle,titre:s.titre,mode:s.mode,
+    ref:{exo:s.exo||null,code:s.code||null,ras:s.ras||null,pat:s.pat||null,bpm:s.bpm||null,mode:s.mode},
+    objectif:objectif||null,cree:Date.now()});
+  sauve();return true;
+}
+function rendVeille(tout){
+  const auj=aujourdhui();
+  const avant=tout.filter(s=>cleJour(s.t)<auj);
+  const z=$("#dVeille");z.innerHTML="";
+  if(!avant.length){$("#dVeilleTitre").textContent="Ta dernière séance";$("#dVeilleAide").textContent="Rien encore dans le journal avant aujourd'hui : chaque passage mesuré au micro apparaîtra ici le lendemain.";return;}
+  const jour=cleJour(avant[avant.length-1].t),hier=decaleJour(auj,-1);
+  $("#dVeilleTitre").textContent=jour===hier?"Travaillé hier":"Ta dernière séance — "+dateLongue(jour);
+  $("#dVeilleAide").textContent=(jour===hier?"":"Rien hier. ")+"Ce que tu as joué ce jour-là, avec le dernier passage de chaque exercice.";
+  const duJour=avant.filter(s=>cleJour(s.t)===jour);
+  const parCle=new Map();duJour.forEach(s=>{const g=parCle.get(s.cle)||[];g.push(s);parCle.set(s.cle,g);});
+  parCle.forEach(l=>{
+    const der=l[l.length-1],meil=l.reduce((a,b)=>(b.r||0)>(a.r||0)?b:a),pts=pointsDe(der),deja=D.liste.some(x=>x.cle===der.cle);
+    const d=document.createElement("div");d.className="d-veille-ligne";
+    d.innerHTML='<div><span class="d-titre">'+esc(der.titre)+'</span>'+
+      '<p class="d-sous">'+l.length+' passage'+(l.length>1?"s":"")+(tempoDe(der)?" · tempo "+esc(tempoDe(der)):"")+(meil.r!=null?" · meilleur rythme "+meil.r:"")+'</p>'+
+      (pts.length?'<div class="d-bloc"><ul>'+pts.slice(0,2).map(p=>'<li><i class="'+esc(p.n)+'"></i><span><b>'+esc(p.t)+'.</b> '+esc(p.x)+'</span></li>').join("")+'</ul></div>':"")+'</div>'+
+      '<div class="j-actions"><button type="button" data-a="jouer">Rejouer</button>'+(deja?'<button type="button" disabled>Déjà en devoir</button>':'<button type="button" data-a="garder">Garder en devoir</button>')+'</div>';
+    d.querySelector('[data-a="jouer"]').addEventListener("click",()=>travaille({mode:der.mode,ref:null},der));
+    const g=d.querySelector('[data-a="garder"]');if(g)g.addEventListener("click",()=>{ajoute(der);rend();});
+    z.appendChild(d);
+  });
+}
+function rendChoix(tout){
+  const sel=$("#dChoix"),v=sel.value;sel.innerHTML="";
+  const l=exercicesConnus(tout).filter(s=>!D.liste.some(x=>x.cle===s.cle));
+  if(!l.length){const o=document.createElement("option");o.value="";o.textContent=tout.length?"tous tes exercices sont déjà en devoir":"aucun exercice dans le journal pour l'instant";sel.appendChild(o);sel.disabled=true;$("#dAjouter").disabled=true;return;}
+  sel.disabled=false;$("#dAjouter").disabled=false;
+  l.forEach(s=>{const o=document.createElement("option");o.value=s.cle;o.textContent=s.titre+(tempoDe(s)?" — "+tempoDe(s):"");sel.appendChild(o);});
+  if([...sel.options].some(o=>o.value===v))sel.value=v;
+}
+function aFaire(tout){const auj=aujourdhui();return D.liste.filter(dv=>!faitLe(deCle(tout,dv.cle),auj));}
+function rendRappel(){
+  const tout=seances(),n=aFaire(tout).length,b=$("#dBadge");
+  b.hidden=!n;b.textContent=n;
+  const r=$("#rappelDevoirs"),vue=document.body.dataset.vue;
+  if(!n||vue==="devoirs"||D.masqueLe===aujourdhui()){r.hidden=true;return;}
+  const noms=aFaire(tout).map(d=>d.titre);
+  r.innerHTML='<span><b>Devoirs du jour :</b> '+n+' à faire — '+esc(noms.slice(0,3).join(", "))+(noms.length>3?"…":"")+'</span>'+
+    '<button type="button" id="dVoir">Voir mes devoirs</button><button type="button" class="d-fermer" id="dPlusTard">Plus tard</button>';
+  r.hidden=false;
+  $("#dVoir").addEventListener("click",()=>{if(window.Vues)Vues.montre("devoirs");window.scrollTo(0,0);});
+  $("#dPlusTard").addEventListener("click",()=>{D.masqueLe=aujourdhui();sauve();r.hidden=true;});
+}
+function rend(){
+  const tout=seances();
+  rendRappel();
+  if($("#vueDevoirs").hidden)return;
+  const z=$("#dListe");z.innerHTML="";
+  const n=D.liste.length,reste=aFaire(tout).length;
+  $("#dResume").textContent=!n?"Aucun devoir pour l'instant. Garde un exercice d'hier, ou choisis-en un plus bas : Compás vérifiera chaque jour qu'il est travaillé.":
+    (reste?reste+" sur "+n+" encore à faire aujourd'hui, "+dateLongue(aujourdhui())+".":"Tous tes devoirs sont faits aujourd'hui. Bravo !");
+  // à faire d'abord, puis ceux déjà faits
+  const auj=aujourdhui();
+  D.liste.slice().sort((a,b)=>faitLe(deCle(tout,a.cle),auj)-faitLe(deCle(tout,b.cle),auj)).forEach(dv=>z.appendChild(carte(dv,tout)));
+  rendVeille(tout);rendChoix(tout);
+  $("#dHeure").value=D.heure;
+}
+$("#dAjouter").addEventListener("click",()=>{
+  const cle=$("#dChoix").value;if(!cle)return;
+  const s=exercicesConnus(seances()).find(x=>x.cle===cle);if(!s)return;
+  const o=parseInt($("#dObjectif").value,10);
+  ajoute(s,(o>=30&&o<=240)?o:null);$("#dObjectif").value="";rend();
+});
+$("#dHeure").addEventListener("change",e=>{D.heure=e.target.value||"18:00";sauve();});
+// rappel quotidien : un événement répété chaque jour, avec une alerte, à ajouter au Calendrier
+$("#dIcs").addEventListener("click",()=>{
+  const [h,m]=(D.heure||"18:00").split(":").map(Number),d=new Date();
+  const dt=d.getFullYear()+pad(d.getMonth()+1)+pad(d.getDate())+"T"+pad(h)+pad(m)+"00";
+  const st=new Date().toISOString().replace(/[-:]/g,"").replace(/\.\d+/,"");
+  const ics=["BEGIN:VCALENDAR","VERSION:2.0","PRODID:-//Compas//Devoirs//FR","CALSCALE:GREGORIAN","BEGIN:VEVENT",
+    "UID:compas-devoirs-"+Date.now()+"@compas","DTSTAMP:"+st,"DTSTART:"+dt,"DURATION:PT30M","RRULE:FREQ=DAILY",
+    "SUMMARY:Compás — devoirs de guitare","DESCRIPTION:Ouvre Compás : tes devoirs du jour t'attendent dans l'onglet Devoirs.",
+    "BEGIN:VALARM","ACTION:DISPLAY","DESCRIPTION:Devoirs Compás","TRIGGER:PT0M","END:VALARM","END:VEVENT","END:VCALENDAR"].join("\r\n");
+  const a=document.createElement("a");
+  a.href="data:text/calendar;charset=utf-8,"+encodeURIComponent(ics);a.download="compas-rappel.ics";
+  document.body.appendChild(a);a.click();setTimeout(()=>a.remove(),1000);
+  $("#dRetour").textContent="Le rappel s'ouvre : touche « Ajouter » (ou « Tout ajouter ») pour le mettre dans ton Calendrier, chaque jour à "+D.heure+".";
+});
+document.addEventListener("journal-maj",rend);
+document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="visible")rend();});
+charge();
+window.Devoirs={montre:function(){rend();},aFaire:()=>aFaire(seances()).length};
+})();
+</script>
 <script>
 (function(){
 "use strict";
-const VUES=["metronome","rasgueado","rythme","morceaux","journal"];
+const VUES=["metronome","rasgueado","rythme","morceaux","journal","devoirs"];
 const onglets=[].slice.call(document.querySelectorAll('.vues [role="tab"]'));
 function montre(v){
   if(VUES.indexOf(v)<0)v="metronome";
@@ -9218,6 +9529,7 @@ function montre(v){
   document.getElementById("vueEntraineur").hidden=!entr;
   document.getElementById("vueMorceaux").hidden=v!=="morceaux";
   document.getElementById("vueJournal").hidden=v!=="journal";
+  document.getElementById("vueDevoirs").hidden=v!=="devoirs";
   onglets.forEach(function(b){const on=b.dataset.vue===v;b.setAttribute("aria-selected",on?"true":"false");b.tabIndex=on?0:-1;});
   // micro, scène de lecture et relevé servent aussi aux morceaux : on les déplace avec l'onglet
   if(entr||v==="morceaux"){
@@ -9227,6 +9539,7 @@ function montre(v){
   if(entr&&window.Entraineur){Entraineur.bascule(v);Entraineur.majPalo();}
   if(v==="morceaux"){if(window.Entraineur)Entraineur.bascule("morceau");if(window.Morceaux)Morceaux.montre();}
   if(v==="journal"&&window.Journal)Journal.montre();
+  if(window.Devoirs)Devoirs.montre(v);
   try{localStorage.setItem("compas-vue",v);}catch(e){}
 }
 window.Vues={montre:montre};

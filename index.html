@@ -549,6 +549,24 @@ footer{color:var(--muted);font-size:.82rem;margin-top:1.6rem;max-width:70ch}
 .calage{margin-top:12px;padding-top:10px;border-top:1px dashed var(--trait)}
 .entraineur .bouton-fichier.secondaire{background:transparent;color:var(--oro);border:1px solid var(--oro)}
 .entraineur .doigts-cel{font-family:Georgia,serif;font-size:.8rem;color:var(--bronce);text-align:center;margin-top:3px;letter-spacing:.02em;word-spacing:.15em}
+/* ---------- compte-rendu et compás intérieur ---------- */
+.entraineur .compte-rendu{margin:0 0 20px;padding:14px 16px;border:1px solid var(--trait);border-left:3px solid var(--bronce);border-radius:0 3px 3px 0;background:var(--ebano)}
+.entraineur .cr-tete{margin:0 0 4px;font-size:.8rem;color:var(--tapa-doux)}
+.entraineur .cr-prio{margin:0 0 10px;font-weight:600;color:var(--tapa)}
+.entraineur .cr-liste{list-style:none;margin:0;padding:0}
+.entraineur .cr-liste li{display:grid;grid-template-columns:14px 1fr;column-gap:8px;align-items:baseline;padding:6px 0;border-top:1px solid var(--trait);font-size:.9rem;line-height:1.45;color:var(--tapa)}
+.entraineur .cr-liste li:first-child{border-top:0}
+.entraineur .cr-liste li .pastille{align-self:center}
+.entraineur .cr-liste li b{font-weight:600}
+.entraineur .cr-liste li b,.entraineur .cr-liste li span{grid-column:2}
+.entraineur .cr-liste li b{display:inline}
+#blocScene #lecturePiste,#blocScene #bandeCompas,#blocScene .gros{transition:opacity .25s}
+#blocScene.en-silence #lecturePiste{opacity:.12}
+#blocScene.en-silence #bandeCompas{opacity:.15}
+#blocScene.en-silence .gros{opacity:0}
+#blocScene.en-silence #legendeGros{opacity:0}
+.veille-opt{display:flex;align-items:center;gap:.5rem;margin-top:.7rem;color:var(--muted);font-size:.85rem;cursor:pointer}
+.veille-opt input{accent-color:var(--oro);width:16px;height:16px}
 
 /* ---------- journal de travail ---------- */
 .journal{font-variant-numeric:tabular-nums}
@@ -673,6 +691,7 @@ footer{color:var(--muted);font-size:.82rem;margin-top:1.6rem;max-width:70ch}
       <button class="mini" id="versRas" type="button">Rasgueados</button>
       <button class="mini" id="versRyt" type="button">Figures rythmiques</button>
     </div>
+    <label class="veille-opt"><input type="checkbox" id="veilleAudio" checked> Continuer en audio quand l'écran s'éteint</label>
 
     <div class="libre-note" id="libreNote" hidden></div>
 
@@ -1122,6 +1141,24 @@ footer{color:var(--muted);font-size:.82rem;margin-top:1.6rem;max-width:70ch}
         <p class="aide" id="gloseCalage"></p>
       </div>
     </div>
+    <div id="blocSilences">
+      <label for="silences">Compás intérieur</label>
+      <select id="silences">
+        <option value="0" selected>accompagnement continu</option>
+        <option value="4-2">4 cycles joués, 2 en silence</option>
+        <option value="4-4">4 joués, 4 en silence</option>
+        <option value="2-2">2 joués, 2 en silence</option>
+        <option value="2-4">2 joués, 4 en silence</option>
+        <option value="1-1">1 joué, 1 en silence</option>
+      </select>
+      <label for="silencesQuoi" style="margin-top:8px">Pendant le silence</label>
+      <select id="silencesQuoi" disabled>
+        <option value="tout" selected>tout se tait</option>
+        <option value="accents">seuls les accents restent</option>
+        <option value="trame">seule la trame reste, sans les accents</option>
+      </select>
+      <p class="aide" id="gloseSilences"></p>
+    </div>
     <div id="blocGroupe">
       <label for="groupe">Accent du clic</label>
       <select id="groupe"><option value="2">tous les 2 temps</option><option value="3">tous les 3 temps</option><option value="4" selected>tous les 4 temps</option><option value="6">tous les 6 temps</option><option value="12">tous les 12 temps</option></select>
@@ -1195,6 +1232,7 @@ footer{color:var(--muted);font-size:.82rem;margin-top:1.6rem;max-width:70ch}
 
 <section class="plateau masque" id="resultats">
   <h2>Relevé du passage</h2>
+  <div class="compte-rendu" id="compteRendu" hidden></div>
   <div class="notes">
     <div class="note"><div class="valeur" id="noteRythme">—</div><div class="intitule">précision rythmique</div></div>
     <div class="note"><div class="valeur" id="noteVolume">—</div><div class="intitule" id="intituleVolume">régularité de volume</div></div>
@@ -2617,6 +2655,184 @@ try{
   box.textContent = "L'application n'a pas pu démarrer sur ce navigateur : " + (err && err.message ? err.message : err);
   document.querySelector(".stage").prepend(box);
 }
+
+/* ============================================================
+   7. En veille : le compás continue, en audio seulement
+   Quand l'écran s'éteint, le navigateur fige les minuteries : le moteur rythmique ne peut plus planifier.
+   On prépare donc à l'avance une boucle enregistrée de plusieurs compases (mêmes palmas, cajón, pieds,
+   mêmes volumes), jouée par un lecteur audio que iOS laisse tourner écran éteint. Au retour, le moteur reprend.
+   ============================================================ */
+const Veille = (function(){
+  const T0 = 0.05, QUEUE = 2.5;          // départ de la boucle dans le fichier ; queue de résonance repliée au début
+  const lecteur = new Audio();
+  lecteur.loop = true; lecteur.preload = "auto"; lecteur.muted = true;
+  lecteur.setAttribute("playsinline", ""); lecteur.setAttribute("webkit-playsinline", "");
+  let boucle = null;          // {url, cycle, total, cle}
+  let enFond = false, minuteur = null, rendu = 0, deverrouille = false, echange = false;
+
+  // un fichier WAV 16 bits mono : lu partout, et bouclé sans le blanc qu'ajoutent les formats compressés
+  function wav(data, sr){
+    const n = data.length, buf = new ArrayBuffer(44 + n*2), v = new DataView(buf);
+    const ecrit = (o, s) => { for(let i=0;i<s.length;i++) v.setUint8(o+i, s.charCodeAt(i)); };
+    ecrit(0,"RIFF"); v.setUint32(4, 36+n*2, true); ecrit(8,"WAVE"); ecrit(12,"fmt ");
+    v.setUint32(16,16,true); v.setUint16(20,1,true); v.setUint16(22,1,true); v.setUint32(24,sr,true);
+    v.setUint32(28,sr*2,true); v.setUint16(32,2,true); v.setUint16(34,16,true); ecrit(36,"data"); v.setUint32(40,n*2,true);
+    for(let i=0;i<n;i++){ const s = Math.max(-1, Math.min(1, data[i])); v.setInt16(44+i*2, s<0 ? s*0x8000 : s*0x7FFF, true); }
+    return new Blob([buf], {type:"audio/wav"});
+  }
+  function cleReglages(){
+    return JSON.stringify([state.palo && state.palo.id, state.bpm, state.edits[state.palo && state.palo.id], state.starts[state.palo && state.palo.id],
+      state.layers, state.vols, state.zapMode, state.spread]);
+  }
+  // la boucle : un nombre entier de compases, au moins 40 s, rendue hors temps réel avec les mêmes fonctions de son
+  async function prepare(){
+    if(!state.palo || !window.OfflineAudioContext && !window.webkitOfflineAudioContext) return;
+    const cle = cleReglages(), num = ++rendu;
+    if(boucle && boucle.cle === cle) return;
+    buildSeq();
+    const pas = stepDur(), cycle = pas * state.seq.length;
+    if(!(cycle > 0)) return;
+    const nCompases = Math.max(2, Math.min(64, Math.ceil(40 / cycle)));
+    const total = nCompases * cycle, sr = 32000;
+    const OAC = window.OfflineAudioContext || window.webkitOfflineAudioContext;
+    const off = new OAC(1, Math.ceil((T0 + total + QUEUE) * sr), sr);
+    const ctx0 = Audio_.ctx, master0 = Audio_.master;
+    if(!ctx0) return;
+    try{
+      Audio_.ctx = off;
+      Audio_.master = off.createGain(); Audio_.master.gain.value = 0.9; Audio_.master.connect(off.destination);
+      const n = nCompases * state.seq.length;
+      for(let k=0;k<n;k++) scheduleStep(k % state.seq.length, T0 + k*pas);
+    } finally { Audio_.ctx = ctx0; Audio_.master = master0; }
+    const rendu_ = await new Promise(function(ok, ko){
+      off.oncomplete = function(e){ ok(e.renderedBuffer); };
+      const r = off.startRendering(); if(r && r.then) r.then(ok, ko);
+    });
+    if(num !== rendu) return;                           // un réglage a changé entre-temps
+    const d = rendu_.getChannelData(0), L = Math.round(total * sr), a = Math.round(T0 * sr);
+    // la boucle va de T0 à T0+total ; ce qui résonne après la fin revient se superposer au début
+    const out = new Float32Array(L);
+    for(let i=0;i<L;i++) out[i] = d[a+i] || 0;
+    for(let i=0;i<Math.round(QUEUE*sr) && a+L+i<d.length;i++) out[i] += d[a+L+i];
+    for(let i=0;i<a && i<L;i++) out[L-a+i] += d[i];   // et ce qui précède T0 (micro-humanisation) va à la fin
+    if(boucle && boucle.url) URL.revokeObjectURL(boucle.url);
+    boucle = {url: URL.createObjectURL(wav(out, sr)), cycle, total, cle};
+    const pos = lecteur.currentTime;
+    echange = true;
+    lecteur.src = boucle.url;
+    setTimeout(function(){ echange = false; }, 400);
+    if(state.playing && !enFond){ lecteur.muted = true; lecteur.play().catch(function(){}); }
+    else if(enFond){ try{ lecteur.currentTime = pos % total; }catch(e){} lecteur.play().catch(function(){}); }
+  }
+  function planifie(){
+    if(!state.playing) return;
+    clearTimeout(minuteur);
+    minuteur = setTimeout(function(){ prepare().catch(function(){}); }, 600);
+  }
+  // où en est le moteur dans le compás, en secondes depuis le pas 0
+  function phase(){
+    // le prochain pas à planifier, et l'instant où il sonnera
+    const c = Audio_.ctx, now = c.currentTime, pas = stepDur();
+    return state.stepIndex * pas - (state.nextTime - now);
+  }
+  function passeEnFond(){
+    if(!state.playing || !boucle || enFond) return;
+    let p = phase() % boucle.cycle; if(p < 0) p += boucle.cycle;
+    try{ lecteur.currentTime = p; }catch(e){}
+    lecteur.muted = false;
+    lecteur.play().catch(function(){});
+    clearInterval(state.timer); state.timer = null;       // le moteur se tait, le lecteur prend le relais
+    Audio_.setMuted(true);
+    enFond = true;
+    majSession();
+  }
+  function revient(){
+    if(!enFond) return;
+    enFond = false;
+    const c = Audio_.ctx;
+    const reprendre = function(){
+      if(!state.playing){ lecteur.pause(); return; }
+      // le moteur repart exactement où en est la boucle
+      const pas = stepDur(), len = state.seq.length;
+      let p = (lecteur.currentTime % boucle.cycle); if(p < 0) p += boucle.cycle;
+      const k = Math.floor(p / pas) + 1;
+      state.queue = [];
+      state.stepIndex = k % len;
+      state.nextTime = c.currentTime + (k * pas - p);
+      lecteur.muted = true;
+      Audio_.setMuted(state.muted);
+      state.timer = setInterval(scheduler, TICK);
+      scheduler();
+    };
+    if(c.state !== "running" && c.resume){
+      c.resume().then(function(){ c.state === "running" ? reprendre() : (enFond = true); }, function(){ enFond = true; });
+    } else reprendre();
+  }
+  // les commandes de l'écran verrouillé : arrêter le compás sans rallumer l'app
+  function majSession(){
+    if(!("mediaSession" in navigator)) return;
+    try{
+      if(state.playing && state.palo){
+        navigator.mediaSession.metadata = new MediaMetadata({title: "Compás — " + state.palo.name, artist: state.bpm + " pulsos/min"});
+      }
+      navigator.mediaSession.playbackState = state.playing ? "playing" : "paused";
+    }catch(e){}
+  }
+  try{
+    if("mediaSession" in navigator){
+      const arreter = function(){ if(state.playing) stop(); };
+      navigator.mediaSession.setActionHandler("pause", arreter);
+      navigator.mediaSession.setActionHandler("stop", arreter);
+      navigator.mediaSession.setActionHandler("play", function(){ if(!state.playing) play(); });
+    }
+  }catch(e){}
+  lecteur.addEventListener("pause", function(){
+    // pause demandée depuis l'écran verrouillé ou le centre de contrôle
+    if(enFond && state.playing && !echange){ enFond = false; stop(); }
+  });
+  document.addEventListener("visibilitychange", function(){
+    if(!actif()) return;
+    if(document.visibilityState === "hidden") passeEnFond(); else revient();
+  });
+  window.addEventListener("pagehide", function(){ if(actif()) passeEnFond(); });
+  function actif(){ const c = document.getElementById("veilleAudio"); return !c || c.checked; }
+  // la case se souvient de son état
+  const caseV = document.getElementById("veilleAudio");
+  if(caseV){
+    try{ const v = localStorage.getItem("compas-veille"); if(v !== null) caseV.checked = v === "1"; }catch(e){}
+    caseV.addEventListener("change", function(){
+      try{ localStorage.setItem("compas-veille", caseV.checked ? "1" : "0"); }catch(e){}
+      if(!caseV.checked){ lecteur.pause(); lecteur.muted = true; }
+      else if(state.playing) Veille.demarre();
+    });
+  }
+
+  return {
+    // au démarrage, dans le geste de l'utilisateur : on déverrouille le lecteur, puis on prépare la boucle
+    demarre: function(){
+      if(!actif()) return;
+      if(!deverrouille){
+        lecteur.src = boucle ? boucle.url : URL.createObjectURL(wav(new Float32Array(16000), 32000));
+        lecteur.muted = true;
+        lecteur.play().then(function(){ deverrouille = true; }, function(){});
+      } else if(boucle){ lecteur.muted = true; lecteur.play().catch(function(){}); }
+      majSession();
+      prepare().catch(function(){});
+    },
+    arrete: function(){ enFond = false; clearTimeout(minuteur); lecteur.pause(); lecteur.muted = true; majSession(); },
+    planifie: planifie,
+    etat: function(){ return {enFond, pret: !!boucle, duree: boucle ? boucle.total : 0, cycle: boucle ? boucle.cycle : 0, url: boucle ? boucle.url : null, lecteur: {t: lecteur.currentTime, muet: lecteur.muted, pause: lecteur.paused}}; },
+    // pour les essais : simuler l'écran qui s'éteint et se rallume
+    _cache: passeEnFond, _montre: revient
+  };
+})();
+// le moteur prévient la veille à chaque démarrage, arrêt ou réglage
+(function(){
+  const _play = play, _stop = stop, _save = save;
+  play = function(){ _play.apply(this, arguments); Veille.demarre(); };
+  stop = function(){ Veille.arrete(); _stop.apply(this, arguments); };
+  save = function(){ _save.apply(this, arguments); Veille.planifie(); };
+})();
 </script>
 <script>
 (function(){
@@ -3741,8 +3957,11 @@ function pulsoDuTemps(pl,b){
 function niveauPulso(ch){ return ch==="A"?"majeur":(ch==="F"?"fuerte":(ch==="s"?"sorda":"silence")); }
 
 // un pas de la séquence du palo, joué avec les couches et les volumes réglés dans le métronome
-function jouePas(pl,i,t,temps){
+function jouePas(pl,i,t,temps,filtre){
   const s=pl.seq[i];if(!s)return;
+  // pendant un silence du « compás intérieur » : on ne garde que les accents, ou que la trame
+  if(filtre==="accents"&&!isAcc(s.palma))return;
+  if(filtre==="trame"&&isAcc(s.palma))return;
   const f=clamp(parseFloat($("#volClic").value)/55,0,1.8),w=s.w||1,pas=temps/pl.sub;
   if(isAcc(s.palma)&&state.layers.fuertes)palmaHit("F",t,state.vols.fuertes*w*f);
   else if(s.palma==="s"&&state.layers.sordas)palmaHit("s",t,state.vols.sordas*f);
@@ -3963,6 +4182,9 @@ function demarre(){
   S.attendus=b.attendus.map(a=>({...a,t:S.depart+a.dt,dev:null,amp:null,tol:0})).sort((x,y)=>x.t-y.t);
   S.aDesAccents=S.attendus.some(a=>a.accent)&&S.attendus.some(a=>!a.accent);
   S.palo=(S.mode!=="morceau"&&$("#palo").value==="metronome")?paloMetronome():null;S.compteAffiche=null;
+  S.sil=lireSilences();
+  if(S.sil)S.attendus.forEach(a=>{a.phase=phaseSil(Math.floor((a.t-S.depart)/S.dureeTemps-S.decompte+1e-6));});
+  $("#blocScene").classList.remove("en-silence");$("#compteRendu").hidden=true;
   majPalo();
 
   const n=S.attendus.length;let minInt=Infinity;
@@ -3997,20 +4219,25 @@ function ordonnance(){
     const enDec=b<S.decompte;
     if(enDec) palma(ctx,t,b===0?"fuerte":"clara");
     else if(!coupe&&S.mode!=="morceau"){
-      if(S.palo){
-        for(let k=0;k<S.palo.sub;k++){
-          const i=((b-S.decompte)*S.palo.sub+k)%S.palo.seq.length;
-          jouePas(S.palo,i,t+k*S.dureeTemps/S.palo.sub,S.dureeTemps);
+      const filtre=phaseSil(b-S.decompte)==="silence"?S.sil.quoi:null;
+      if(filtre!=="tout"){
+        if(S.palo){
+          for(let k=0;k<S.palo.sub;k++){
+            const i=((b-S.decompte)*S.palo.sub+k)%S.palo.seq.length;
+            jouePas(S.palo,i,t+k*S.dureeTemps/S.palo.sub,S.dureeTemps,filtre);
+          }
+        }else{
+          const fort=(b-S.decompte)%S.groupe===0;
+          if(!(filtre==="accents"&&!fort)&&!(filtre==="trame"&&fort))palma(ctx,t,fort?"fuerte":"clara");
         }
       }
-      else palma(ctx,t,(b-S.decompte)%S.groupe===0?"fuerte":"clara");
     }
     S.prochainTemps++;
   }
   const guide=$("#guide").value;
   while(S.prochainAttendu<S.attendus.length&&S.attendus[S.prochainAttendu].t<ctx.currentTime+0.18){
     const a=S.attendus[S.prochainAttendu];
-    if(guide==="tout"||(guide==="premier"&&a.cycle===0)) bois(ctx,a.t,!!a.accent,!!a.appui);
+    if((guide==="tout"||(guide==="premier"&&a.cycle===0))&&a.phase!=="silence") bois(ctx,a.t,!!a.accent,!!a.appui);
     S.prochainAttendu++;
   }
   if(ctx.currentTime>S.depart+S.totalTemps*S.dureeTemps+0.35)termine();
@@ -4256,6 +4483,12 @@ function rafraichitScene(){
       }
     }
   }
+  // compás intérieur : la portée s'efface pendant le silence, et l'on annonce le retour
+  if(S.sil&&e>=S.decompte){
+    const bt=Math.floor(e-S.decompte),silence=phaseSil(bt)==="silence";
+    $("#blocScene").classList.toggle("en-silence",silence);
+    if(silence){const p=((bt%S.sil.per)+S.sil.per)%S.sil.per;$("#etat").textContent="Silence : garde le compás — l'accompagnement revient dans "+(S.sil.per-p)+" temps";}
+  }
   S.raf=requestAnimationFrame(rafraichitScene);
 }
 
@@ -4281,7 +4514,7 @@ function confronteDirect(onset){
 
 function arrete(){
   if(window.Morceaux&&Morceaux.stopEntrainement)Morceaux.stopEntrainement();
-  S.running=false;clearInterval(S.timer);cancelAnimationFrame(S.raf);
+  S.running=false;clearInterval(S.timer);cancelAnimationFrame(S.raf);$("#blocScene").classList.remove("en-silence");
   if(Audio_.master)Audio_.setMuted(state.muted);
   $("#btnJouer").disabled=false;$("#btnStop").disabled=true;
   document.querySelectorAll(".pas").forEach(c=>c.classList.remove("active"));
@@ -4344,6 +4577,7 @@ function calcule(){
     $("#cFrappes").textContent=touches.length+" / "+S.attendus.length;
     ["#cDecalage","#cJitter","#cVolume"].forEach(s=>$(s).textContent="—");
     $("#cParasites").textContent=parasites;$("#tableDoigts").innerHTML="";
+    $("#compteRendu").hidden=true;S.diagTexte=null;
     $("#diagnostic").innerHTML="<p>Trop peu de frappes reconnues. Baisse le seuil de détection, rapproche le micro, ou ralentis le tempo.</p>";
     return;
   }
@@ -4398,6 +4632,7 @@ function calcule(){
 
   tableau(touches);nuage();
   diagnostic(moy,ecart,ecartV,touches,parasites);
+  S.diagTexte=compteRendu();
   corrigePartition();
 
   const nom=S.mode==="morceau"?S.pm.nom:S.mode==="rasgueado"?(P.nom||"patron").split(" —")[0]:(R.num+"/"+R.den+" · "+R.nbMes+" mes.");
@@ -4612,7 +4847,7 @@ function ecritMemoire(){
     try{
       localStorage.setItem(CLE,JSON.stringify({
         v:1,bpm:$("#bpm").value,temps:$("#temps").value,palo:$("#palo").value,groupe:$("#groupe").value,
-        volClic:$("#volClic").value,clicDecompte:$("#clicDecompte").checked,guide:$("#guide").value,volGuide:$("#volGuide").value,
+        volClic:$("#volClic").value,sil:$("#silences").value,silQ:$("#silencesQuoi").value,clicDecompte:$("#clicDecompte").checked,guide:$("#guide").value,volGuide:$("#volGuide").value,
         seuil:$("#seuil").value,latence:$("#latence").value,repet:$("#repet").value,
         patronId:selModele.value,P:{sub:P.sub,duree:P.duree,ancrage:P.ancrage,golpes:P.golpes,glose:P.glose,nom:P.nom},
         code:ecrireCode(),exo:B.courant,depart:B.depart,caler:B.caler
@@ -4625,7 +4860,7 @@ function restaure(){
   if(!d||d.v!==1)return;
   const val=(id,v)=>{if(v!==undefined&&v!==null)$(id).value=String(v);};
   val("#bpm",d.bpm);val("#temps",d.temps);val("#groupe",d.groupe);val("#volClic",d.volClic);val("#guide",d.guide);
-  val("#volGuide",d.volGuide);val("#seuil",d.seuil);val("#latence",d.latence);
+  val("#volGuide",d.volGuide);val("#silences",d.sil);val("#silencesQuoi",d.silQ);val("#seuil",d.seuil);val("#latence",d.latence);
   if(d.palo==="metronome"||d.palo==="simple")$("#palo").value=d.palo;
   $("#clicDecompte").checked=!!d.clicDecompte;
   $("#tBpmVal").textContent=$("#bpm").value;
@@ -4926,6 +5161,7 @@ function paloActuel(){
   return ($("#palo").value==="metronome"&&typeof state!=="undefined"&&state.palo&&!state.palo.libre)?state.palo:null;
 }
 function majBiblioPalos(){
+  if(typeof majGloseSil==="function")majGloseSil();
   const z=$("#palosConseilles");if(!z)return;
   const {T,cons,autres,compat}=palosPour(),act=paloActuel();
   z.innerHTML="";
@@ -5109,7 +5345,8 @@ function entreeJournal(x){
     bpm:mode==="morceau"?null:parseInt($("#bpm").value,10),vit:mode==="morceau"?Math.round(S.pm.vitesse*100):null,
     palo:(mode!=="morceau"&&S.palo)?S.palo.nom:null,
     r:x.r,v:x.v,a:x.a,fr:x.fr,att:A.length,dec:Math.round(x.dec),jit:Math.round(x.jit),
-    dur:Math.round(Math.max(0,t1-t0)+(S.dureeTemps||0)),partiel:!!S.partiel};
+    dur:Math.round(Math.max(0,t1-t0)+(S.dureeTemps||0)),partiel:!!S.partiel,
+    diag:S.diagTexte||null,silences:S.sil?(S.sil.on+"-"+S.sil.off+" "+S.sil.quoi):null};
 }
 // depuis le journal : on remet l'exercice et son tempo
 function rejoueSeance(s){
@@ -5161,6 +5398,205 @@ function initBiblio(){
   chargePerso();majCollections();afficheListe();afficheCourant();majBiblioPalos();
 }
 
+/* ---------- compás intérieur : l'accompagnement se tait par moments, puis revient ---------- */
+function lireSilences(){
+  if(S.mode==="morceau")return null;
+  const v=$("#silences").value;
+  if(!v||v==="0")return null;
+  const [on,off]=v.split("-").map(Number);
+  const unite=S.palo?S.palo.pulses:(S.mode==="rythme"?R.num:S.groupe);
+  if(!on||!off||!unite)return null;
+  return {on,off,unite,quoi:$("#silencesQuoi").value,per:(on+off)*unite};
+}
+// beat : temps écoulés depuis la fin du décompte
+function phaseSil(beat){
+  const c=S.sil;
+  if(!c||beat<0)return "avec";
+  const p=((beat%c.per)+c.per)%c.per;
+  if(p>=c.on*c.unite)return "silence";
+  if(beat>=c.per&&p<c.unite)return "retour";
+  return "avec";
+}
+function majGloseSil(){
+  const v=$("#silences").value,z=$("#gloseSilences");
+  if(!z)return;
+  $("#silencesQuoi").disabled=v==="0";
+  if(v==="0"){z.textContent="L'accompagnement joue sans interruption.";return;}
+  const [on,off]=v.split("-");
+  let u;
+  if($("#palo").value==="metronome"&&typeof state!=="undefined"&&state.palo&&!state.palo.libre){
+    u="un compás de "+normalise(state.palo).pulses+" pulsos ("+state.palo.name+")";
+  }else if(S.mode==="rythme")u="une mesure de "+R.num+"/"+R.den;
+  else u="un groupe de "+$("#groupe").value+" temps";
+  z.textContent="Un cycle = "+u+". L'accompagnement joue "+on+" cycle"+(on>1?"s":"")+", se tait "+off+", puis revient : tu dois retomber pile dessus. "+
+    "Mets les reprises « en boucle » pour enchaîner plusieurs retours. Le relevé compare ton jeu avec l'accompagnement, dans le silence et au retour.";
+}
+$("#silences").addEventListener("change",majGloseSil);
+$("#groupe").addEventListener("change",majGloseSil);
+
+/* ---------- compte-rendu : ce qui se passe vraiment, en phrases ---------- */
+const moyenneL=l=>l.reduce((s,v)=>s+v,0)/l.length;
+const ecartL=l=>{const m=moyenneL(l);return Math.sqrt(l.reduce((s,v)=>s+(v-m)*(v-m),0)/l.length);};
+function regLin(x,y){
+  const n=x.length,mx=moyenneL(x),my=moyenneL(y);
+  let sxx=0,sxy=0;for(let i=0;i<n;i++){sxx+=(x[i]-mx)*(x[i]-mx);sxy+=(x[i]-mx)*(y[i]-my);}
+  const pente=sxx?sxy/sxx:0;
+  let r=0;for(let i=0;i<n;i++){const e=y[i]-my-pente*(x[i]-mx);r+=e*e;}
+  const se=(n>2&&sxx)?Math.sqrt(r/(n-2)/sxx):Infinity;
+  return {pente,se};
+}
+const msTxt=v=>(v>=0?"+":"−")+Math.round(Math.abs(v))+" ms";
+function placementTxt(v){return Math.abs(v)<8?"sur le temps":Math.round(Math.abs(v))+" ms "+(v<0?"en avance":"en retard");}
+// où tombe une frappe : le pulso du palo, sinon le temps de la mesure (seulement pour les frappes posées sur un temps)
+function repereFrappe(a){
+  const bt=(a.t-S.depart)/S.dureeTemps-S.decompte,br=Math.round(bt);
+  if(Math.abs(bt-br)>0.02||br<0)return null;
+  if(S.palo)return {cle:"p"+pulsoDuTemps(S.palo,br),nom:"le "+pulsoDuTemps(S.palo,br)};
+  if(S.mode==="rythme"){
+    const cycP=R.num*R.nbMes,cyc=cycP+(R.pad||0),pos=((br%cyc)+cyc)%cyc;
+    if(pos>=cycP)return null;
+    const tp=pos%R.num+1;return {cle:"t"+tp,nom:"le temps "+tp};
+  }
+  const tp=br%S.groupe+1;return {cle:"t"+tp,nom:"le temps "+tp};
+}
+function doigtFrappe(a,ix){
+  if(S.mode==="rasgueado")return a.libelle||null;
+  if(S.mode==="rythme"&&ix&&a.cle){const i=ix[a.cle];const tk=i==null?"":(R.doigts[i]||"");const j=jeton(tk);return (j.doigt+j.sens)||null;}
+  return null;
+}
+function titrePassage(){
+  if(S.mode==="morceau")return S.pm?S.pm.nom:"Morceau";
+  if(S.mode==="rasgueado")return "Rasgueado — "+((P.nom||"patron").split(" —")[0]);
+  const e=B.courant?exoParId(B.courant):null;
+  return e&&codeCompact(e.code)===compactMesures(R.num,R.den,R.mesures)?e.titre:"Partition libre — "+R.num+"/"+R.den;
+}
+function compteRendu(){
+  const z=$("#compteRendu");if(!z)return null;
+  const A=S.attendus,T=A.filter(a=>a.dev!==null);
+  if(T.length<4){z.hidden=true;return null;}
+  const L=[],court=[];
+  const devs=T.map(a=>a.dev),m=moyenneL(devs),d=ecartL(devs);
+  const dbs=T.map(a=>dB(a.amp)),mdb=moyenneL(dbs);
+  // écart local : chaque frappe comparée à ses voisines, pour que la dérive ou le silence ne se fassent pas passer
+  // pour un défaut d'un doigt ou d'un pulso
+  const Ts=T.slice().sort((x,y)=>x.t-y.t);
+  Ts.forEach((a,i)=>{let s=0,n=0;for(let j=Math.max(0,i-6);j<=Math.min(Ts.length-1,i+6);j++){if(j!==i){s+=Ts[j].dev;n++;}}a.res=n?a.dev-s/n:0;});
+  const dRes=ecartL(T.map(a=>a.res));
+  // volume relatif : comparé aux frappes de même statut (accentuées ou non)
+  const mAcc=T.some(a=>a.accent)?moyenneL(T.filter(a=>a.accent).map(a=>dB(a.amp))):0;
+  const mNon=T.some(a=>!a.accent)?moyenneL(T.filter(a=>!a.accent).map(a=>dB(a.amp))):0;
+  T.forEach(a=>{a.vrel=dB(a.amp)-(a.accent?mAcc:mNon);});
+
+  // 1. placement et régularité
+  const regul=d<15?"très régulier":d<28?"régulier":d<45?"assez irrégulier":"irrégulier";
+  L.push({t:"Placement",n:Math.abs(m)<15&&d<28?"bon":(Math.abs(m)<30&&d<45?"moyen":"mauvais"),
+    x:"En moyenne "+placementTxt(m)+", dispersion ± "+Math.round(d)+" ms : "+regul+"."});
+  court.push(placementTxt(m)+" ± "+Math.round(d)+" ms");
+
+  // 2. dérive : l'écart grandit-il au fil du passage ?
+  // avec le compás intérieur, la dérive se mesure hors des silences (ceux-ci ont leur propre ligne)
+  const Td=S.sil?T.filter(a=>a.phase!=="silence"):T;
+  const xs=Td.map(a=>a.t-S.depart),duree=xs.length?xs[xs.length-1]-xs[0]:0;
+  if(duree>=4&&Td.length>=8){
+    const g=regLin(xs,Td.map(a=>a.dev)),total=g.pente*duree;
+    // écart moyen cycle par cycle, pour voir où ça décroche
+    const parCycle=[];Td.forEach(a=>{(parCycle[a.cycle]=parCycle[a.cycle]||[]).push(a.dev);});
+    let cyc=parCycle.map((l,i)=>l&&l.length?moyenneL(l):null).filter(v=>v!==null);
+    const pas=Math.ceil(cyc.length/8);
+    if(pas>1){const r=[];for(let i=0;i<cyc.length;i+=pas)r.push(moyenneL(cyc.slice(i,i+pas)));cyc=r;}
+    const suite=cyc.length>=3?" Écart moyen "+(pas>1?"par groupe de "+pas+" cycles":"cycle par cycle")+" : "+cyc.map(v=>msTxt(v)).join(", ")+".":"";
+    if(Math.abs(total)>=15&&Math.abs(total)>2*g.se*duree){
+      const pct=Math.abs(g.pente)/10;
+      L.push({t:"Dérive",n:Math.abs(total)>40?"mauvais":"moyen",
+        x:(total>0?"Tu ralentis":"Tu accélères")+" peu à peu : "+msTxt(total)+" entre le début et la fin, soit environ "+pct.toFixed(1).replace(".",",")+" % de tempo."+suite});
+      court.push((total>0?"ralentit ":"accélère ")+pct.toFixed(1).replace(".",",")+" %");
+    }else L.push({t:"Dérive",n:"bon",x:"Pas de dérive nette : ton tempo tient du début à la fin."+suite});
+  }
+
+  // 3. pulso par pulso (ou temps par temps)
+  const par=new Map();
+  T.forEach(a=>{const r=repereFrappe(a);if(!r)return;const g=par.get(r.cle)||{nom:r.nom,devs:[],acc:[],num:parseInt(r.cle.slice(1),10)};g.devs.push(a.res);par.set(r.cle,g);});
+  const seuilP=Math.max(15,dRes*0.8),ecarts=[];
+  par.forEach(g=>{if(g.devs.length>=2){const e=moyenneL(g.devs);if(Math.abs(e)>seuilP)ecarts.push({nom:g.nom,e});}});
+  ecarts.sort((x,y)=>Math.abs(y.e)-Math.abs(x.e));
+  // accents : ceux qui ne ressortent pas, rangés par pulso
+  let manques=[];
+  const acA=A.filter(a=>a.accent),nonAcc=T.filter(a=>!a.accent).map(a=>dB(a.amp));
+  if(acA.length&&nonAcc.length){
+    const mN=moyenneL(nonAcc),parA=new Map();
+    acA.forEach(a=>{const r=repereFrappe(a)||{cle:"hors",nom:"les accents à contretemps"};const g=parA.get(r.cle)||{nom:r.nom,n:0,ok:0};g.n++;if(a.dev!==null&&dB(a.amp)>=mN+3)g.ok++;parA.set(r.cle,g);});
+    parA.forEach(g=>{if(g.n>=2&&g.ok/g.n<0.5)manques.push(g);});
+    manques.sort((x,y)=>x.ok/x.n-y.ok/y.n);
+  }
+  if(ecarts.length||manques.length){
+    const bouts=[];
+    if(ecarts.length)bouts.push(ecarts.slice(0,3).map(x=>x.nom+" arrive "+Math.round(Math.abs(x.e))+" ms plus "+(x.e>0?"tard":"tôt")+" que le reste").join(" ; "));
+    if(manques.length)bouts.push("accents qui ne ressortent pas : "+manques.slice(0,3).map(g=>g.nom+" ("+g.ok+" sur "+g.n+")").join(", "));
+    const s=bouts.join(". ");
+    L.push({t:S.palo?"Pulso par pulso":"Temps par temps",n:manques.length||ecarts.some(x=>Math.abs(x.e)>30)?"mauvais":"moyen",x:s.charAt(0).toUpperCase()+s.slice(1)+"."});
+    court.push((ecarts[0]?ecarts[0].nom+" "+msTxt(ecarts[0].e):"")+(manques[0]?(ecarts[0]?", ":"")+"accent faible sur "+manques[0].nom:""));
+  }else if(par.size>=2)L.push({t:S.palo?"Pulso par pulso":"Temps par temps",n:"bon",x:"Aucun "+(S.palo?"pulso":"temps")+" ne se détache : tous tombent au même endroit"+(acA.length?", et les accents ressortent.":"."),});
+
+  // 4. doigté prévu par la partition ou le patron
+  const ix=(S.mode==="rythme"&&aDesDoigts())?indexFrappes(R.mesures).map:null;
+  if(S.mode==="rasgueado"||ix){
+    const pd=new Map();
+    T.forEach(a=>{const k=doigtFrappe(a,ix);if(!k)return;const g=pd.get(k)||{k,devs:[],dbs:[]};g.devs.push(a.res);g.dbs.push(a.vrel);pd.set(k,g);});
+    const gs=[...pd.values()].filter(g=>g.devs.length>=4);
+    if(gs.length>=2){
+      gs.forEach(g=>{g.e=moyenneL(g.devs);g.v=moyenneL(g.dbs);g.d=ecartL(g.devs);});
+      const bouts=[];
+      const tps=gs.slice().sort((x,y)=>Math.abs(y.e)-Math.abs(x.e))[0];
+      if(Math.abs(tps.e)>Math.max(12,dRes*0.8))bouts.push("les frappes « "+tps.k+" » arrivent "+Math.round(Math.abs(tps.e))+" ms plus "+(tps.e>0?"tard":"tôt")+" que les autres");
+      const irr=gs.slice().sort((x,y)=>y.d-x.d)[0];
+      if(irr.d>dRes*1.3&&irr.d>20)bouts.push("« "+irr.k+" » est le geste le plus irrégulier (± "+Math.round(irr.d)+" ms)");
+      const faible=gs.slice().sort((x,y)=>x.v-y.v)[0];
+      if(faible.v<-3)bouts.push("« "+faible.k+" » sonne "+Math.abs(faible.v).toFixed(1).replace(".",",")+" dB sous les autres frappes");
+      const s=bouts.length?bouts.join(" ; "):"aucun geste ne se distingue des autres, ni en placement ni en volume";
+      L.push({t:"Par doigté",n:bouts.length?"moyen":"bon",x:s.charAt(0).toUpperCase()+s.slice(1)+". (D'après le doigté écrit : le micro entend les frappes, pas les doigts.)"});
+      if(bouts.length)court.push(bouts[0].replace("les frappes ",""));
+    }
+  }
+
+  // 5. compás intérieur
+  if(S.sil){
+    const grp=ph=>T.filter(a=>a.phase===ph).map(a=>a.dev);
+    const av=grp("avec"),si=grp("silence"),re=grp("retour");
+    const f=(l,nom)=>l.length>=2?nom+" "+placementTxt(moyenneL(l))+" ± "+Math.round(ecartL(l))+" ms":null;
+    const parts=[f(av,"avec l'accompagnement :"),f(si,"dans le silence :"),f(re,"au retour :")].filter(Boolean);
+    if(si.length>=2){
+      const mSi=moyenneL(si),mRe=re.length?moyenneL(re):mSi,dSi=ecartL(si),mAv=av.length?moyenneL(av):0;
+      const glisse=Math.abs(mSi-mAv)>20?"Dans le silence, tu glisses de "+Math.round(Math.abs(mSi-mAv))+" ms "+(mSi>mAv?"vers l'arrière":"vers l'avant")+". ":"";
+      const bien=Math.abs(mRe)<25&&dSi<40,moyen=Math.abs(mRe)<50&&dSi<60;
+      let concl=bien?glisse+(glisse?"Mais tu retombes en place au retour.":"Le compás tient sans aide."):glisse+(Math.abs(mRe)>=25?"Au retour de l'accompagnement, tu n'es plus en place : "+(mRe>0?"tu as ralenti":"tu as pressé")+" pendant le silence.":"Dans le silence, ton jeu devient irrégulier.");
+      L.push({t:"Compás intérieur",n:bien?"bon":(moyen?"moyen":"mauvais"),x:parts.join(" ; ")+". "+concl});
+      court.push("retour "+placementTxt(mRe));
+    }
+  }
+
+  // en-tête et rendu
+  const pal=S.palo?S.palo.nom:null,tempo=S.mode==="morceau"?"vitesse "+Math.round(S.pm.vitesse*100)+" %":"tempo "+$("#bpm").value;
+  const ordre={mauvais:0,moyen:1,bon:2};
+  const prio=L.filter(x=>x.n!=="bon").sort((x,y)=>ordre[x.n]-ordre[y.n])[0];
+  z.innerHTML="";
+  const h=document.createElement("p");h.className="cr-tete";
+  h.textContent=titrePassage()+" — "+tempo+(pal?" — "+pal:"")+" — "+S.cycles+" cycle"+(S.cycles>1?"s":"")+(S.partiel?" (interrompu)":"");
+  z.appendChild(h);
+  const pr=document.createElement("p");pr.className="cr-prio";
+  pr.textContent=prio?"À travailler d'abord : "+prio.t.toLowerCase()+".":"Rien de saillant à corriger : garde ce tempo ou monte un peu.";
+  z.appendChild(pr);
+  const ul=document.createElement("ul");ul.className="cr-liste";
+  L.forEach(x=>{
+    const li=document.createElement("li");li.className="cr-"+x.n;
+    li.innerHTML='<i class="pastille q-'+x.n+'" aria-hidden="true"></i><b></b><span></span>';
+    li.querySelector("b").textContent=x.t;li.querySelector("span").textContent=x.x;
+    ul.appendChild(li);
+  });
+  z.appendChild(ul);
+  z.hidden=false;
+  return court.filter(Boolean).join(" · ");
+}
+
 /* ---- démarrage ---- */
 chargeModele("cuatro");
 selModele.value="cuatro";
@@ -5183,7 +5619,10 @@ window.Entraineur={
   majPalo:()=>majPalo(),
   depuisMetronome:m=>depuisMetronome(m),
   rejoue:s=>{if(window.Vues)Vues.montre("rythme");rejoueSeance(s);const b=document.getElementById("blocBiblio");if(b)b.scrollIntoView({block:"start"});},
-  redessine:()=>{if(!$("#resultats").classList.contains("masque"))nuage();}
+  redessine:()=>{if(!$("#resultats").classList.contains("masque"))nuage();},
+  // lecture seule, pour vérifier le calendrier des frappes attendues
+  attendus:()=>S.attendus.map(a=>({t:a.t,cle:a.cle,accent:!!a.accent,phase:a.phase||"avec",libelle:a.libelle,dev:a.dev,res:a.res})),
+  depart:()=>({depart:S.depart,dt:S.dureeTemps,dec:S.decompte})
 };
 })();
 </script>
@@ -6309,6 +6748,7 @@ function rendJour(){
     const te=cell(s.titre);
     const sous=[s.palo?"sur "+s.palo:(s.mode==="morceau"?"morceau":"clic simple"),s.partiel?"interrompu":"",s.dur?duree(s.dur):""].filter(Boolean).join(" · ");
     const sp=document.createElement("span");sp.className="sous col-palo";sp.textContent=sous;te.appendChild(sp);
+    if(s.diag){const dg=document.createElement("span");dg.className="sous";dg.textContent=s.diag;te.appendChild(dg);}
     cell(tempoTexte(s),"nb");cell(s.r!=null?String(s.r):"—","nb");cell(s.v!=null?String(s.v):"—","nb col-vol");
     cell(s.a!=null?String(s.a):"—","nb");cell((s.fr!=null?s.fr:"?")+" / "+(s.att!=null?s.att:"?"),"nb");
     const act=document.createElement("td");act.className="j-ligne-act";
@@ -6433,8 +6873,8 @@ async function donne(txt,nom,type){
 }
 function csv(){
   const q=v=>{v=v==null?"":String(v);return /[;"\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v;};
-  const t=["date;heure;exercice;mode;tempo;vitesse_%;palo;rythme;volume;accents;frappes_reconnues;frappes_attendues;decalage_moyen_ms;dispersion_ms;duree_s;interrompu"];
-  J.seances.forEach(s=>t.push([cleJour(s.t),heure(s.t),s.titre,s.mode,s.bpm,s.vit,s.palo,s.r,s.v,s.a,s.fr,s.att,s.dec,s.jit,s.dur,s.partiel?"oui":"non"].map(q).join(";")));
+  const t=["date;heure;exercice;mode;tempo;vitesse_%;palo;rythme;volume;accents;frappes_reconnues;frappes_attendues;decalage_moyen_ms;dispersion_ms;duree_s;interrompu;compas_interieur;compte_rendu"];
+  J.seances.forEach(s=>t.push([cleJour(s.t),heure(s.t),s.titre,s.mode,s.bpm,s.vit,s.palo,s.r,s.v,s.a,s.fr,s.att,s.dec,s.jit,s.dur,s.partiel?"oui":"non",s.silences,s.diag].map(q).join(";")));
   return "﻿"+t.join("\n");
 }
 $("#jCsv").addEventListener("click",async()=>{

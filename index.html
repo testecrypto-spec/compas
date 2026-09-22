@@ -517,6 +517,26 @@ footer{color:var(--muted);font-size:.82rem;margin-top:1.6rem;max-width:70ch}
   .entete-morceau input{flex:1 1 100%;font-size:1.15rem}
 }
 
+/* ---------- tempo proposé et transcription ---------- */
+.tempo-analyse{margin-top:14px;padding:12px 14px;border:1px solid var(--edge);border-left:3px solid var(--oro);border-radius:0 3px 3px 0;background:var(--bg)}
+.tempo-analyse .aide{margin:8px 0 0}
+.tempo-analyse .actions{margin-top:10px}
+.tempo-choix{display:flex;flex-wrap:wrap;gap:6px}
+.tempo-choix button{display:flex;flex-direction:column;align-items:flex-start;gap:1px;padding:7px 12px;min-width:5.5rem}
+.tempo-choix button b{font-family:"Bodoni Moda",Georgia,serif;font-size:1.2rem;font-variant-numeric:tabular-nums;line-height:1.1}
+.tempo-choix button span{font-size:.72rem;color:var(--muted)}
+.tempo-choix button[aria-pressed="true"]{background:var(--oro);border-color:var(--oro);color:var(--sur-oro)}
+.tempo-choix button[aria-pressed="true"] span{color:var(--sur-oro);opacity:.85}
+.tempo-m button{white-space:nowrap}
+.etiquette-m{display:block;font-size:.85rem;color:var(--muted);margin-bottom:6px}
+.un-m{margin-top:0}
+.champ-m{width:100%;box-sizing:border-box;background:var(--bg);color:var(--text);border:1px solid var(--edge);border-radius:3px;padding:9px 11px;
+  font-family:ui-monospace,"SF Mono",Menlo,Consolas,monospace;font-size:.9rem;line-height:1.5;resize:vertical}
+.champ-m:focus-visible{outline:2px solid var(--oro);outline-offset:1px}
+.trans-notes{margin:8px 0 0;padding-left:1.1rem;color:var(--muted);font-size:.85rem}
+.trans-notes:empty{display:none}
+#mTransResultat{margin-top:12px}
+
 /* ---------- bibliothèque d'exercices ---------- */
 .entraineur .champ{width:100%;background:var(--ebano);color:var(--tapa);border:1px solid var(--trait);border-radius:2px;padding:9px 11px;font:inherit;font-size:.95rem}
 .entraineur textarea.champ{resize:vertical;line-height:1.45}
@@ -1351,9 +1371,15 @@ footer{color:var(--muted);font-size:.82rem;margin-top:1.6rem;max-width:70ch}
       <div class="tempo-m">
         <input type="number" id="mTempo" min="30" max="320" step="1" value="120">
         <button type="button" id="mTap">Tap</button>
+        <button type="button" id="mTrouver">Trouver</button>
       </div>
-      <p class="aide">Tape en rythme pendant la lecture pour le trouver. Le décompte suit la vitesse choisie.</p>
+      <p class="aide">« Trouver » écoute la sélection (ou tout le morceau). « Tap » : tape en rythme pendant la lecture. Le décompte suit la vitesse choisie.</p>
     </div>
+  </div>
+  <div class="tempo-analyse" id="mTempoAnalyse" hidden>
+    <div class="tempo-choix" id="mTempoChoix" role="group" aria-label="Tempos proposés"></div>
+    <p class="aide" id="mTempoInfo" aria-live="polite"></p>
+    <div class="actions"><button type="button" class="petit" id="mVersMetronome">Régler le métronome sur ce tempo</button></div>
   </div>
 </section>
 
@@ -1409,6 +1435,41 @@ footer{color:var(--muted);font-size:.82rem;margin-top:1.6rem;max-width:70ch}
   <div class="actions"><button type="button" id="mDetecter" class="primaire" disabled>Détecter les frappes</button></div>
   <p class="aide" id="mFrappesInfo" aria-live="polite">Choisis d'abord un passage sur la forme d'onde.</p>
   <p class="aide">La détection est une aide, pas une vérité : dans un rasgueado continu, les coups se fondent. Vérifie les repères à l'écoute avant de te fier au score. Joue au casque : sinon le micro entend le morceau.</p>
+</section>
+<section class="plateau" id="blocTranscription" hidden>
+  <h2>Transcrire le passage</h2>
+  <p class="aide intro">Compás place les frappes de la piste de référence sur la grille des temps et les écrit en figures rythmiques : doubles-croches, triolets, sextolets, silences et accents. Tu les travailles ensuite dans l'onglet Figures rythmiques. Les doigtés et le sens des coups ne s'entendent pas : ajoute-les toi-même.</p>
+  <div class="reglages">
+    <div>
+      <label for="mMesure">Mesures de</label>
+      <select id="mMesure">
+        <option value="2">2 temps (2/4)</option>
+        <option value="3" selected>3 temps (3/4)</option>
+        <option value="4">4 temps (4/4)</option>
+        <option value="6">6 temps (6/4)</option>
+      </select>
+    </div>
+    <div>
+      <span class="etiquette-m" id="mUnTitre">Le premier temps</span>
+      <div class="actions un-m" role="group" aria-labelledby="mUnTitre">
+        <button type="button" class="petit" id="mUnAvant">◀ un temps plus tôt</button>
+        <button type="button" class="petit" id="mUnApres">un temps plus tard ▶</button>
+      </div>
+      <p class="aide" id="mUnInfo">La 1re mesure commence au premier temps de la sélection. Les chiffres sur la forme d'onde montrent où tombe chaque mesure.</p>
+    </div>
+  </div>
+  <div class="actions"><button type="button" id="mTranscrire" class="primaire" disabled>Transcrire</button></div>
+  <p class="aide" id="mTransInfo" aria-live="polite">Choisis d'abord un passage sur la forme d'onde, de 1 à 4 compases.</p>
+  <div id="mTransResultat" hidden>
+    <label for="mTransCode">Le code de la figure</label>
+    <textarea id="mTransCode" class="champ-m" rows="6" spellcheck="false"></textarea>
+    <ul class="trans-notes" id="mTransNotes"></ul>
+    <div class="actions">
+      <button type="button" id="mVersFigures" class="primaire">Travailler dans Figures rythmiques</button>
+      <button type="button" id="mEcouterGrille">Écouter avec le clic</button>
+    </div>
+    <p class="aide">Écoute d'abord le passage avec le clic sur la grille : si les clics ne tombent pas sur la musique, corrige le tempo ou le premier temps avant d'envoyer la figure.</p>
+  </div>
 </section>
 <div id="ancreMorceau" hidden></div>
 </div>
@@ -5596,6 +5657,21 @@ function rejoueSeance(s){
   sauve();
 }
 document.addEventListener("journal-maj",()=>afficheListe());
+/* ---- une figure transcrite depuis l'onglet Morceaux ---- */
+window.EntraineurCode={charge:function(code,bpm,titre){
+  const r=lireCode(code);
+  if(r.erreurs.length)return false;
+  if(S.running&&window.Entraineur)Entraineur.arrete();
+  $("#code").value=code;importe(false);
+  R.doigts=null;B.courant=null;B.depart=0;
+  if(bpm){const v=Math.round(clamp(bpm,30,240));$("#bpm").value=String(v);$("#tBpmVal").textContent=String(v);if(typeof majVitesse==="function")majVitesse();}
+  const nom=$("#exoNom"),coll=$("#exoColl"),aj=$("#exoAjout");
+  if(nom)nom.value=titre||"";if(coll)coll.value="Transcriptions";if(aj)aj.open=true;
+  afficheCourant();afficheListe();majBiblioPalos();majPalo();sauve();
+  retourExo("Transcription chargée"+(bpm>240?" (tempo ramené à 240, le maximum ici)":"")+". Écoute-la, corrige ce qui doit l'être, ajoute tes doigtés, puis enregistre-la dans ta bibliothèque.");
+  const z=$("#partition");if(z&&z.scrollIntoView)setTimeout(()=>z.scrollIntoView({block:"center",behavior:"smooth"}),60);
+  return true;
+}};
 
 /* ---- doigtés imprimés : un jeton par frappe, dans l'ordre des frappes ---- */
 // « a↑ » : doigt(s) et sens au-dessus de la portée ; « /p » : pouce écrit dessous ; « · » : rien d'écrit
@@ -5958,6 +6034,272 @@ function detecteFrappes(donnees,sr,delta){
   return out;
 }
 
+/* Tempo, temps et transcription d'un passage.
+   Tout se calcule dans l'appareil, sur le son déjà chargé : rien ne part sur Internet.
+   1. enveloppeTempo : la « courbe des attaques » (flux spectral) à ~86 images/s
+   2. estimeTempo    : le tempo le plus probable, et ses voisins ambigus (moitié, double, 2/3, 3/2)
+   3. suitTemps      : l'emplacement de chaque temps, qui suit les petites accélérations (programmation dynamique)
+   4. transcrit      : les frappes placées sur la grille, écrites dans le code des Figures rythmiques */
+const Tempo=(function(){
+  function fft(re,im){
+    const n=re.length;
+    for(let i=1,j=0;i<n;i++){let bit=n>>1;for(;j&bit;bit>>=1)j^=bit;j^=bit;
+      if(i<j){let t=re[i];re[i]=re[j];re[j]=t;t=im[i];im[i]=im[j];im[j]=t;}}
+    for(let len=2;len<=n;len<<=1){
+      const ang=-2*Math.PI/len,wr=Math.cos(ang),wi=Math.sin(ang);
+      for(let i=0;i<n;i+=len){let cr=1,ci=0;
+        for(let j=0;j<len/2;j++){const a=i+j,b=a+len/2;
+          const tr=re[b]*cr-im[b]*ci,ti=re[b]*ci+im[b]*cr;
+          re[b]=re[a]-tr;im[b]=im[a]-ti;re[a]+=tr;im[a]+=ti;
+          const ncr=cr*wr-ci*wi;ci=cr*wi+ci*wr;cr=ncr;}}}
+  }
+
+  // ---- 1. la courbe des attaques ----
+  // le son réduit à ~11 kHz, mono : assez pour les attaques, et huit fois plus léger
+  function reduit(canaux,sr,x,poids){
+    const k=Math.max(1,Math.round(sr/11025)),n2=Math.floor(canaux[0].length/k);
+    if(!x)x=new Float32Array(n2);
+    const w=(poids===undefined?1:poids)/(k*canaux.length);
+    canaux.forEach(d=>{for(let i=0;i<n2&&i<x.length;i++){let s=0;const o=i*k;for(let j=0;j<k;j++)s+=d[o+j];x[i]+=s*w;}});
+    return {x,sr:sr/k};
+  }
+  function enveloppeTempo(mono,sr){
+    const r=reduit([mono],sr);return enveloppeReduite(r.x,r.sr);
+  }
+  function enveloppeReduite(x,sr2){
+    const n2=x.length;
+    const N=512,hop=128,fps=sr2/hop,nf=Math.max(0,Math.floor((n2-N)/hop)+1);
+    const kmax=Math.min(N/2,Math.round(5000/sr2*N));
+    const win=new Float32Array(N);for(let i=0;i<N;i++)win[i]=0.5-0.5*Math.cos(2*Math.PI*i/N);
+    const re=new Float64Array(N),im=new Float64Array(N);
+    let prec=new Float32Array(kmax),cour=new Float32Array(kmax);
+    const flux=new Float32Array(nf);
+    for(let f=0;f<nf;f++){
+      const s0=f*hop;
+      for(let i=0;i<N;i++){re[i]=x[s0+i]*win[i];im[i]=0;}
+      fft(re,im);
+      let s=0;
+      for(let b=1;b<kmax;b++){
+        const m=Math.log(1+1000*Math.hypot(re[b],im[b]));cour[b]=m;
+        const p=Math.max(prec[b-1],prec[b],b+1<kmax?prec[b+1]:0);
+        if(f>0&&m>p)s+=m-p;
+      }
+      flux[f]=s;const t=prec;prec=cour;cour=t;
+    }
+    // on retire la moyenne locale (0,5 s) : ne restent que les attaques
+    const env=new Float32Array(nf),W=Math.round(fps*0.25);
+    let acc=0;const cum=new Float64Array(nf+1);
+    for(let f=0;f<nf;f++){acc+=flux[f];cum[f+1]=acc;}
+    for(let f=0;f<nf;f++){const a=Math.max(0,f-W),b=Math.min(nf,f+W+1);env[f]=Math.max(0,flux[f]-(cum[b]-cum[a])/(b-a));}
+    let mx=0;for(let f=0;f<nf;f++)if(env[f]>mx)mx=env[f];
+    if(mx>0)for(let f=0;f<nf;f++)env[f]/=mx;
+    // une image décrit la fenêtre qui commence à f*hop : l'attaque y pèse le plus quand elle est au milieu
+    return {env,fps,t0:N/2/sr2};
+  }
+  function tranche(E,t0,t1){
+    const d=E.t0||0,a=Math.max(0,Math.floor((t0-d)*E.fps)),b=Math.min(E.env.length,Math.ceil((t1-d)*E.fps));
+    return {env:E.env.subarray(a,Math.max(a,b)),fps:E.fps,t0:d+a/E.fps};
+  }
+
+  // ---- 2. le tempo ----
+  // autocorrélation de la courbe ; chaque tempo reçoit aussi le soutien de ses multiples (la mesure, le compás)
+  function autocorr(env,lmin,lmax){
+    const n=env.length,ac=new Float64Array(lmax+2);
+    let moy=0;for(let i=0;i<n;i++)moy+=env[i];moy/=n||1;
+    for(let L=lmin>>1;L<=lmax+1&&L<n;L++){let s=0;for(let i=0;i+L<n;i++)s+=(env[i]-moy)*(env[i+L]-moy);ac[L]=s/(n-L);}
+    return ac;
+  }
+  function estimeTempo(E,opts){
+    opts=opts||{};
+    const bmin=opts.min||45,bmax=opts.max||300,centre=opts.centre||150;
+    const env=E.env,fps=E.fps;
+    if(env.length<fps*3)return null;
+    const lmin=Math.floor(60*fps/bmax),lmax=Math.ceil(60*fps/bmin);
+    const ac=autocorr(env,lmin,Math.min(env.length-1,lmax*4));
+    const val=L=>{if(L<1||L>=ac.length-1)return 0;const i=Math.floor(L),f=L-i;return ac[i]*(1-f)+ac[i+1]*f;};
+    let norme=ac[0]||1;for(let i=1;i<ac.length;i++)if(ac[i]>norme)norme=ac[i];
+    // saillance d'une période : elle-même, puis ses multiples (moins de poids)
+    const sal=L=>Math.max(0,val(L))+0.5*Math.max(0,val(2*L))+0.33*Math.max(0,val(3*L))+0.25*Math.max(0,val(4*L));
+    const pts=[];
+    for(let L=lmin;L<=lmax;L+=0.25){
+      const bpm=60*fps/L;
+      const pr=Math.exp(-0.5*Math.pow(Math.log2(bpm/centre)/1.1,2));    // un léger penchant pour les tempos courants
+      pts.push({L,bpm,s:sal(L)/norme,p:sal(L)/norme*pr});
+    }
+    // les sommets
+    const pics=[];
+    for(let i=1;i<pts.length-1;i++)if(pts[i].p>=pts[i-1].p&&pts[i].p>pts[i+1].p)pics.push(pts[i]);
+    pics.sort((a,b)=>b.p-a.p);
+    if(!pics.length)return null;
+    const best=pics[0];
+    const scoreDe=bpm=>{let m=0;pts.forEach(q=>{if(Math.abs(q.bpm-bpm)/bpm<0.03&&q.p>m)m=q.p;});return m;};
+    const alt=[];
+    [[2,"le double"],[0.5,"la moitié"],[1.5,"×3/2"],[2/3,"×2/3"]].forEach(([k,nom])=>{
+      const b=best.bpm*k;if(b<bmin*0.8||b>bmax*1.1)return;
+      alt.push({bpm:b,nom,score:scoreDe(b)/best.p});
+    });
+    alt.sort((a,b)=>b.score-a.score);
+    // la netteté : le sommet dépasse-t-il nettement le reste ?
+    const autres=pics.filter(q=>Math.abs(Math.log2(q.bpm/best.bpm))>0.1&&[2,0.5,1.5,2/3].every(k=>Math.abs(q.bpm/(best.bpm*k)-1)>0.04));
+    const nettete=autres.length?1-autres[0].p/best.p:1;
+    return {bpm:best.bpm,alternatives:alt,nettete};
+  }
+  // le tempo au fil du morceau : quelques fenêtres
+  function evolution(E,fen){
+    fen=fen||20;const dur=E.env.length/E.fps,out=[];
+    for(let t=0;t+fen*0.6<=dur;t+=fen){
+      const tr=tranche(E,t,Math.min(dur,t+fen));
+      let e=0;for(let i=0;i<tr.env.length;i++)e+=tr.env[i];
+      if(e/tr.env.length<0.01)continue;          // silence
+      const r=estimeTempo(tr);if(r)out.push({t,bpm:r.bpm});
+    }
+    return out;
+  }
+  // les grandes sections de tempo : on accorde chaque fenêtre à la précédente (moitié ou double),
+  // on écarte les fenêtres isolées, puis on regroupe celles qui se suivent de près
+  function sections(evol,duree,ref){
+    if(!evol.length)return [];
+    // une fenêtre à la moitié ou au double du tempo général y est ramenée ; un vrai changement (×2/3…) reste tel quel
+    const v=evol.map(e=>{
+      let b=e.bpm;
+      if(ref)[2,0.5].forEach(k=>{if(Math.abs(e.bpm*k/ref-1)<0.15)b=e.bpm*k;});
+      return {t:e.t,bpm:b};
+    });
+    const ok=v.filter((e,i)=>{
+      const pr=v[i-1],su=v[i+1],pres=(a,b)=>a&&Math.abs(a.bpm/b.bpm-1)<0.08;
+      return v.length<3||pres(pr,e)||pres(su,e);
+    });
+    const out=[];
+    ok.forEach(e=>{
+      const d=out[out.length-1];
+      if(d&&Math.abs(e.bpm/d.bpm-1)<0.07){d.n++;d.somme+=e.bpm;d.bpm=d.somme/d.n;d.fin=e.t;}
+      else out.push({debut:e.t,fin:e.t,bpm:e.bpm,somme:e.bpm,n:1});
+    });
+    out.forEach((s,i)=>{s.fin=i<out.length-1?out[i+1].debut:duree;delete s.somme;});
+    return out;
+  }
+  // on ramène un tempo sur l'« octave » d'un autre (même famille : ×2, ÷2, ×3/2, ×2/3)
+  function aligne(bpm,ref){
+    let best=bpm,d=1e9;
+    [1,2,0.5,1.5,2/3,3,1/3].forEach(k=>{const v=bpm*k,e=Math.abs(Math.log2(v/ref));if(e<d){d=e;best=v;}});
+    return best;
+  }
+
+  // ---- 3. les temps ----
+  function suitTemps(E,bpm,serrage){
+    const env=E.env,fps=E.fps,n=env.length,P=60*fps/bpm,alpha=serrage||100;
+    if(n<P*2)return [];
+    const score=new Float64Array(n),prev=new Int32Array(n).fill(-1);
+    // lissage léger
+    const o=new Float64Array(n);
+    for(let i=0;i<n;i++){let s=0,c=0;for(let k=-2;k<=2;k++){const j=i+k;if(j>=0&&j<n){s+=env[j]*(3-Math.abs(k));c+=3-Math.abs(k);}}o[i]=s/c;}
+    for(let t=0;t<n;t++){
+      let best=0,arg=-1;
+      const a=Math.max(0,Math.round(t-2*P)),b=Math.round(t-P/2);
+      for(let u=a;u<=b;u++){const r=Math.log((t-u)/P),v=score[u]-alpha*r*r;if(v>best||arg<0){best=v;arg=u;}}
+      score[t]=o[t]+(arg>=0?Math.max(0,best):0);prev[t]=arg>=0&&best>0?arg:-1;
+    }
+    // la fin : le meilleur score parmi les dernières positions
+    let fin=n-1,mx=-1e9;for(let t=Math.max(0,Math.floor(n-P));t<n;t++)if(score[t]>mx){mx=score[t];fin=t;}
+    const temps=[];for(let t=fin;t>=0;t=prev[t]){temps.push(t);if(prev[t]<0)break;}
+    temps.reverse();
+    // on complète au début si la chaîne s'est arrêtée trop tôt
+    while(temps.length&&temps[0]-P>=0)temps.unshift(Math.round(temps[0]-P));
+    // position fine : le sommet de la courbe près de chaque temps
+    return temps.map(f=>{let bf=f,bv=-1;for(let k=-3;k<=3;k++){const j=f+k;if(j>=0&&j<n&&o[j]>bv){bv=o[j];bf=j;}}return (E.t0||0)+bf/fps;});
+  }
+  // les frappes détectées servent d'étalon : on recale la grille sur elles (décalage médian des frappes proches d'un temps)
+  function recale(temps,frappes){
+    if(temps.length<2||!frappes.length)return {temps,decalage:0};
+    const ecarts=[];
+    frappes.forEach(t=>{
+      let j=0;for(let i=1;i<temps.length;i++)if(Math.abs(temps[i]-t)<Math.abs(temps[j]-t))j=i;
+      const P=(temps[Math.min(j+1,temps.length-1)]-temps[Math.max(j-1,0)])/(j>0&&j<temps.length-1?2:1);
+      const e=(t-temps[j])/P;if(Math.abs(e)<0.2)ecarts.push(t-temps[j]);
+    });
+    if(ecarts.length<3)return {temps,decalage:0};
+    ecarts.sort((p,q)=>p-q);const d=ecarts[ecarts.length>>1];
+    return {temps:temps.map(t=>t+d),decalage:d};
+  }
+  function forceTemps(E,temps){
+    return temps.map(t=>{const f=Math.round((t-(E.t0||0))*E.fps);let m=0;for(let k=-2;k<=2;k++){const j=f+k;if(j>=0&&j<E.env.length&&E.env[j]>m)m=E.env[j];}return m;});
+  }
+
+  // ---- 4. la transcription ----
+  const DIVS=[1,2,3,4,6,8],COUT_DIV={1:0,2:0.6,3:1.4,4:1.2,6:2.6,8:3.4};
+  // une frappe écartée de sigma (en fraction de temps) coûte 1 ; deux frappes sur la même case coûtent cher
+  function meilleureCase(xs,sigma){
+    let best=null;
+    DIVS.forEach(d=>{
+      const cases=new Array(d).fill(null);let cout=COUT_DIV[d],col=0,err=0;
+      xs.forEach(q=>{
+        let s=Math.round(q.x*d);if(s>=d){s=d-1;cout+=4;}if(s<0)s=0;
+        const e=q.x-s/d;cout+=(e/sigma)*(e/sigma);err=Math.max(err,Math.abs(e));
+        if(cases[s]){col++;cout+=6;if(q.fort)cases[s].fort=true;}else cases[s]={fort:!!q.fort};
+      });
+      if(!best||cout<best.cout)best={d,cases,cout,col,err};
+    });
+    return best;
+  }
+  function motifDe(cases){
+    const d=cases.length;let s="",tenu=false;
+    for(let i=0;i<d;i++){
+      if(cases[i]){s+=cases[i].fort?"X":"x";tenu=true;}
+      else s+=tenu?"-":"o";
+    }
+    // on simplifie : « x-x- » s'écrit « xx », « x--- » s'écrit « x »
+    for(const k of [4,3,2]){
+      if(s.length%k)continue;
+      let ok=true;for(let i=0;i<s.length;i++)if(i%k&&s[i]!=="-")ok=false;
+      if(ok){s=s.split("").filter((c,i)=>i%k===0).join("");}
+    }
+    if(/^o+$/.test(s))s="o";
+    return s;
+  }
+  // frappes : [{t, fort}] ; temps : instants des temps ; i0 : indice du temps qui ouvre la 1re mesure
+  function transcrit(frappes,temps,i0,num,opts){
+    opts=opts||{};
+    const maxMes=opts.maxMesures||8,delta=0.09,sigma=opts.sigma||0.06;
+    if(temps.length<2)return null;
+    // position de chaque frappe en temps (fraction), par interpolation entre les temps voisins
+    const periodeFin=temps[temps.length-1]-temps[temps.length-2],periodeDeb=temps[1]-temps[0];
+    const pos=t=>{
+      if(t<temps[0])return (t-temps[0])/periodeDeb;
+      for(let j=0;j<temps.length-1;j++)if(t<temps[j+1])return j+(t-temps[j])/(temps[j+1]-temps[j]);
+      return temps.length-1+(t-temps[temps.length-1])/periodeFin;
+    };
+    const ps=frappes.map(q=>({p:pos(q.t),fort:q.fort,t:q.t}));
+    const derniere=ps.length?ps[ps.length-1].p:i0;
+    const nbTemps=Math.min(maxMes*num,Math.max(num,Math.ceil((derniere+delta-i0)/num)*num));
+    const mesures=[],notes=[];let nFrappes=0,nAcc=0,errs=[],serres=0;
+    for(let m=0;m<nbTemps/num;m++){
+      const cells=[];
+      for(let b=0;b<num;b++){
+        const j=i0+m*num+b;
+        const xs=ps.filter(q=>q.p>=j-delta&&q.p<j+1-delta).map(q=>({x:q.p-j,fort:q.fort}));
+        const c=meilleureCase(xs,sigma);
+        const motif=motifDe(c.cases);
+        cells.push(motif==="x"?"n":"n:"+motif);
+        c.cases.forEach(k=>{if(k){nFrappes++;if(k.fort)nAcc++;}});
+        if(xs.length)errs.push(c.err);
+        if(c.col){serres+=c.col;notes.push("mesure "+(m+1)+", temps "+(b+1)+" : "+(c.col+1)+" frappes très serrées, réunies en une");}
+      }
+      mesures.push(cells.join(" "));
+    }
+    const hors=ps.filter(q=>q.p>=i0+nbTemps-delta).length;
+    return {code:ecrit(num,mesures),mesures:mesures.length,frappes:nFrappes,accents:nAcc,serres,hors,
+      ecartMoyen:errs.length?errs.reduce((s,x)=>s+x,0)/errs.length:0,notes};
+  }
+  function ecrit(num,mesures){
+    let s=num+"/4";
+    mesures.forEach((p,i)=>{s+=(i%2===0?"\n|":" |")+" "+p;});
+    return s+" |";
+  }
+
+  return {reduit,enveloppeReduite,enveloppeTempo,tranche,recale,estimeTempo,evolution,aligne,suitTemps,forceTemps,sections,transcrit,_meilleureCase:meilleureCase,_motifDe:motifDe};
+})();
+if(typeof module!=="undefined")module.exports=Tempo;
+
 const $=s=>document.querySelector(s);
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
 
@@ -6034,7 +6376,7 @@ function lisFichier(cle){
 }
 function meta(){
   return {id:M.id,nom:M.nom,maj:Date.now(),duree:M.duree,tempo:M.tempo,vitesse:M.vitesse,decompte:M.decompte,boucle:M.boucle,
-    a:M.a,b:M.b,passages:M.passages,frappes:M.frappes,
+    a:M.a,b:M.b,passages:M.passages,frappes:M.frappes,analyse:M.analyse||null,transcription:M.transcription||null,mesure:M.mesure||null,
     pistes:M.pistes.map(p=>({cle:p.cle,nom:p.nom,role:p.role,volume:p.volume,muet:p.muet,solo:p.solo}))};
 }
 function sauve(){
@@ -6101,10 +6443,12 @@ async function chargeFichiers(fichiers,ajout){
   if(!garde)msg+=" Ce navigateur n'a pas pu garder les fichiers : le morceau reste chargé pour cette séance seulement.";
   etat(msg,false);
   M.vue=[0,M.duree];
-  if(nouveau){M.a=null;M.b=null;M.pos=0;M.passages=[];M.frappes=null;}
+  if(nouveau){M.a=null;M.b=null;M.pos=0;M.passages=[];M.frappes=null;M.analyse=null;M.transcription=null;}
   memoriseDernier(M.id);
   tx("morceaux","readwrite",s=>s.put(meta())).then(dessineBiblio).catch(()=>{});
   afficheLecteur();
+  // le tempo se cherche tout seul dès le chargement
+  trouveTempo(true,nouveau);
 }
 function nomCommun(noms){
   if(!noms.length)return "Morceau";
@@ -6116,6 +6460,7 @@ function nomCommun(noms){
 function videMorceau(){
   M.pistes.forEach(p=>{try{p.gain.disconnect();}catch(e){}});
   M.pistes=[];M.duree=0;M.cache.clear();M.passageCourant=null;M.frappes=null;
+  M.analyse=null;M.transcription=null;TP.env=null;TP.grille=null;TP.decal=0;
 }
 
 async function ouvre(id){
@@ -6140,12 +6485,15 @@ async function ouvre(id){
   if(!M.pistes.length){etat("Les fichiers de ce morceau n'ont pas pu être relus.",true);return;}
   M.duree=Math.max(...M.pistes.map(p=>p.buffer.duration));
   M.tempo=rec.tempo||120;M.vitesse=rec.vitesse||1;M.decompte=rec.decompte!==undefined?rec.decompte:4;
-  M.boucle=rec.boucle!==false;M.a=rec.a;M.b=rec.b;M.passages=rec.passages||[];M.frappes=rec.frappes||null;M.pos=M.a!==null&&M.a!==undefined?M.a:0;
+  M.boucle=rec.boucle!==false;M.a=rec.a;M.b=rec.b;M.passages=rec.passages||[];M.frappes=rec.frappes||null;
+  M.analyse=rec.analyse||null;M.transcription=rec.transcription||null;M.mesure=rec.mesure||null;M.pos=M.a!==null&&M.a!==undefined?M.a:0;
   if(M.a===undefined)M.a=null;if(M.b===undefined)M.b=null;
   M.vue=[0,M.duree];
   memoriseDernier(M.id);
   etat(rates?rates+" piste(s) n'ont pas pu être relues.":"",!!rates);
   afficheLecteur();
+  // un morceau rangé avant la recherche du tempo : on la fait, sans toucher à un tempo déjà réglé à la main
+  if(!M.analyse)trouveTempo(true,M.tempo===120);
 }
 async function supprime(id){
   try{
@@ -6242,6 +6590,7 @@ function exemple(){
   M.vue=[0,M.duree];
   etat("Exemple chargé : trois pistes synthétisées. Il n'est pas gardé dans la bibliothèque.");
   afficheLecteur();
+  trouveTempo(true,false);
 }
 
 /* ---------------------------------------------------------------- mixage */
@@ -6381,6 +6730,7 @@ function dessineOnde(){
       });
     }
   }
+  dessineGrille(g,w,h);
   // bornes de la sélection
   if(M.a!==null){
     g.strokeStyle=couleur("--oro");g.lineWidth=2;
@@ -6455,6 +6805,7 @@ function majSelection(){
   $("#mZoomSel").disabled=!a;
   $("#mZoomTout").disabled=M.vue[0]===0&&M.vue[1]===M.duree;
   dessinePassages();
+  majTranscription();
 }
 document.querySelectorAll("#retouches [data-borne]").forEach(b=>b.addEventListener("click",()=>{
   if(M.a===null)return;
@@ -6607,6 +6958,7 @@ function planifie(t,de){
 }
 function veille(){
   if(!M.joue)return;
+  clicsGrille();
   const c=contexte(),now=c.currentTime,der=M.reps[M.reps.length-1];
   M.sources=M.sources.filter(x=>x.fin>now-0.5);
   if(!der)return;
@@ -6832,16 +7184,244 @@ function stopEntrainement(){
 /* ---------------------------------------------------------------- affichage */
 function afficheLecteur(){
   const a=M.pistes.length>0;
-  $("#lecteur").hidden=!a;$("#blocPistes").hidden=!a;$("#blocPassages").hidden=!a;$("#blocEntrainement").hidden=!a;
+  $("#lecteur").hidden=!a;$("#blocPistes").hidden=!a;$("#blocPassages").hidden=!a;$("#blocEntrainement").hidden=!a;$("#blocTranscription").hidden=!a;
   if(!a){dessineBiblio();return;}
   $("#nomMorceau").value=M.nom;
   $("#dureeMorceau").textContent=fmtT(M.duree).replace(/,\d$/,"")+" · "+M.pistes.length+" piste"+(M.pistes.length>1?"s":"");
   $("#mVitesse").value=Math.round(M.vitesse*100);$("#mVitesseVal").textContent=Math.round(M.vitesse*100);
   $("#mDecompte").value=String(M.decompte);$("#mTempo").value=Math.round(M.tempo);$("#mBoucle").checked=M.boucle;
   $("#mTemps").textContent=fmtT(M.pos);
+  $("#mMesure").value=String(M.mesure||mesureParDefaut());
+  $("#mTransResultat").hidden=true;
+  afficheTempo();
   dessinePistes();
   requestAnimationFrame(()=>{dessineOnde();majSelection();});
   dessineBiblio();
+}
+/* ---------------------------------------------------------------- tempo proposé et transcription du passage */
+const TP={env:null,envCle:"",grille:null,clic:false,decal:0};
+
+// la courbe des attaques du morceau entier, calculée une fois (pistes mélangées, ~11 kHz)
+function cleEnv(){return M.id+"|"+M.pistes.map(p=>p.cle||p.nom).join(",")+"|"+M.duree.toFixed(2);}
+function envMorceau(){
+  if(TP.env&&TP.envCle===cleEnv())return TP.env;
+  // s'il y a un mélange complet, il suffit ; sinon on additionne les pistes (le chant à moitié : il marque peu le rythme)
+  const mix=M.pistes.find(p=>p.role==="mix");
+  const pistes=mix?[mix]:M.pistes;
+  let x=null,sr2=0;
+  pistes.forEach(p=>{
+    const b=p.buffer,can=[];for(let c=0;c<b.numberOfChannels;c++)can.push(b.getChannelData(c));
+    if(x&&Math.abs(b.sampleRate/Math.max(1,Math.round(b.sampleRate/11025))-sr2)>1)return;   // fréquence différente : on l'ignore
+    const r=Tempo.reduit(can,b.sampleRate,x,p.role==="chant"?0.5:1);x=r.x;sr2=r.sr;
+  });
+  TP.env=Tempo.enveloppeReduite(x,sr2);TP.envCle=cleEnv();
+  return TP.env;
+}
+const arrondi=v=>Math.round(v);
+function fmtMin(t){return fmtT(t).replace(/,\d$/,"");}
+
+// ---- le tempo ----
+function analyse(portee){
+  if(!M.pistes.length)return null;
+  const E=envMorceau();
+  if(portee==="passage"&&M.a!==null&&M.b-M.a>=2.5){
+    const G=M.analyse&&M.analyse.bpm;
+    const r=Tempo.estimeTempo(Tempo.tranche(E,M.a,M.b),{centre:G||150});
+    if(!r)return null;
+    return {portee:"passage",a:M.a,b:M.b,bpm:r.bpm,alt:r.alternatives.slice(0,3).map(x=>({bpm:x.bpm,nom:x.nom})),nettete:r.nettete};
+  }
+  const r=Tempo.estimeTempo(E);
+  if(!r)return null;
+  const sec=Tempo.sections(Tempo.evolution(E),M.duree,r.bpm).map(s=>({debut:s.debut,fin:s.fin,bpm:s.bpm}));
+  return {portee:"morceau",bpm:r.bpm,alt:r.alternatives.slice(0,3).map(x=>({bpm:x.bpm,nom:x.nom})),nettete:r.nettete,sections:sec};
+}
+function trouveTempo(auto,appliquer){
+  if(appliquer===undefined)appliquer=true;
+  const portee=(!auto&&M.a!==null&&M.b-M.a>=2.5)?"passage":"morceau";
+  $("#mTempoAnalyse").hidden=false;
+  $("#mTempoInfo").textContent=portee==="passage"?"J'écoute la sélection…":"J'écoute le morceau…";
+  // on laisse l'écran se mettre à jour avant le calcul
+  setTimeout(()=>{
+    let r=null;
+    try{r=analyse(portee);}catch(e){r=null;}
+    if(!r){$("#mTempoInfo").textContent=portee==="passage"?"Pas de tempo net dans cette sélection : prends un passage plus long (au moins 3 s), ou tape le tempo.":"Pas de tempo net dans ce morceau : tape-le pendant la lecture.";return;}
+    if(portee==="morceau")M.analyse=r;else M.analyse=Object.assign({},M.analyse||{},{passage:r});
+    if(appliquer)choisitTempo(r.bpm,true);
+    afficheTempo();sauve();
+  },30);
+}
+function choisitTempo(bpm,silencieux){
+  M.tempo=clamp(arrondi(bpm),30,320);$("#mTempo").value=M.tempo;
+  TP.grille=null;
+  if(!silencieux)sauve();
+  afficheTempo();
+  if(!$("#mTransResultat").hidden)transcrire();else dessineOnde();
+}
+function afficheTempo(){
+  const A=M.analyse;
+  if(!A){$("#mTempoAnalyse").hidden=true;return;}
+  $("#mTempoAnalyse").hidden=false;
+  const r=(A.passage&&M.a!==null&&Math.abs(A.passage.a-M.a)<0.01&&Math.abs(A.passage.b-M.b)<0.01)?A.passage:A;
+  const z=$("#mTempoChoix");z.innerHTML="";
+  const bouton=(bpm,etiq)=>{
+    const b=document.createElement("button");b.type="button";
+    b.innerHTML="<b></b><span></span>";b.firstChild.textContent=arrondi(bpm);b.lastChild.textContent=etiq;
+    b.setAttribute("aria-pressed",arrondi(bpm)===M.tempo?"true":"false");
+    b.setAttribute("aria-label",arrondi(bpm)+" temps par minute, "+etiq);
+    b.addEventListener("click",()=>choisitTempo(bpm));
+    z.appendChild(b);
+  };
+  bouton(r.bpm,"le plus probable");
+  r.alt.forEach(x=>bouton(x.bpm,x.nom));
+  let t=r.portee==="passage"?"Tempo de la sélection ("+fmtMin(r.a)+" → "+fmtMin(r.b)+"). ":"Tempo proposé d'après tout le morceau. ";
+  if(r.portee==="morceau"&&r.sections&&r.sections.length>1){
+    t+="Il change en cours de route : "+r.sections.map(s=>"≈ "+arrondi(s.bpm)+" de "+fmtMin(s.debut)+" à "+(s.fin>=M.duree-1?"la fin":fmtMin(s.fin))).join(", ")+
+      ". Sélectionne un passage puis « Trouver » pour le tempo exact d'un endroit. ";
+  }
+  if(r.nettete<0.12)t+="La pulsation est peu marquée ici : vérifie à l'oreille, ou tape le tempo. ";
+  t+="Le même passage se compte souvent de plusieurs façons (le double, la moitié, ou 3 temps au lieu de 2) : choisis celle qui correspond à ton comptage.";
+  $("#mTempoInfo").textContent=t;
+}
+$("#mTrouver").addEventListener("click",()=>trouveTempo(false));
+$("#mTempo").addEventListener("change",()=>{TP.grille=null;afficheTempo();if(!$("#mTransResultat").hidden)transcrire();});
+$("#mTap").addEventListener("click",()=>{TP.grille=null;setTimeout(afficheTempo,0);});
+$("#mVersMetronome").addEventListener("click",()=>{
+  if(typeof setBpm!=="function")return;
+  setBpm(M.tempo);if(typeof save==="function")save();
+  $("#mTempoInfo").textContent="Le métronome est réglé à "+M.tempo+". Choisis son palo dans l'onglet Métronome.";
+});
+
+// ---- la grille des temps sur la sélection ----
+function grilleValide(){
+  const G=TP.grille;
+  return !!(G&&M.a!==null&&Math.abs(G.a-M.a)<0.002&&Math.abs(G.b-M.b)<0.002&&G.tempo===M.tempo&&G.cleF===cleFrappes());
+}
+function cleFrappes(){const f=frappesVisibles();return f?f.liste.length+":"+f.sens+":"+f.ref:"";}
+function calculeGrille(){
+  if(M.a===null)return null;
+  if(grilleValide())return TP.grille;
+  const E=envMorceau(),marge=3;
+  const tr=Tempo.tranche(E,Math.max(0,M.a-marge),Math.min(M.duree,M.b+marge));
+  let temps=Tempo.suitTemps(tr,M.tempo);
+  const f=frappesVisibles();
+  if(f)temps=Tempo.recale(temps,f.liste.filter(q=>!q.off).map(q=>q.t)).temps;
+  if(temps.length<2)return null;
+  const P=60/M.tempo;
+  let i0=temps.findIndex(t=>t>=M.a-0.15*P);if(i0<0)i0=0;
+  TP.grille={a:M.a,b:M.b,tempo:M.tempo,cleF:cleFrappes(),temps,i0};
+  return TP.grille;
+}
+function departTranscription(){
+  const G=TP.grille;if(!G)return 0;
+  return clamp(G.i0+TP.decal,0,G.temps.length-2);
+}
+// sur la forme d'onde : un trait par temps, et le numéro de chaque mesure
+function dessineGrille(g,w,h){
+  if(!grilleValide()||$("#blocTranscription").hidden)return;
+  const G=TP.grille,num=parseInt($("#mMesure").value,10)||3,i0=departTranscription();
+  g.save();
+  G.temps.forEach((t,j)=>{
+    if(t<M.a-0.3||t>M.b+0.3)return;
+    const x=Math.round(xDe(t,w))+.5;if(x<0||x>w)return;
+    const k=j-i0,debut=k>=0&&k%num===0;
+    g.strokeStyle=couleur(debut?"--carmin":"--muted");g.lineWidth=debut?2:1;g.globalAlpha=debut?.75:.45;
+    g.beginPath();g.moveTo(x,debut?HAUT_REGLE-8:HAUT_REGLE-5);g.lineTo(x,debut?h:HAUT_REGLE+4);g.stroke();
+    if(debut&&k/num<8){g.globalAlpha=1;g.fillStyle=couleur("--carmin");g.font="700 10px Archivo, sans-serif";g.fillText(String(k/num+1),x+3,h-5);}
+  });
+  g.restore();
+}
+
+// ---- la transcription ----
+function transcrire(){
+  const info=$("#mTransInfo");
+  if(M.a===null){info.textContent="Choisis d'abord un passage sur la forme d'onde, de 1 à 4 compases.";return;}
+  if(!frappesVisibles())detecte();
+  const f=frappesVisibles();
+  if(!f||!f.liste.some(q=>!q.off)){info.textContent="Aucune frappe trouvée dans ce passage : monte la sensibilité (plus haut), ou vérifie la piste de référence.";return;}
+  const G=calculeGrille();
+  if(!G){info.textContent="Je ne trouve pas de pulsation régulière dans ce passage : vérifie le tempo.";return;}
+  const num=parseInt($("#mMesure").value,10)||3;
+  const r=Tempo.transcrit(f.liste.filter(q=>!q.off).map(q=>({t:q.t,fort:q.fort})),G.temps,departTranscription(),num);
+  if(!r){info.textContent="La transcription n'a pas abouti : essaie un passage plus long.";return;}
+  M.transcription={a:M.a,b:M.b,code:r.code,num,decal:TP.decal,tempo:M.tempo};
+  $("#mTransCode").value=r.code;
+  $("#mTransResultat").hidden=false;
+  const P=60/M.tempo,ms=Math.round(r.ecartMoyen*P*1000);
+  info.textContent=r.mesures+" mesure"+(r.mesures>1?"s":"")+" de "+num+"/4 à "+M.tempo+" : "+r.frappes+" frappe"+(r.frappes>1?"s":"")+
+    (r.accents?", dont "+r.accents+" accent"+(r.accents>1?"s":""):"")+". Les frappes tombent en moyenne à "+ms+" ms de la case où elles sont écrites"+
+    (ms<=25?" : la grille colle bien au jeu.":" : vérifie le tempo et le premier temps, la grille colle mal.");
+  const ul=$("#mTransNotes");ul.innerHTML="";
+  const note=t=>{const li=document.createElement("li");li.textContent=t;ul.appendChild(li);};
+  if(r.hors)note(r.hors+" frappe"+(r.hors>1?"s":"")+" après la 8e mesure ne sont pas transcrites : un exercice tient en 8 mesures. Découpe le passage en deux.");
+  r.notes.slice(0,4).forEach(n=>note(n.charAt(0).toUpperCase()+n.slice(1)+" : un rasgueado trop rapide pour être séparé, vérifie à l'oreille."));
+  if(r.notes.length>4)note("Et "+(r.notes.length-4)+" autre(s) endroit(s) du même genre.");
+  const i0=departTranscription(),t1=G.temps[i0];
+  $("#mUnInfo").textContent="La 1re mesure commence à "+fmtT(t1)+(TP.decal?" ("+(TP.decal>0?"+":"")+TP.decal+" temps par rapport au début de la sélection)":", au premier temps de la sélection")+". Les chiffres rouges sur la forme d'onde montrent où tombe chaque mesure.";
+  dessineOnde();sauve();
+}
+function majTranscription(){
+  const ok=M.a!==null&&M.pistes.length>0;
+  $("#mTranscrire").disabled=!ok;
+  const t=M.transcription;
+  const meme=t&&M.a!==null&&Math.abs(t.a-M.a)<0.002&&Math.abs(t.b-M.b)<0.002;
+  if(!meme){
+    $("#mTransResultat").hidden=true;
+    if(TP.clic)basculeClic(false);
+    TP.decal=0;
+    $("#mTransInfo").textContent=ok?"Passage de "+(M.b-M.a).toFixed(1).replace(".",",")+" s. Règle le tempo au-dessus (« Trouver »), puis transcris.":"Choisis d'abord un passage sur la forme d'onde, de 1 à 4 compases.";
+    $("#mUnInfo").textContent="La 1re mesure commence au premier temps de la sélection. Les chiffres sur la forme d'onde montrent où tombe chaque mesure.";
+  }else if($("#mTransResultat").hidden){
+    TP.decal=t.decal||0;$("#mMesure").value=String(t.num);$("#mTransCode").value=t.code;$("#mTransResultat").hidden=false;
+  }
+}
+$("#mTranscrire").addEventListener("click",transcrire);
+$("#mMesure").addEventListener("change",()=>{M.mesure=parseInt($("#mMesure").value,10);if(!$("#mTransResultat").hidden)transcrire();else dessineOnde();sauve();});
+$("#mUnAvant").addEventListener("click",()=>{TP.decal--;transcrire();});
+$("#mUnApres").addEventListener("click",()=>{TP.decal++;transcrire();});
+
+// le clic sur la grille, pendant la lecture : pour vérifier qu'elle tombe juste
+function basculeClic(on){
+  TP.clic=on;
+  $("#mEcouterGrille").textContent=on?"Couper le clic":"Écouter avec le clic";
+  $("#mEcouterGrille").setAttribute("aria-pressed",on?"true":"false");
+}
+$("#mEcouterGrille").addEventListener("click",()=>{
+  basculeClic(!TP.clic);
+  if(TP.clic&&!M.joue){M.boucle=true;$("#mBoucle").checked=true;M.pos=M.a;lecture();}
+});
+function clicsGrille(){
+  if(!TP.clic||!M.joue||!grilleValide())return;
+  const c=contexte(),now=c.currentTime,G=TP.grille,num=parseInt($("#mMesure").value,10)||3,i0=departTranscription();
+  M.reps.forEach(rep=>{
+    rep.clics=rep.clics||{};
+    G.temps.forEach((tb,j)=>{
+      if(tb<rep.de-0.001||tb>=rep.a||rep.clics[j])return;
+      const quand=rep.t+(tb-rep.de)/M.vitesse;
+      if(quand<now-0.02||quand>now+0.25)return;
+      rep.clics[j]=true;
+      const k=j-i0,debut=k>=0&&k%num===0;
+      Audio_.click(Math.max(quand,now),debut?0.75:0.5,debut);
+    });
+  });
+}
+
+// vers l'onglet Figures rythmiques
+$("#mVersFigures").addEventListener("click",()=>{
+  const code=$("#mTransCode").value.trim();
+  if(!code||!window.EntraineurCode)return;
+  const pc=M.passages.find(x=>Math.abs(x.a-M.a)<0.002&&Math.abs(x.b-M.b)<0.002);
+  const titre=M.nom+(pc?" · "+pc.nom:" · "+fmtMin(M.a));
+  pause();basculeClic(false);
+  if(window.Vues)Vues.montre("rythme");
+  const ok=EntraineurCode.charge(code,M.tempo,titre);
+  if(!ok){if(window.Vues)Vues.montre("morceaux");$("#mTransInfo").textContent="Le code contient une erreur : corrige-le dans le champ ci-dessus.";}
+});
+
+// la mesure proposée suit le palo du métronome : 3 temps pour les compás de 12 et de 6, 4 pour les binaires
+function mesureParDefaut(){
+  const p=typeof state!=="undefined"&&state.palo;
+  if(!p||p.libre)return 3;
+  return p.pulses===4?4:(p.pulses===2?2:3);
 }
 let visible=false;
 window.addEventListener("resize",()=>{if(visible&&M.pistes.length)dessineOnde();});

@@ -1269,8 +1269,8 @@ footer{color:var(--muted);font-size:.82rem;margin-top:1.6rem;max-width:70ch}
     </div>
     <div>
       <label for="latence">Compensation de latence — <span id="latenceVal">0</span> ms</label>
-      <input type="range" id="latence" min="-150" max="150" step="1" value="0">
-      <p class="aide">Retard fixe de ta carte son. Après un passage, « Corriger la latence » le règle tout seul.</p>
+      <input type="range" id="latence" min="-400" max="400" step="1" value="0">
+      <p class="aide">Retard fixe de ta sortie et de ton micro. Après un passage, « Corriger la latence » le règle tout seul. En Bluetooth (AirPods), il dépasse souvent 150 ms : la plage va jusqu'à 400 ms.</p>
     </div>
   </div>
   <div class="actions">
@@ -3286,7 +3286,7 @@ const S={
   depart:0,dureeTemps:0,decompte:4,groupe:4,totalTemps:0,
   attendus:[],onsets:[],prochainTemps:0,timer:null,raf:null,
   seuilLin:0,refractaire:.045,enAttente:null,dernierPic:0,dernierNiveau:0,
-  niveauAffiche:0,histo:[],medianeDev:0,choisi:null,celluleChoisie:null
+  niveauAffiche:0,vuSon:0,histo:[],medianeDev:0,choisi:null,celluleChoisie:null
 };
 
 /* =================================================================
@@ -4291,30 +4291,119 @@ function ctxAudio(){
   S.ctx=c;
   return c;
 }
+function avisMicro(html,montre){
+  const a=$("#avisMicro");
+  if(!html){a.classList.add("masque");a.innerHTML="";return;}
+  a.classList.remove("masque");a.innerHTML=html;void montre;
+}
+function detacheMicro(){
+  try{if(S.proc){S.proc.onaudioprocess=null;S.proc.disconnect();}}catch(e){}
+  try{if(S.source)S.source.disconnect();}catch(e){}
+  try{if(S.muetMicro)S.muetMicro.disconnect();}catch(e){}
+  S.proc=null;S.source=null;S.muetMicro=null;
+}
+// un contexte audio neuf : iOS fixe la fréquence d'échantillonnage à l'ouverture du micro,
+// et un contexte ouvert avant, à une autre fréquence, ne reçoit plus rien
+function refaisContexte(){
+  try{if(typeof stop==="function"&&typeof state!=="undefined"&&state.playing)stop();}catch(e){}
+  try{if(window.Morceaux&&Morceaux.enCours())Morceaux.arrete();}catch(e){}
+  detacheMicro();
+  const anc=Audio_.ctx;
+  Audio_.ctx=null;Audio_.master=null;Audio_.noise=null;
+  try{if(anc&&anc.close)anc.close();}catch(e){}
+  const c=ctxAudio();
+  try{if(window.Morceaux&&Morceaux.refaitAudio)Morceaux.refaitAudio();}catch(e){}
+  return c;
+}
+function brancheMicro(ctx){
+  detacheMicro();
+  S.source=ctx.createMediaStreamSource(S.flux);
+  S.proc=ctx.createScriptProcessor(256,1,1);
+  const muet=ctx.createGain();muet.gain.value=0;
+  S.source.connect(S.proc);S.proc.connect(muet);muet.connect(ctx.destination);
+  S.muetMicro=muet;S.proc.onaudioprocess=analyse;
+  if(!S.boucleNiveau){S.boucleNiveau=true;boucleNiveau();}
+}
+function nomMicro(){
+  try{const p=S.flux&&S.flux.getAudioTracks()[0];return (p&&p.label)||"";}catch(e){return "";}
+}
+function couperMicro(silencieux){
+  detacheMicro();
+  try{if(S.flux)S.flux.getTracks().forEach(t=>t.stop());}catch(e){}
+  clearTimeout(S.veilleMicro);
+  S.flux=null;S.micro=false;S.niveauAffiche=0;
+  const b=$("#btnMicro");b.disabled=false;b.textContent="Activer le micro";
+  if(!silencieux)avisMicro("");
+}
+function perduMicro(){
+  if(!S.micro)return;
+  couperMicro(true);
+  avisMicro("Le micro s'est arrêté : un casque a été branché ou débranché, ou une autre application l'a pris. Touche « Activer le micro » pour le reprendre.");
+}
+// le micro rend-il vraiment du son ? sinon, on refait le contexte, puis on explique
+function surveilleMicro(){
+  clearTimeout(S.veilleMicro);
+  S.vuSon=0;
+  S.veilleMicro=setTimeout(function(){
+    if(!S.micro)return;
+    if(S.vuSon>2e-5){
+      const nom=nomMicro(),bt=/airpod|bluetooth|beats|sans fil|wireless/i.test(nom);
+      avisMicro(bt?("Micro utilisé : <b>"+nom.replace(/[<>&]/g,"")+"</b>. Micro sans fil : le son passe en mode conversation et le retard monte à 150–300 ms. Fais un passage puis « Corriger la latence ».")
+        :(nom?"Micro utilisé : <b>"+nom.replace(/[<>&]/g,"")+"</b>.":""));
+      return;
+    }
+    // rien n'est arrivé : on propose de rouvrir la sortie audio (sans jamais couper un passage en cours)
+    avisMicro("Aucun son n'arrive encore"+(nomMicro()?" du micro <b>"+nomMicro().replace(/[<>&]/g,"")+"</b>":"")+
+      ". Joue quelques notes : si la jauge reste à zéro, touche « Rouvrir le son et réessayer ». Sinon, débranche les écouteurs sans fil, ou vérifie qu'aucune autre application ne tient le micro."+
+      ' <button type="button" id="btnMicroRelance" class="mini">Rouvrir le son et réessayer</button>');
+    const rb=$("#btnMicroRelance");
+    if(rb)rb.addEventListener("click",function(){
+      if(S.running){avisMicro("Attends la fin du passage avant de rouvrir le son.");return;}
+      avisMicro("Je rouvre la sortie audio…");
+      const c=refaisContexte();brancheMicro(c);surveilleMicro();
+    });
+  },2600);
+}
 async function activeMicro(){
+  const b=$("#btnMicro");
+  if(S.micro){couperMicro();return;}
+  b.disabled=true;b.textContent="Micro…";
+  avisMicro("");
   try{
-    const ctx=ctxAudio();
+    // on ouvre le micro d'abord : le système fixe alors la fréquence de l'entrée
     S.flux=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:false,noiseSuppression:false,autoGainControl:false,channelCount:1}});
-    S.source=ctx.createMediaStreamSource(S.flux);
-    S.proc=ctx.createScriptProcessor(256,1,1);
-    const muet=ctx.createGain();muet.gain.value=0;
-    S.source.connect(S.proc);S.proc.connect(muet);muet.connect(ctx.destination);
-    S.proc.onaudioprocess=analyse;S.micro=true;
-    $("#btnMicro").textContent="Micro actif";$("#btnMicro").disabled=true;
-    $("#avisMicro").classList.add("masque");boucleNiveau();
+    const piste=S.flux.getAudioTracks()[0];
+    const reg=(piste&&piste.getSettings&&piste.getSettings())||{};
+    let ctx=Audio_.ctx;
+    // le contexte tourne à une autre fréquence que l'entrée : iOS ne ferait rien passer, on le rouvre
+    if(ctx&&!S.running&&reg.sampleRate&&Math.abs(ctx.sampleRate-reg.sampleRate)>1)ctx=refaisContexte();
+    ctx=ctxAudio();
+    brancheMicro(ctx);
+    S.micro=true;S.micRefait=false;
+    b.disabled=false;b.textContent="Micro actif — toucher pour couper";
+    if(piste){
+      piste.addEventListener("ended",perduMicro);
+      piste.addEventListener("mute",perduMicro);
+    }
+    avisMicro("J'écoute…");
+    surveilleMicro();
   }catch(err){
-    const a=$("#avisMicro");a.classList.remove("masque");
-    a.textContent="Le micro n'est pas accessible dans cette page ("+(err&&err.name?err.name:"erreur")+
-      "). Autorise le micro pour Compás quand l'iPad le demande, ou dans les réglages de Safari (rubrique Microphone), puis touche à nouveau « Activer le micro ». Tout le reste fonctionne sans lui.";
+    S.micro=false;b.disabled=false;b.textContent="Activer le micro";
+    const nom=err&&err.name?err.name:"erreur";
+    avisMicro(nom==="NotAllowedError"
+      ? "L'accès au micro a été refusé. Sur iPad : Réglages → Safari → Micro (ou, pour l'application installée sur l'écran d'accueil, supprime-la de l'écran d'accueil et réinstalle-la pour que la question soit reposée)."
+      : "Le micro n'est pas accessible dans cette page ("+nom+"). Autorise le micro pour Compás quand l'iPad le demande, ou dans les réglages de Safari (rubrique Microphone), puis touche à nouveau « Activer le micro ». Tout le reste fonctionne sans lui.");
   }
 }
 $("#btnMicro").addEventListener("click",activeMicro);
+window.S_micro=()=>S.micro;window.S_flux=()=>S.flux;window.refaisContexte=refaisContexte;
 
 function analyse(ev){
   const buf=ev.inputBuffer.getChannelData(0),sr=S.ctx.sampleRate,t0=S.ctx.currentTime;
   let pic=0,iPic=0;
   for(let i=0;i<buf.length;i++){const v=Math.abs(buf[i]);if(v>pic){pic=v;iPic=i;}}
   S.niveauAffiche=Math.max(S.niveauAffiche*0.82,pic);
+  if(pic>S.vuSon)S.vuSon=pic;
   if(!S.running)return;
   if(S.enAttente){
     if(pic>S.enAttente.amp)S.enAttente.amp=pic;
@@ -5152,7 +5241,7 @@ function corrigePartition(){
 }
 
 $("#btnLatence").addEventListener("click",()=>{
-  const v=Math.round(clamp(parseFloat($("#latence").value)+S.medianeDev,-150,150));
+  const v=Math.round(clamp(parseFloat($("#latence").value)+S.medianeDev,-400,400));
   $("#latence").value=v;$("#latenceVal").textContent=v;
 });
 
@@ -8530,6 +8619,7 @@ function mesureParDefaut(){
 let visible=false;
 window.addEventListener("resize",()=>{if(visible&&M.pistes.length)dessineOnde();});
 
+window.M_pistes=()=>M.pistes.map(p=>!!p.gain);
 window.Morceaux={
   montre:async()=>{
     visible=true;
@@ -8543,6 +8633,13 @@ window.Morceaux={
   },
   cache:()=>{visible=false;pause();},
   arrete:()=>{if(M.joue)pause();},
+  // le contexte audio a été refait (ouverture du micro) : on rebranche les pistes
+  refaitAudio:()=>{
+    pause();M.bus=null;M.cache.clear();
+    const c=contexte();
+    M.pistes.forEach(p=>{try{p.gain.disconnect();}catch(e){}p.gain=c.createGain();p.gain.connect(M.bus);});
+    appliqueGains();
+  },
   pourEntrainement,prepareEntrainement,planifieEntrainement,stopEntrainement,
   enCours:()=>M.joue,
   basculeLecture:()=>{M.joue?pause():lecture();},
@@ -21141,6 +21238,37 @@ if(ios&&!installee&&!vu&&/^https?:$/.test(location.protocol)){
   if(h)h.after(b);b.hidden=false;
   document.getElementById("installerFermer").addEventListener("click",function(){b.hidden=true;try{localStorage.setItem("compas-installer-vu","1");}catch(e){}});
 }
+// état du hors connexion : prêt ou non, avec un bouton pour le préparer
+const CACHE="compas-v18";
+async function etatHL(){
+  if(!("serviceWorker" in navigator)||!/^https?:$/.test(location.protocol))
+    return "Hors connexion : impossible ici. Ouvre l'application depuis son adresse https (GitHub Pages), pas depuis un fichier.";
+  let pret=false;
+  try{const c=await caches.open(CACHE);pret=!!(await c.match("index.html"))||!!(await c.match("./"));}catch(e){}
+  const pilote=!!navigator.serviceWorker.controller;
+  if(pret&&pilote)return "Hors connexion : prêt. Tu peux couper le réseau, l'application s'ouvrira (version 18).";
+  if(pret)return "Hors connexion : les fichiers sont en cache ; ferme l'application et rouvre-la une fois pour terminer.";
+  return "Hors connexion : pas encore prêt. Reste connecté et touche « Préparer le hors-ligne ».";
+}
+window.addEventListener("load",function(){
+  const z=document.getElementById("vueMetronome");if(!z)return;
+  const p=document.createElement("p");p.className="aide";p.style.marginTop="20px";
+  const t=document.createElement("span");t.id="hlTexte";
+  const b2=document.createElement("button");b2.type="button";b2.className="mini";b2.style.marginLeft="8px";b2.textContent="Préparer le hors-ligne";
+  p.append(t," ",b2);z.appendChild(p);
+  const maj=()=>etatHL().then(x=>{t.textContent=x;});
+  maj();setInterval(maj,3000);
+  if("serviceWorker" in navigator)navigator.serviceWorker.addEventListener("controllerchange",maj);
+  b2.addEventListener("click",async function(){
+    t.textContent="Préparation…";
+    try{
+      if("serviceWorker" in navigator)await navigator.serviceWorker.register("sw.js");
+      const c=await caches.open(CACHE);
+      await c.addAll(["./","index.html","manifest.webmanifest","icone-180.png","icone-192.png","icone-512.png","icone-masquable-512.png","pdfjs/pdf.min.js","pdfjs/pdf.worker.min.js"]);
+    }catch(e){t.textContent="La préparation a échoué ("+(e&&e.message||e)+"). Vérifie que tu es connecté, puis réessaie.";return;}
+    maj();
+  });
+});
 })();
 </script>
 </body>

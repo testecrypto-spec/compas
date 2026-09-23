@@ -1,6 +1,6 @@
 /* Compás hors connexion : tout est mis en cache à l'installation.
    La page passe par le réseau quand il y en a (pour recevoir les mises à jour), sinon par le cache. */
-const VERSION = "compas-v24";
+const VERSION = "compas-v25";
 const FICHIERS = ["./", "index.html", "manifest.webmanifest", "icone-180.png", "icone-192.png", "icone-512.png",
   "icone-masquable-512.png", "pdfjs/pdf.min.js", "pdfjs/pdf.worker.min.js"];
 

@@ -6200,8 +6200,65 @@ function entreeJournal(x){
     dur:Math.round(Math.max(0,t1-t0)+(S.dureeTemps||0)),partiel:!!S.partiel,
     diag:S.diagTexte||null,silences:S.sil?(S.sil.on+"-"+S.sil.off+" "+S.sil.quoi):null,
     pts:S.diagPoints||null,
+    regl:instantane(),
     ras:mode==="rasgueado"?selModele.value:null,
     pat:mode==="rasgueado"?{sub:P.sub,duree:P.duree,ancrage:P.ancrage,nom:P.nom,glose:P.glose,golpes:P.golpes.map(g=>({pos:g.pos,doigt:g.doigt,sens:g.sens,acc:!!g.acc}))}:null};
+}
+// tout ce qu'il faut pour rejouer un passage à l'identique
+function instantane(){
+  const v=id=>{const n=$(id);return n?n.value:null;};
+  const pm=($("#palo").value==="metronome"&&typeof state!=="undefined"&&state.palo)?state.palo.id:null;
+  return {mode:S.mode,palo:v("#palo"),paloId:pm,bpm:v("#bpm"),temps:v("#temps"),groupe:v("#groupe"),volClic:v("#volClic"),
+    sil:v("#silences"),silQ:v("#silencesQuoi"),clicDecompte:$("#clicDecompte").checked,guide:v("#guide"),volGuide:v("#volGuide"),
+    seuil:v("#seuil"),latence:v("#latence"),repet:v("#repet"),
+    exo:S.mode==="rythme"?B.courant:null,depart:B.depart,caler:B.caler,
+    code:S.mode==="rythme"?ecrireCode():null,
+    patronId:S.mode==="rasgueado"?selModele.value:null,
+    P:S.mode==="rasgueado"?{sub:P.sub,duree:P.duree,ancrage:P.ancrage,nom:P.nom,glose:P.glose,golpes:P.golpes.map(g=>({pos:g.pos,doigt:g.doigt,sens:g.sens,acc:!!g.acc}))}:null};
+}
+function appliqueInstantane(x){
+  if(S.running)arrete();
+  // une liste ne prend que ses propres valeurs ; un curseur prend la valeur telle quelle
+  const val=(id,v)=>{const n=$(id);if(!n||v===undefined||v===null)return;if(n.options&&![...n.options].some(o=>o.value===String(v)))return;n.value=String(v);};
+  if(x.mode==="rasgueado"&&x.P&&Array.isArray(x.P.golpes)){
+    if(x.patronId&&[...selModele.options].some(o=>o.value===x.patronId))selModele.value=x.patronId;
+    Object.assign(P,{sub:+x.P.sub,duree:+x.P.duree,ancrage:x.P.ancrage,nom:x.P.nom||P.nom,glose:x.P.glose||"",golpes:x.P.golpes.map(g=>({...g}))});
+    $("#sub").value=String(P.sub);$("#duree").value=String(P.duree);$("#ancrage").value=P.ancrage;S.choisi=null;dessineGrille();
+    if(typeof majBoutonsRas==="function")majBoutonsRas();
+  }
+  if(x.mode==="rythme"&&x.code){
+    const e=x.exo?exoParId(x.exo):null;
+    const r=lireCode(x.code);
+    if(!r.erreurs.length){
+      R.mesures=r.mesures;R.doigts=r.doigts&&r.doigts.some(Boolean)?r.doigts:null;R.active=0;S.celluleChoisie=null;
+      $("#num").value=String(r.num);$("#den").value=String(r.den);$("#nbMes").value=String(r.mesures.length);
+      $("#code").value=x.code;
+    }
+    B.courant=e?e.id:null;
+  }
+  B.depart=Math.max(0,parseInt(x.depart,10)||0);B.caler=x.caler!==false;
+  const cal=$("#caler");if(cal)cal.checked=B.caler;
+  // le palo d'accompagnement, tel qu'il était
+  if(x.palo==="metronome"&&x.paloId&&typeof PALOS!=="undefined"&&typeof selectPalo==="function"){
+    const p=PALOS.find(q=>q.id===x.paloId);
+    if(p&&(!state.palo||state.palo.id!==p.id))selectPalo(p,false);
+  }
+  val("#palo",x.palo);
+  val("#bpm",x.bpm);val("#temps",x.temps);val("#groupe",x.groupe);val("#volClic",x.volClic);val("#guide",x.guide);val("#volGuide",x.volGuide);
+  val("#silences",x.sil);val("#silencesQuoi",x.silQ);val("#seuil",x.seuil);val("#latence",x.latence);val("#repet",x.repet);
+  if(typeof x.clicDecompte==="boolean")$("#clicDecompte").checked=x.clicDecompte;
+  $("#tBpmVal").textContent=$("#bpm").value;
+  $("#seuilVal").textContent="−"+Math.abs($("#seuil").value);$("#latenceVal").textContent=$("#latence").value;placeSeuil();
+  if(x.mode==="rythme"){majSignature();afficheCourant();afficheListe();}
+  majPalo();majBiblioPalos();
+  const ds=$("#departPulso");if(ds&&[...ds.options].some(o=>o.value===String(B.depart)))ds.value=String(B.depart);
+  majVitesse();sauve();
+}
+// les passages d'avant l'instantané : on retrouve le rasgueado par son nom
+function rasParNom(titre){
+  const n=String(titre||"").replace(/^Rasgueado — /,"");
+  const o=[...selModele.options].find(o=>o.value!=="vide"&&o.textContent.split(" —")[0]===n);
+  return o?o.value:null;
 }
 // depuis le journal : on remet l'exercice et son tempo
 function rejoueSeance(s){
@@ -6490,16 +6547,25 @@ window.Entraineur={
   arrete:()=>{if(S.running){arrete();$("#gros").innerHTML="&nbsp;";$("#legendeGros").innerHTML="&nbsp;";$("#etat").textContent="Passage interrompu.";}},
   majPalo:()=>majPalo(),
   depuisMetronome:m=>depuisMetronome(m),
+  instantane:()=>instantane(),
   // un devoir : on remet l'exercice (figure, rasgueado ou morceau) et son tempo
   travaille:s=>{
     if(s.mode==="morceau"){if(window.Vues)Vues.montre("morceaux");return;}
+    if(s.regl&&(s.regl.mode==="rasgueado"||s.regl.mode==="rythme")){
+      if(window.Vues)Vues.montre(s.regl.mode);
+      appliqueInstantane(s.regl);
+      const z=document.getElementById(s.regl.mode==="rasgueado"?"voletRas":"blocBiblio");if(z)z.scrollIntoView({block:"start"});
+      if(s.regl.mode==="rythme")retourExo("Réglages du passage du "+(window.Journal?Journal.dateCourte(s.t):"")+" remis : partition, doigtés, tempo, palo, latence.");
+      return;
+    }
+    if(s.mode==="rasgueado"&&!s.ras&&!s.pat){const id=rasParNom(s.titre);if(id)s=Object.assign({},s,{ras:id});}
     if(s.mode==="rasgueado"){
       if(window.Vues)Vues.montre("rasgueado");
-      if(s.ras&&[...selModele.options].some(o=>o.value===s.ras)&&s.ras!=="vide"){selModele.value=s.ras;chargeModele(s.ras);}
-      else if(s.pat&&Array.isArray(s.pat.golpes)){
+      if(s.pat&&Array.isArray(s.pat.golpes)){
+        if(s.ras&&[...selModele.options].some(o=>o.value===s.ras))selModele.value=s.ras;
         Object.assign(P,{sub:s.pat.sub,duree:s.pat.duree,ancrage:s.pat.ancrage,nom:s.pat.nom||P.nom,glose:s.pat.glose||"",golpes:s.pat.golpes.map(g=>({...g}))});
         $("#sub").value=String(P.sub);$("#duree").value=String(P.duree);$("#ancrage").value=P.ancrage;S.choisi=null;dessineGrille();
-      }
+      }else if(s.ras&&[...selModele.options].some(o=>o.value===s.ras)&&s.ras!=="vide"){selModele.value=s.ras;chargeModele(s.ras);}
       if(s.bpm){const v=Math.round(clamp(s.bpm,30,240));$("#bpm").value=String(v);$("#tBpmVal").textContent=String(v);majVitesse();}
       sauve();
       const z=document.getElementById("blocMicro")||document.getElementById("voletRas");if(z)z.scrollIntoView({block:"start"});
@@ -6508,7 +6574,7 @@ window.Entraineur={
     if(window.Vues)Vues.montre("rythme");rejoueSeance(s);
     const z=document.getElementById("blocMicro");if(z)z.scrollIntoView({block:"start"});
   },
-  rejoue:s=>{if(window.Vues)Vues.montre("rythme");rejoueSeance(s);const b=document.getElementById("blocBiblio");if(b)b.scrollIntoView({block:"start"});},
+  rejoue:s=>{if(s.regl||s.mode==="rasgueado"){window.Entraineur.travaille(s);return;}if(window.Vues)Vues.montre("rythme");rejoueSeance(s);const b=document.getElementById("blocBiblio");if(b)b.scrollIntoView({block:"start"});},
   redessine:()=>{if(!$("#resultats").classList.contains("masque"))nuage();},
   // lecture seule, pour vérifier le calendrier des frappes attendues
   attendus:()=>S.attendus.map(a=>({t:a.t,cle:a.cle,accent:!!a.accent,phase:a.phase||"avec",libelle:a.libelle,dev:a.dev,res:a.res})),

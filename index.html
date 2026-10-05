@@ -3034,6 +3034,7 @@ function setLight(on){
 function setMuted(m){
   state.muted = m;
   Audio_.setMuted(m);
+  if(typeof Veille !== "undefined" && Veille.son) Veille.son();
   const b = el("muteBtn");
   b.setAttribute("aria-pressed", m ? "true" : "false");
   b.textContent = m ? "Son coupé" : "Couper le son";
@@ -4048,7 +4049,9 @@ const Veille = (function(){
   lecteur.loop = true; lecteur.preload = "auto"; lecteur.muted = true;
   lecteur.setAttribute("playsinline", ""); lecteur.setAttribute("webkit-playsinline", "");
   let boucle = null;          // {url, cycle, total, cle}
-  let enFond = false, minuteur = null, rendu = 0, deverrouille = false, echange = false;
+  let enFond = false, minuteur = null, rendu = 0, echange = false, attente = null, derive = null;
+  let parle = "moteur", enCours = null;       // qui fait le son : le moteur (Web Audio) ou le lecteur (la boucle enregistrée)
+  const SILENCE = URL.createObjectURL(wav(new Float32Array(4410), 44100));
 
   // un fichier WAV 16 bits (mono ou stéréo) : lu partout, et bouclé sans le blanc qu'ajoutent les formats compressés
   function wav(data, sr, droite){
@@ -4075,13 +4078,16 @@ const Veille = (function(){
   // la boucle : un nombre entier de compases, au moins 40 s, rendue hors temps réel avec les mêmes fonctions de son
   async function prepare(){
     if(!state.palo || !window.OfflineAudioContext && !window.webkitOfflineAudioContext) return;
-    const cle = cleReglages(), num = ++rendu;
-    if(boucle && boucle.cle === cle) return;
+    const cle = cleReglages();
+    if(boucle && boucle.cle === cle){ if(state.playing && parle === "moteur" && !enFond && actif()) charge(null); return; }
+    if(enCours === cle) return;                       // ce rendu-là est déjà en route
+    enCours = cle;
+    const num = ++rendu;
     buildSeq();
     const pas = stepDur(), cycle = pas * state.seq.length;
     if(!(cycle > 0)) return;
-    const nCompases = Math.max(2, Math.min(64, Math.ceil(40 / cycle)));
-    const total = nCompases * cycle, sr = 32000;
+    const nCompases = Math.max(2, Math.min(64, Math.ceil(24 / cycle)));
+    const total = nCompases * cycle, sr = 44100;
     const OAC = window.OfflineAudioContext || window.webkitOfflineAudioContext;
     const off = new OAC(2, Math.ceil((T0 + total + QUEUE) * sr), sr);
     const ctx0 = Audio_.ctx, master0 = Audio_.master, cyc0 = state.acCyc;
@@ -4094,10 +4100,13 @@ const Veille = (function(){
       const n = nCompases * state.seq.length;
       for(let k=0;k<n;k++) scheduleStep(k % state.seq.length, T0 + k*pas);
     } finally { Audio_.ctx = ctx0; Audio_.master = master0; state.acCyc = cyc0; }
-    const rendu_ = await new Promise(function(ok, ko){
-      off.oncomplete = function(e){ ok(e.renderedBuffer); };
-      const r = off.startRendering(); if(r && r.then) r.then(ok, ko);
-    });
+    let rendu_;
+    try{
+      rendu_ = await new Promise(function(ok, ko){
+        off.oncomplete = function(e){ ok(e.renderedBuffer); };
+        const r = off.startRendering(); if(r && r.then) r.then(ok, ko);
+      });
+    } finally { if(enCours === cle) enCours = null; }
     if(num !== rendu) return;                           // un réglage a changé entre-temps
     const L = Math.round(total * sr), a = Math.round(T0 * sr);
     // la boucle va de T0 à T0+total ; ce qui résonne après la fin revient se superposer au début
@@ -4109,35 +4118,110 @@ const Veille = (function(){
       return out;
     };
     const G = replie(rendu_.getChannelData(0)), D = rendu_.numberOfChannels > 1 ? replie(rendu_.getChannelData(1)) : null;
-    if(boucle && boucle.url) URL.revokeObjectURL(boucle.url);
+    const ancienne = boucle;
     boucle = {url: URL.createObjectURL(wav(G, sr, D)), cycle, total, cle};
-    const pos = lecteur.currentTime;
+    charge(ancienne);
+  }
+
+  /* Pourquoi le lecteur joue dès que la boucle est prête, et pas seulement à l'extinction de l'écran :
+     iOS laisse continuer, écran éteint, un son qui jouait déjà et qu'on entendait. Il refuse en revanche
+     de lancer un son au moment où l'app passe en arrière-plan. Le lecteur prend donc la parole tout de suite,
+     le moteur se tait et ne sert plus qu'à l'affichage, calé sur le lecteur. */
+  function actif(){ const c = document.getElementById("veilleAudio"); return !c || c.checked; }
+  function session(on){
+    try{
+      const a = navigator.audioSession;
+      if(!a || a.type === "play-and-record") return;
+      a.type = on ? "playback" : "auto";      // iOS 17 : le son continue écran verrouillé, même interrupteur latéral sur silence
+    }catch(e){}
+  }
+  // où en est le moteur dans le compás, en secondes depuis le pas 0 (null pendant le décompte)
+  function phase(){
+    if(state.preReste > 0) return null;
+    const c = Audio_.ctx, pas = stepDur();
+    return state.stepIndex * pas - (state.nextTime - c.currentTime);
+  }
+  function dansCycle(p){ if(!boucle) return 0; p = p % boucle.cycle; return p < 0 ? p + boucle.cycle : p; }
+  // le moteur se cale sur le lecteur : c'est le lecteur qu'on entend
+  function recale(){
+    if(!boucle || !state.seq.length) return;
+    const c = Audio_.ctx, pas = stepDur(), len = state.seq.length;
+    const p = dansCycle(lecteur.currentTime), k = Math.floor(p / pas) + 1;
+    state.queue = [];
+    state.stepIndex = k % len;
+    state.nextTime = c.currentTime + (k * pas - p);
+  }
+  function versMoteur(){
+    if(parle === "moteur") return;
+    parle = "moteur";
+    Audio_.setMuted(state.muted);
+    lecteur.muted = true;
+    clearInterval(derive); derive = null;
+  }
+  function versLecteur(){
+    if(!state.playing || !boucle || lecteur.paused) return;
+    recale();
+    lecteur.muted = state.muted;
+    Audio_.setMuted(true);
+    parle = "lecteur";
+    // les deux horloges glissent un peu l'une par rapport à l'autre : on recale l'affichage de temps en temps
+    clearInterval(derive);
+    derive = setInterval(function(){
+      if(parle !== "lecteur" || document.hidden || !state.playing || lecteur.paused) return;
+      const ph = phase(); if(ph === null) return;
+      let d = dansCycle(lecteur.currentTime) - dansCycle(ph);
+      if(d > boucle.cycle/2) d -= boucle.cycle; else if(d < -boucle.cycle/2) d += boucle.cycle;
+      if(Math.abs(d) > 0.03) recale();
+    }, 2000);
+  }
+  // la nouvelle boucle entre dans le lecteur, calée sur le moteur ; puis le lecteur reprend la parole
+  function charge(ancienne){
+    clearInterval(attente);
+    if(!state.playing || !actif()){ if(ancienne) URL.revokeObjectURL(ancienne.url); return; }
+    if(enFond) return;                               // on ne change rien écran éteint
+    versMoteur();
     echange = true;
+    lecteur.muted = true;
     lecteur.src = boucle.url;
-    setTimeout(function(){ echange = false; }, 400);
-    if(state.playing && !enFond){ lecteur.muted = true; lecteur.play().catch(function(){}); }
-    else if(enFond){ try{ lecteur.currentTime = pos % total; }catch(e){} lecteur.play().catch(function(){}); }
+    try{ lecteur.load(); }catch(e){}
+    let essais = 0;
+    // on attend la fin du décompte et que le fichier soit prêt
+    attente = setInterval(function(){
+      if(!state.playing){ clearInterval(attente); echange = false; return; }
+      if(++essais > 100){ clearInterval(attente); echange = false; return; }
+      const ph = phase();
+      if(ph === null || lecteur.readyState < 2) return;
+      clearInterval(attente);
+      try{ lecteur.currentTime = dansCycle(ph + 0.04); }catch(e){}
+      lecteur.play().then(function(){
+        setTimeout(function(){
+          echange = false;
+          if(ancienne) URL.revokeObjectURL(ancienne.url);
+          if(state.playing) versLecteur();
+        }, 300);
+      }, function(){ echange = false; });
+    }, 80);
   }
   function planifie(){
     if(!state.playing) return;
+    // un réglage a changé : le moteur reprend la parole tout de suite, la boucle suit
+    if(boucle && boucle.cle !== cleReglages()) versMoteur();
     clearTimeout(minuteur);
     minuteur = setTimeout(function(){ prepare().catch(function(){}); }, 600);
   }
-  // où en est le moteur dans le compás, en secondes depuis le pas 0
-  function phase(){
-    // le prochain pas à planifier, et l'instant où il sonnera
-    const c = Audio_.ctx, now = c.currentTime, pas = stepDur();
-    return state.stepIndex * pas - (state.nextTime - now);
-  }
   function passeEnFond(){
-    if(!state.playing || !boucle || enFond) return;
-    let p = phase() % boucle.cycle; if(p < 0) p += boucle.cycle;
-    try{ lecteur.currentTime = p; }catch(e){}
-    lecteur.muted = false;
-    lecteur.play().catch(function(){});
-    clearInterval(state.timer); state.timer = null;       // le moteur se tait, le lecteur prend le relais
-    Audio_.setMuted(true);
+    if(!state.playing || enFond) return;
     enFond = true;
+    if(actif() && boucle && parle !== "lecteur"){
+      // dernier recours : la boucle n'avait pas encore pris la parole
+      const ph = phase();
+      try{ if(ph !== null) lecteur.currentTime = dansCycle(ph); }catch(e){}
+      lecteur.muted = state.muted;
+      lecteur.play().catch(function(){});
+      Audio_.setMuted(true);
+      parle = "lecteur";
+    }
+    if(parle === "lecteur"){ clearInterval(state.timer); state.timer = null; }   // le moteur se repose, le lecteur continue
     majSession();
   }
   function revient(){
@@ -4146,21 +4230,13 @@ const Veille = (function(){
     const c = Audio_.ctx;
     const reprendre = function(){
       if(!state.playing){ lecteur.pause(); return; }
-      // le moteur repart exactement où en est la boucle
-      const pas = stepDur(), len = state.seq.length;
-      let p = (lecteur.currentTime % boucle.cycle); if(p < 0) p += boucle.cycle;
-      const k = Math.floor(p / pas) + 1;
-      state.queue = [];
-      state.stepIndex = k % len;
-      state.nextTime = c.currentTime + (k * pas - p);
-      lecteur.muted = true;
-      Audio_.setMuted(state.muted);
-      state.timer = setInterval(scheduler, TICK);
-      scheduler();
+      if(parle === "lecteur" && lecteur.paused){ versMoteur(); }    // le système a coupé le lecteur : le moteur reprend
+      else if(parle === "lecteur") recale();
+      if(!state.timer){ state.timer = setInterval(scheduler, TICK); scheduler(); }
+      if(boucle && boucle.cle !== cleReglages()) planifie();
     };
-    if(c.state !== "running" && c.resume){
-      c.resume().then(function(){ c.state === "running" ? reprendre() : (enFond = true); }, function(){ enFond = true; });
-    } else reprendre();
+    if(c.state !== "running" && c.resume) c.resume().then(reprendre, reprendre);
+    else reprendre();
   }
   // les commandes de l'écran verrouillé : arrêter le compás sans rallumer l'app
   function majSession(){
@@ -4181,41 +4257,51 @@ const Veille = (function(){
     }
   }catch(e){}
   lecteur.addEventListener("pause", function(){
-    // pause demandée depuis l'écran verrouillé ou le centre de contrôle
-    if(enFond && state.playing && !echange){ enFond = false; stop(); }
+    // pause demandée depuis l'écran verrouillé, le centre de contrôle ou un casque
+    if(state.playing && !echange && parle === "lecteur" && lecteur.src !== SILENCE) stop();
   });
   document.addEventListener("visibilitychange", function(){
-    if(!actif()) return;
     if(document.visibilityState === "hidden") passeEnFond(); else revient();
   });
-  window.addEventListener("pagehide", function(){ if(actif()) passeEnFond(); });
-  function actif(){ const c = document.getElementById("veilleAudio"); return !c || c.checked; }
+  window.addEventListener("pagehide", passeEnFond);
+  window.addEventListener("pageshow", revient);
   // la case se souvient de son état
   const caseV = document.getElementById("veilleAudio");
   if(caseV){
     try{ const v = localStorage.getItem("compas-veille"); if(v !== null) caseV.checked = v === "1"; }catch(e){}
     caseV.addEventListener("change", function(){
       try{ localStorage.setItem("compas-veille", caseV.checked ? "1" : "0"); }catch(e){}
-      if(!caseV.checked){ lecteur.pause(); lecteur.muted = true; }
-      else if(state.playing) Veille.demarre();
+      if(!caseV.checked){ versMoteur(); lecteur.pause(); }
+      else if(state.playing){ if(boucle && boucle.cle === cleReglages()) charge(null); else prepare().catch(function(){}); }
     });
   }
 
   return {
-    // au démarrage, dans le geste de l'utilisateur : on déverrouille le lecteur, puis on prépare la boucle
+    // au démarrage, dans le geste de l'utilisateur : on ouvre la session « lecture » et on déverrouille le lecteur
     demarre: function(){
-      if(!actif()) return;
-      if(!deverrouille){
-        lecteur.src = boucle ? boucle.url : URL.createObjectURL(wav(new Float32Array(16000), 32000));
-        lecteur.muted = true;
-        lecteur.play().then(function(){ deverrouille = true; }, function(){});
-      } else if(boucle){ lecteur.muted = true; lecteur.play().catch(function(){}); }
+      session(true);
       majSession();
-      prepare().catch(function(){});
+      if(!actif()) return;
+      parle = "moteur";
+      echange = true;
+      if(!lecteur.src) lecteur.src = SILENCE;
+      lecteur.muted = true;
+      lecteur.play().catch(function(){});
+      setTimeout(function(){ echange = false; }, 300);
+      if(boucle && boucle.cle === cleReglages()) charge(null);
+      else prepare().catch(function(){});
     },
-    arrete: function(){ enFond = false; clearTimeout(minuteur); lecteur.pause(); lecteur.muted = true; majSession(); },
+    arrete: function(){
+      enFond = false; clearTimeout(minuteur); clearInterval(attente); clearInterval(derive); derive = null;
+      echange = true; lecteur.pause(); lecteur.muted = true; setTimeout(function(){ echange = false; }, 300);
+      parle = "moteur"; Audio_.setMuted(state.muted);
+      session(false); majSession();
+    },
+    // « couper le son » : quand le lecteur parle, c'est lui qu'on coupe
+    son: function(){ if(parle === "lecteur"){ lecteur.muted = state.muted; Audio_.setMuted(true); } },
     planifie: planifie,
-    etat: function(){ return {enFond, pret: !!boucle, duree: boucle ? boucle.total : 0, cycle: boucle ? boucle.cycle : 0, url: boucle ? boucle.url : null, lecteur: {t: lecteur.currentTime, muet: lecteur.muted, pause: lecteur.paused}}; },
+    etat: function(){ return {enFond, parle, pret: !!boucle, duree: boucle ? boucle.total : 0, cycle: boucle ? boucle.cycle : 0, url: boucle ? boucle.url : null,
+      lecteur: {t: lecteur.currentTime, muet: lecteur.muted, pause: lecteur.paused}}; },
     // pour les essais : simuler l'écran qui s'éteint et se rallume
     _cache: passeEnFond, _montre: revient
   };

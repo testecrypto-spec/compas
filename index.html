@@ -607,6 +607,18 @@ footer{color:var(--muted);font-size:.82rem;margin-top:1.6rem;max-width:70ch}
 .entraineur .palos-conseilles button[aria-pressed="true"]{background:var(--bronce);border-color:var(--bronce);color:var(--sur-oro)}
 .entraineur .palos-conseilles button[aria-pressed="true"] .etiq{color:var(--sur-oro);opacity:.85}
 .palo-autre{margin-top:12px}
+.ch-bandeau{margin:0 auto 10px;max-width:520px;padding:10px 14px;border:1px solid var(--bronce);border-radius:4px;background:rgba(201,154,70,.10);text-align:center}
+.ch-bandeau b{display:block;font-family:"Bodoni Moda",Georgia,serif;font-size:2.1rem;line-height:1.1;color:var(--tapa)}
+.ch-bandeau span{font-size:.84rem;color:var(--tapa-doux)}
+.ch-resume{margin:18px auto 0;max-width:620px;padding:12px 14px;border:1px solid var(--trait);border-left:3px solid var(--bronce);border-radius:0 3px 3px 0;background:var(--ebano);font-size:.9rem;color:var(--tapa)}
+.ch-resume p{margin:0 0 8px}
+.ch-pastilles{display:flex;flex-wrap:wrap;gap:4px}
+.ch-pastilles span{min-width:44px;padding:4px 6px;border-radius:3px;border:1px solid var(--trait);font-size:.76rem;text-align:center;font-variant-numeric:tabular-nums}
+.ch-pastilles .q-bon{border-color:var(--oliva);color:var(--oliva)} .ch-pastilles .q-moyen{border-color:var(--bronce);color:var(--bronce)} .ch-pastilles .q-mauvais{border-color:var(--carmin);color:var(--carmin)}
+.exo-image{margin-top:12px;background:#fff;border:1px solid var(--trait);border-radius:3px;line-height:0;max-height:360px;overflow:auto;-webkit-overflow-scrolling:touch}
+.exo-image img{width:100%;height:auto;display:block}
+.exo-image-reglage{margin-top:10px}
+.exo-image-reglage summary{cursor:pointer;font-size:.86rem;color:var(--bronce)}
 .arp-touches button{min-width:58px;font-size:1rem}
 .arp-reglages{margin-top:16px}
 .arp-mode{display:flex;flex-wrap:wrap;align-items:center;gap:6px 14px;margin-top:18px}
@@ -734,7 +746,21 @@ body[data-moteur="acompas"] .layers>.layer:not(.garde-ac),body[data-moteur="acom
 
 /* ---------- analyse fine ---------- */
 .af{margin-top:24px;border-top:1px solid var(--edge);padding-top:16px;color:var(--text)}
-#jAnaCorps{overflow-x:auto;-webkit-overflow-scrolling:touch}
+#jAnaCorps,#afCorps{overflow-x:auto;-webkit-overflow-scrolling:touch}
+.cj{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px 16px;margin:6px 0 14px;padding:12px 14px;border:1px solid var(--edge);border-left:4px solid var(--oro);border-radius:4px}
+.cj>div{display:flex;flex-direction:column;gap:2px;min-width:0}
+.cj-sur{font-size:.72rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+.cj-nom{font-size:1.15rem;letter-spacing:.03em;color:var(--text)}
+.cj-raison{font-size:.8rem;color:var(--muted)}
+.cj button{padding:.55rem 1.1rem;font-size:.9rem;background:var(--oro);border-color:var(--oro);color:#1B1220;font-weight:600}
+.pg-barre{height:8px;border-radius:4px;background:color-mix(in srgb,var(--edge) 55%,transparent);overflow:hidden;margin:10px 0 4px}
+.pg-barre i{display:block;height:100%;background:var(--verde)}
+.pg-items{list-style:none;margin:8px 0 0;padding:0}
+.pg-items li{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:6px 12px;padding:8px 0;border-top:1px solid var(--edge)}
+.pg-items li:first-child{border-top:0}
+.pg-items b{font-weight:600;letter-spacing:.02em}
+.pg-items span{font-size:.82rem;color:var(--muted)}
+.pg-items button{padding:.45rem .9rem;font-size:.86rem}
 .cv-total{margin:4px 0 0;font-size:.95rem;color:var(--text)}
 .cv-h{font-size:.78rem;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin:18px 0 8px;font-weight:600}
 .cv-grille{display:grid;grid-template-columns:repeat(auto-fill,minmax(76px,1fr));gap:5px}
@@ -1330,6 +1356,18 @@ table.af-main td.af-case{min-width:104px;border:1px solid var(--edge);border-lef
     <h3 id="exoTitre"></h3>
     <p class="exo-doigtes" id="exoDoigtes"></p>
     <p class="aide" id="exoNotes"></p>
+    <div class="exo-image" id="exoImage" hidden><img id="exoImageImg" alt="Partition de l'exercice"></div>
+    <details class="exo-image-reglage" id="exoImageReglage">
+      <summary id="exoImageResume">Ajouter l'image de la partition</summary>
+      <p class="aide">Une capture de la page du livre ou une photo. Elle reste dans cet appareil, s'affiche ici et, si tu veux, pendant le passage. Depuis un PDF : charge-le dans « La partition source » plus bas, encadre le passage, « Garder ce passage », puis reviens ici.</p>
+      <div class="actions">
+        <label class="bouton-fichier secondaire">Choisir une image<input type="file" id="exoImageFichier" accept="image/*"></label>
+        <button type="button" id="exoImagePrendre">Prendre le passage gardé</button>
+        <button type="button" id="exoImageRetirer" hidden>Retirer l'image</button>
+      </div>
+      <div class="ligne-case"><input type="checkbox" id="exoImageLecture" checked><label for="exoImageLecture">Afficher l'image pendant le passage</label></div>
+      <p class="aide exo-retour" id="exoImageRetour" aria-live="polite"></p>
+    </details>
   </div>
 
   <h3>Jouer sur un palo</h3>
@@ -1712,7 +1750,45 @@ table.af-main td.af-case{min-width:104px;border:1px solid var(--edge);border-lef
   <p class="aide">Joue au casque : dans les haut-parleurs, le clic serait entendu par le micro et compté comme une frappe.</p>
 </section>
 
+<section class="plateau" id="blocSerie">
+  <h2>Séance enchaînée</h2>
+  <p class="aide intro">Plusieurs passages à la suite, avec une courte pause entre deux : le tempo monte dès que c'est propre, ou l'accord monte d'une case à chaque passage, jusqu'à la 12e et retour.</p>
+  <div class="reglages">
+    <div>
+      <label for="chaine">Enchaîner</label>
+      <select id="chaine">
+        <option value="non" selected>non, un passage à la fois</option>
+        <option value="tempo">le tempo monte quand c'est propre</option>
+        <option value="cases">monter l'accord case par case</option>
+      </select>
+    </div>
+    <div class="ch-tempo">
+      <label for="chVise">Tempo visé</label>
+      <input type="number" id="chVise" min="30" max="240" step="1" value="100" inputmode="numeric">
+    </div>
+    <div class="ch-tempo">
+      <label for="chPas">Monter de</label>
+      <select id="chPas"><option value="2">2 bpm</option><option value="4" selected>4 bpm</option><option value="6">6 bpm</option><option value="8">8 bpm</option></select>
+    </div>
+    <div class="ch-tempo">
+      <label for="chSeuil">quand le rythme atteint</label>
+      <select id="chSeuil"><option>70</option><option>75</option><option selected>80</option><option>85</option><option>90</option></select>
+    </div>
+    <div class="ch-cases">
+      <label for="chCaseMax">Jusqu'à la case</label>
+      <select id="chCaseMax"><option>5</option><option>7</option><option>9</option><option selected>12</option></select>
+      <div class="ligne-case"><input type="checkbox" id="chRedescend" checked><label for="chRedescend">puis redescendre à la 1re</label></div>
+    </div>
+    <div>
+      <label for="chPause">Pause entre deux passages</label>
+      <select id="chPause"><option value="2">2 secondes</option><option value="3" selected>3 secondes</option><option value="5">5 secondes</option><option value="8">8 secondes</option></select>
+    </div>
+  </div>
+  <p class="aide" id="chGlose"></p>
+</section>
+
 <section class="plateau scene" id="blocScene">
+  <div class="ch-bandeau" id="chBandeau" hidden></div>
   <div class="compte-temps" id="etat">Active le micro, puis démarre.</div>
   <div class="gros" id="gros">&nbsp;</div>
   <div class="legende-gros" id="legendeGros">&nbsp;</div>
@@ -1735,6 +1811,7 @@ table.af-main td.af-case{min-width:104px;border:1px solid var(--edge);border-lef
     <button id="btnJouer" class="primaire">Démarrer</button>
     <button id="btnStop" disabled>Arrêter</button>
   </div>
+<div class="ch-resume" id="chResume" hidden></div>
 </section>
 
 <section class="plateau masque" id="resultats">
@@ -2071,6 +2148,25 @@ table.af-main td.af-case{min-width:104px;border:1px solid var(--edge);border-lef
 </section>
 
 <section class="j-plateau">
+  <h2>Programme progressif</h2>
+  <p class="j-aide">Un devoir qui avance tout seul dans une série de combinaisons : chaque jour une ou deux, et tu passes à la suivante dès qu'elle est tenue au tempo visé avec au moins 80 de rythme. « Travailler » ouvre la combinaison et règle la séance enchaînée pour faire monter le tempo.</p>
+  <div class="j-reglages">
+    <div><label for="pgGroupe">Série</label><select id="pgGroupe"></select></div>
+    <div><label for="pgVise">Tempo visé</label><input type="number" id="pgVise" min="40" max="240" step="1" value="116" inputmode="numeric"></div>
+    <div><label for="pgDepart">Tempo de départ</label><input type="number" id="pgDepart" min="30" max="200" step="1" value="60" inputmode="numeric"></div>
+    <div><label for="pgParJour">Par jour</label><select id="pgParJour"><option value="1">1 combinaison</option><option value="2" selected>2 combinaisons</option><option value="3">3 combinaisons</option></select></div>
+  </div>
+  <div class="j-actions"><button type="button" id="pgAjouter">Commencer ce programme</button></div>
+  <p class="j-aide" id="pgRetour" aria-live="polite"></p>
+</section>
+
+<section class="j-plateau">
+  <h2>Combinaison du jour</h2>
+  <p class="j-aide">Une combinaison de la main droite jamais travaillée, ou celle où ta note est la plus faible. Elle change chaque jour.</p>
+  <div class="cj" id="dJour" hidden></div>
+</section>
+
+<section class="j-plateau">
   <h2>Ajouter un devoir</h2>
   <p class="j-aide">Parmi les exercices que tu as déjà joués au micro. Un devoir se coche tout seul : il est fait dès qu'un passage mesuré de cet exercice entre dans le journal, le jour même.</p>
   <div class="j-reglages">
@@ -2133,6 +2229,7 @@ table.af-main td.af-case{min-width:104px;border:1px solid var(--edge);border-lef
 <section class="j-plateau" id="jCouverture">
   <h2>Combinaisons de la main droite</h2>
   <p class="j-aide">Chaque case est une combinaison de doigts. Elle se colore dès que tu l'as jouée au micro, d'où qu'elle vienne : bibliothèque, livre importé ou générateur d'arpèges. Le tempo affiché (bpm) est le plus rapide tenu avec au moins 80 de rythme ; sinon « r. » donne ta meilleure note de rythme. Les cases du Great Chart portent leur numéro de ligne et de colonne du livre. Touche une case pour l'ouvrir dans Figures rythmiques.</p>
+  <div class="cj" id="jCouvJour" hidden></div>
   <div id="jCouvCorps"></div>
   <p class="cv-leg"><i class="cv-jamais"></i>jamais <i class="cv-faible"></i>rythme sous 60 <i class="cv-moyen"></i>60 à 79 <i class="cv-bon"></i>80 et plus</p>
 </section>
@@ -5685,6 +5782,8 @@ function majReference(){
 $("#btnMasquerRef").addEventListener("click",()=>{SRC.masque=true;majReference();});
 
 function referenceLecture(){
+  // l'image attachée à l'exercice passe avant le passage de la partition source
+  if(S.mode==="rythme"&&IMG.courante&&$("#exoImageLecture").checked){$("#refLecture").classList.remove("masque");$("#refLectureImg").src=IMG.courante;return;}
   const ok=S.mode==="rythme"&&SRC.actif>=0&&SRC.extraits[SRC.actif]&&$("#refPendantLecture").checked;
   $("#refLecture").classList.toggle("masque",!ok);
   if(ok)$("#refLectureImg").src=SRC.extraits[SRC.actif];
@@ -5812,6 +5911,7 @@ function bascule(mode){
   $("#voletRyt").classList.toggle("masque",mode!=="rythme");
   $("#blocLongueur").classList.toggle("masque",mode==="rythme");
   $("#blocGroupe").classList.toggle("masque",mode==="rythme");
+  $("#blocSerie").classList.toggle("masque",mode==="morceau");
   $("#resultats").classList.add("masque");
   majVitesse();
   if(typeof majPalo==="function")majPalo();
@@ -6389,6 +6489,7 @@ function demarre(){
   });
   S.refractaire=Math.min(0.045,(isFinite(minInt)?minInt:0.2)*0.55);
 
+  S.derniereNote=null;
   S.onsets=[];S.enAttente=null;S.dernierPic=0;S.dernierNiveau=0;S.curseur=0;
   S.seuilLin=linDe(parseFloat($("#seuil").value));
   S.prochainTemps=0;S.prochainAttendu=0;S.running=true;
@@ -6719,10 +6820,13 @@ function termine(){
   $("#gros").innerHTML="&nbsp;";$("#legendeGros").innerHTML="&nbsp;";
   $("#etat").textContent=S.micro?"Passage terminé.":"Passage terminé — sans micro, pas de mesure.";
   if(S.micro){S.partiel=false;calcule();}
+  if(CH.on)suiteSerie();
 }
-$("#btnJouer").addEventListener("click",()=>{S.mode==="morceau"?demarreMorceau():demarre();});
-$("#btnRejouer").addEventListener("click",()=>{S.mode==="morceau"?demarreMorceau():demarre();});
+$("#btnJouer").addEventListener("click",()=>{S.mode==="morceau"?demarreMorceau():lanceSerie();});
+$("#btnRejouer").addEventListener("click",()=>{S.mode==="morceau"?demarreMorceau():lanceSerie();});
 $("#btnStop").addEventListener("click",()=>{
+  const enSerie=CH.on;
+  if(enSerie)finSerie("Séance arrêtée.",true);
   if(!S.running){arrete();return;}
   const fin=S.ctx.currentTime;
   arrete();
@@ -6736,6 +6840,125 @@ $("#btnStop").addEventListener("click",()=>{
     $("#etat").textContent="Passage interrompu.";
   }
 });
+
+/* ---------- séance enchaînée : tempo qui monte, ou accord monté case par case ---------- */
+const CH={on:false,type:null,id:null,k:0,liste:[],res:[],pause:null,echecs:0,bpm0:0,vise:0,sim:null};
+const CLE_SERIE="compas-serie";
+function chLit(){
+  try{const d=JSON.parse(localStorage.getItem(CLE_SERIE)||"null");if(!d)return;
+    ["chaine","chVise","chPas","chSeuil","chCaseMax","chPause"].forEach(k=>{if(d[k]!=null)$("#"+k).value=String(d[k]);});
+    if(d.chRedescend===false)$("#chRedescend").checked=false;
+  }catch(e){}
+}
+function chSauve(){
+  const d={};["chaine","chVise","chPas","chSeuil","chCaseMax","chPause"].forEach(k=>d[k]=$("#"+k).value);d.chRedescend=$("#chRedescend").checked;
+  try{localStorage.setItem(CLE_SERIE,JSON.stringify(d));}catch(e){}
+}
+function chMaj(){
+  const t=$("#chaine").value;
+  document.querySelectorAll("#blocSerie .ch-tempo").forEach(x=>x.hidden=t!=="tempo");
+  document.querySelectorAll("#blocSerie .ch-cases").forEach(x=>x.hidden=t!=="cases");
+  const bpm=parseInt($("#bpm").value,10),vise=parseInt($("#chVise").value,10)||bpm;
+  $("#chGlose").textContent=t==="tempo"?"Départ à "+bpm+" (le tempo réglé plus haut). Chaque passage à "+$("#chSeuil").value+" de rythme ou plus fait monter de "+$("#chPas").value+" bpm, jusqu'à "+vise+". Sous le seuil, on rejoue au même tempo ; très en dessous, on redescend d'un cran. Trois passages ratés de suite arrêtent la séance. Le micro est nécessaire."
+    :t==="cases"?"Un passage par case : 1, 2, 3… jusqu'à la "+$("#chCaseMax").value+"e"+($("#chRedescend").checked?", puis retour à la 1re":"")+". La case à jouer s'affiche en grand pendant la pause, le temps de déplacer l'accord. Chaque passage entre au journal, avec sa case."
+    :"Chaque « Démarrer » joue un seul passage.";
+}
+["chaine","chVise","chPas","chSeuil","chCaseMax","chPause","chRedescend"].forEach(k=>$("#"+k).addEventListener("change",()=>{chMaj();chSauve();}));
+$("#bpm").addEventListener("change",chMaj);
+function setBpmEntr(v){v=Math.round(clamp(v,30,240));$("#bpm").value=String(v);$("#tBpmVal").textContent=String(v);majVitesse();sauve();}
+function bandeau(gros,petit){const z=$("#chBandeau");z.hidden=false;z.innerHTML="<b></b><span></span>";z.firstChild.textContent=gros;z.lastChild.textContent=petit||"";}
+function lanceSerie(){
+  const t=S.mode==="morceau"?"non":$("#chaine").value;
+  clearTimeout(CH.pause);CH.on=false;$("#chBandeau").hidden=true;
+  if(t==="non"){demarre();return;}
+  if(t==="tempo"&&!S.micro&&!CH.sim){$("#etat").textContent="Le tempo qui monte se décide sur la note de rythme : active d'abord le micro.";return;}
+  // une séance enchaînée a besoin de passages qui finissent
+  if(S.mode==="rythme"&&$("#repet").value==="0"){$("#repet").value="2";majSignature();}
+  if(S.mode==="rasgueado"&&$("#temps").value==="0")$("#temps").value="16";
+  Object.assign(CH,{on:true,type:t,id:"s"+Date.now().toString(36),k:0,res:[],echecs:0,bpm0:parseInt($("#bpm").value,10)});
+  $("#chResume").hidden=true;
+  if(t==="cases"){
+    const h=parseInt($("#chCaseMax").value,10)||12;CH.liste=[];
+    for(let c=1;c<=h;c++)CH.liste.push(c);
+    if($("#chRedescend").checked)for(let c=h-1;c>=1;c--)CH.liste.push(c);
+  }else{
+    CH.vise=clamp(parseInt($("#chVise").value,10)||CH.bpm0,30,240);
+    if(CH.vise<=CH.bpm0)CH.vise=Math.min(240,CH.bpm0+parseInt($("#chPas").value,10));
+  }
+  passageSerie();
+}
+function texteBandeau(){
+  if(CH.type==="cases"){
+    const c=CH.liste[CH.k],prec=CH.k?CH.liste[CH.k-1]:0;
+    return ["Case "+c,(c>prec?"on monte":"on redescend")+" · passage "+(CH.k+1)+" sur "+CH.liste.length];
+  }
+  return ["♩ "+$("#bpm").value,"visé "+CH.vise+" · passage "+(CH.k+1)];
+}
+function passageSerie(){
+  const [g,p]=texteBandeau();bandeau(g,p);
+  if(CH.sim){const f=CH.sim;window.Entraineur._simule(f);return;}
+  demarre();
+}
+function suiteSerie(){
+  const r=S.micro?S.derniereNote:null,bpm=parseInt($("#bpm").value,10);
+  CH.res.push({n:CH.k+1,cas:CH.type==="cases"?CH.liste[CH.k]:null,bpm,r});
+  if(CH.res.length>=60){finSerie("Soixante passages : la séance s'arrête là.");return;}
+  let msg="";
+  if(CH.type==="cases"){
+    CH.k++;
+    if(CH.k>=CH.liste.length){finSerie("Séance terminée : l'accord est "+($("#chRedescend").checked?"monté et redescendu.":"monté jusqu'en haut."));return;}
+  }else{
+    const seuil=parseInt($("#chSeuil").value,10),pas=parseInt($("#chPas").value,10);
+    CH.k++;
+    if(r!=null&&r>=seuil){
+      CH.echecs=0;
+      if(bpm>=CH.vise){finSerie("Objectif atteint : "+bpm+" tenu à "+r+" de rythme.");return;}
+      setBpmEntr(Math.min(CH.vise,bpm+pas));msg="Rythme "+r+" : on monte.";
+    }else{
+      CH.echecs++;
+      if(CH.echecs>=3){finSerie("Trois passages sous "+seuil+" de suite : la séance s'arrête ici. Reprends un peu plus bas demain.");return;}
+      if(r==null||r<seuil-15){setBpmEntr(Math.max(CH.bpm0,bpm-pas));msg="Rythme "+(r==null?"non mesuré":r)+" : on redescend d'un cran.";}
+      else msg="Rythme "+r+" : encore une fois au même tempo.";
+    }
+  }
+  const pauseS=CH.sim?0:parseFloat($("#chPause").value)||3;
+  const [g,p]=texteBandeau();
+  let reste=Math.ceil(pauseS);
+  const montre=()=>bandeau(g,(msg?msg+" ":"")+(reste>0?"Reprise dans "+reste+" s…":p));
+  montre();
+  $("#btnStop").disabled=false;$("#btnJouer").disabled=true;
+  const tic=()=>{
+    if(!CH.on)return;
+    if(reste<=0){passageSerie();return;}
+    reste--;montre();CH.pause=setTimeout(tic,1000);
+  };
+  if(CH.sim){passageSerie();return;}
+  CH.pause=setTimeout(tic,1000);
+}
+function finSerie(msg,stop){
+  clearTimeout(CH.pause);
+  const etait=CH.on;CH.on=false;
+  if(!stop||!S.running){$("#btnJouer").disabled=false;$("#btnStop").disabled=true;}
+  if(!etait)return;
+  $("#chBandeau").hidden=true;
+  const res=CH.res,z=$("#chResume");
+  if(!res.length){z.hidden=true;return;}
+  const notes=res.filter(x=>x.r!=null),moyR=notes.length?Math.round(notes.reduce((s,x)=>s+x.r,0)/notes.length):null;
+  const q=r=>r==null?"":r>=80?"q-bon":r>=60?"q-moyen":"q-mauvais";
+  let h="<p><b></b></p>";
+  if(CH.type==="cases"){
+    const faible=notes.length?notes.reduce((a,b)=>b.r<a.r?b:a):null;
+    h+="<p>"+res.length+" passage"+(res.length>1?"s":"")+(moyR!=null?", rythme moyen "+moyR:"")+(faible&&notes.length>2&&faible.r<moyR-5?". Case la plus fragile : "+faible.cas+" ("+faible.r+").":".")+"</p>";
+    h+='<div class="ch-pastilles">'+res.map(x=>'<span class="'+q(x.r)+'">case '+x.cas+(x.r!=null?"<br>"+x.r:"")+"</span>").join("")+"</div>";
+  }else{
+    const seuil=parseInt($("#chSeuil").value,10),tenus=notes.filter(x=>x.r>=seuil),max=tenus.length?Math.max(...tenus.map(x=>x.bpm)):null;
+    h+="<p>De "+res[0].bpm+" à "+res[res.length-1].bpm+" bpm en "+res.length+" passage"+(res.length>1?"s":"")+(max?" — tenu proprement jusqu'à "+max+".":" — aucun passage au-dessus de "+seuil+".")+"</p>";
+    h+='<div class="ch-pastilles">'+res.map(x=>'<span class="'+q(x.r)+'">♩'+x.bpm+(x.r!=null?"<br>"+x.r:"")+"</span>").join("")+"</div>";
+  }
+  z.innerHTML=h;z.querySelector("b").textContent=msg;z.hidden=false;
+  $("#etat").textContent=msg;
+}
+chLit();chMaj();
 
 /* =================================================================
    ANALYSE
@@ -6784,6 +7007,7 @@ function calcule(){
   let somme=0;
   S.attendus.forEach(a=>{somme+=a.dev===null?0:Math.max(0,1-Math.abs(a.dev)/(a.tol*1000));});
   const noteR=Math.round(100*somme/S.attendus.length);
+  S.derniereNote=noteR;
 
   // volume : avec des accents, la régularité se mesure à l'intérieur de chaque groupe
   // (accentuées entre elles, non accentuées entre elles), et le contraste entre les deux à part
@@ -7299,6 +7523,7 @@ function afficheListe(){
 function afficheCourant(){
   const e=B.courant?exoParId(B.courant):null,z=$("#exoCourant");
   z.hidden=!e;
+  if(!e){IMG.pour=null;IMG.courante=null;}
   $("#exoMettreAJour").hidden=!(e&&estPerso(e.id));
   if(e&&estPerso(e.id))$("#exoMettreAJour").textContent="Mettre à jour « "+e.titre+" »";
   if(!e)return;
@@ -7308,8 +7533,62 @@ function afficheCourant(){
   $("#exoDoigtes").hidden=!e.doigtes;
   $("#exoNotes").textContent=e.notes||"";
   $("#exoNotes").hidden=!e.notes;
+  if(IMG.pour!==e.id)montreImage(e.id);
 }
 function retourExo(t){$("#exoRetour").textContent=t;}
+
+/* ---- l'image de la partition, attachée à un exercice (IndexedDB : trop lourd pour le stockage simple) ---- */
+const IMG={db:null,courante:null,pour:null};
+function imgBase(){
+  if(IMG.db)return Promise.resolve(IMG.db);
+  return new Promise((ok,ko)=>{
+    try{
+      const q=indexedDB.open("compas-images",1);
+      q.onupgradeneeded=()=>q.result.createObjectStore("img");
+      q.onsuccess=()=>{IMG.db=q.result;ok(IMG.db);};q.onerror=()=>ko(q.error);
+    }catch(e){ko(e);}
+  });
+}
+function imgLit(id){return imgBase().then(db=>new Promise(ok=>{const r=db.transaction("img").objectStore("img").get(id);r.onsuccess=()=>ok(r.result||null);r.onerror=()=>ok(null);})).catch(()=>null);}
+function imgEcrit(id,v){return imgBase().then(db=>new Promise((ok,ko)=>{const t=db.transaction("img","readwrite");v?t.objectStore("img").put(v,id):t.objectStore("img").delete(id);t.oncomplete=()=>ok(true);t.onerror=()=>ko(t.error);}));}
+function montreImage(id){
+  IMG.pour=id;IMG.courante=null;$("#exoImage").hidden=true;$("#exoImageRetirer").hidden=true;
+  $("#exoImageResume").textContent="Ajouter l'image de la partition";
+  if(!id)return;
+  imgLit(id).then(v=>{
+    if(IMG.pour!==id)return;
+    IMG.courante=v||null;
+    $("#exoImage").hidden=!v;$("#exoImageRetirer").hidden=!v;
+    if(v){$("#exoImageImg").src=v;$("#exoImageResume").textContent="Image de la partition";}
+  });
+}
+// réduite à 1600 px de large, en JPEG, pour rester légère
+function reduitImage(src){
+  return new Promise((ok,ko)=>{
+    const im=new Image();
+    im.onload=()=>{const f=Math.min(1,1600/im.naturalWidth),c=document.createElement("canvas");
+      c.width=Math.max(1,Math.round(im.naturalWidth*f));c.height=Math.max(1,Math.round(im.naturalHeight*f));
+      const g=c.getContext("2d");g.fillStyle="#fff";g.fillRect(0,0,c.width,c.height);g.drawImage(im,0,0,c.width,c.height);ok(c.toDataURL("image/jpeg",0.85));};
+    im.onerror=()=>ko(new Error("image illisible"));im.src=src;
+  });
+}
+function attacheImage(v){
+  const id=B.courant;
+  if(!id){$("#exoImageRetour").textContent="Charge d'abord un exercice de la bibliothèque.";return;}
+  imgEcrit(id,v).then(()=>{montreImage(id);$("#exoImageRetour").textContent=v?"Image attachée à l'exercice.":"Image retirée.";})
+    .catch(()=>{$("#exoImageRetour").textContent="L'appareil a refusé d'enregistrer l'image (stockage plein ou navigation privée).";});
+}
+$("#exoImageFichier").addEventListener("change",e=>{
+  const f=e.target.files&&e.target.files[0];e.target.value="";if(!f)return;
+  const url=URL.createObjectURL(f);
+  reduitImage(url).then(attacheImage).catch(()=>{$("#exoImageRetour").textContent="Cette image n'a pas pu être lue.";}).finally(()=>URL.revokeObjectURL(url));
+});
+$("#exoImagePrendre").addEventListener("click",()=>{
+  const v=SRC.actif>=0?SRC.extraits[SRC.actif]:null;
+  if(!v){$("#exoImageRetour").textContent="Aucun passage gardé : charge ton PDF dans « La partition source », encadre le passage, puis « Garder ce passage ».";return;}
+  attacheImage(v);
+});
+$("#exoImageRetirer").addEventListener("click",()=>{if(confirm("Retirer l'image de cet exercice ?"))attacheImage(null);});
 
 /* ---- charger un exercice ---- */
 function chargeExo(e){
@@ -7443,6 +7722,7 @@ function supprimeExo(e){
   if(!confirm("Supprimer l'exercice « "+e.titre+" » ?"))return;
   B.perso=B.perso.filter(x=>x.id!==e.id);
   if(B.courant===e.id)B.courant=null;
+  imgEcrit(e.id,null).catch(()=>{});
   sauvePerso();majCollections();afficheListe();afficheCourant();majBiblioPalos();sauve();
   retourExo("« "+e.titre+" » est supprimé.");
 }
@@ -7747,7 +8027,43 @@ function ouvreCombinaison(g,it){
   else{const f=figureSimple(it.seq,g.rid);chargeCodeLibre(f.code,90,"« P "+it.seq.slice(1).toUpperCase()+" » (ligne "+it.ligne+"-"+it.col+") est dans la partition. Importe le fichier du livre pour l'avoir avec ses notes.");}
   const z=document.getElementById("blocBiblio");if(z)z.scrollIntoView({block:"start"});
 }
-window.Arpeges={rendCouverture,cle:cleArpege,groupes:COMBI_GROUPES};
+// les passages d'une combinaison
+function passagesDe(seances,g,it){
+  return (seances||[]).filter(s=>{
+    if(s.mode!=="rythme"||!s.code)return false;
+    const k=cleArpege(s.code);if(!k)return false;
+    return g.cmp==="exact"?k===it.seq:estRotation(k,it.seq);
+  });
+}
+function nomItem(g,it){return g.id==="gc"?"P "+it.seq.slice(1,4).toUpperCase()+" + "+it.seq.slice(4).toUpperCase()+" (ligne "+it.ligne+"-"+it.col+")":it.seq.toUpperCase();}
+// la combinaison du jour : une jamais travaillée, sinon la plus fragile ; la même toute la journée
+function duJour(seances){
+  const cv=couverture(seances||[]),jour=Math.floor((Date.now()-new Date().getTimezoneOffset()*60000)/864e5);
+  for(const gid of ["3d","r4","p3","gc"]){
+    const g=COMBI_GROUPES.find(x=>x.id===gid),jamais=g.items.filter(it=>!cv[gid+":"+it.seq].n);
+    if(jamais.length){const it=jamais[jour%jamais.length];return {g,it,nom:nomItem(g,it),raison:"jamais travaillée ("+g.titre.split(" — ")[0].toLowerCase()+")"};}
+  }
+  let pire=null;
+  COMBI_GROUPES.forEach(g=>g.items.forEach(it=>{const c=cv[g.id+":"+it.seq];if(!pire||(c.r||0)<(pire.c.r||0))pire={g,it,c};}));
+  return pire?{g:pire.g,it:pire.it,nom:nomItem(pire.g,pire.it),raison:"ta note la plus faible ("+pire.c.r+")"}:null;
+}
+function ouvre(gid,seq,o){
+  const g=COMBI_GROUPES.find(x=>x.id===gid),it=g&&g.items.find(x=>x.seq===seq);if(!it)return;
+  ouvreCombinaison(g,it);
+  if(o&&window.Entraineur&&Entraineur.regleSerie)Entraineur.regleSerie(o);
+  const z=document.getElementById(o&&o.type?"blocSerie":"blocBiblio");if(z)z.scrollIntoView({block:"start"});
+}
+function rendDuJour(z,seances){
+  if(!z)return;
+  const d=duJour(seances);z.innerHTML="";
+  if(!d){z.hidden=true;return;}
+  z.hidden=false;
+  z.innerHTML='<div><span class="cj-sur">Combinaison du jour</span><b class="cj-nom"></b><span class="cj-raison"></span></div><button type="button" class="j-principal">La travailler</button>';
+  z.querySelector(".cj-nom").textContent=d.nom;
+  z.querySelector(".cj-raison").textContent=d.raison;
+  z.querySelector("button").addEventListener("click",()=>ouvre(d.g.id,d.it.seq));
+}
+window.Arpeges={rendCouverture,rendDuJour,duJour,ouvre,passagesDe,nomItem,cle:cleArpege,groupes:COMBI_GROUPES};
 /* ---- journal : ce que l'on inscrit après chaque passage mesuré ---- */
 function compactMesures(num,den,mesures){
   let dernier=-1;mesures.forEach((m,i)=>{if(m.length)dernier=i;});
@@ -7773,6 +8089,7 @@ function entreeJournal(x){
     diag:S.diagTexte||null,silences:S.sil?(S.sil.on+"-"+S.sil.off+" "+S.sil.quoi):null,
     pts:S.diagPoints||null,
     regl:instantane(),
+    serie:CH.on?{id:CH.id,type:CH.type,n:CH.k+1,cas:CH.type==="cases"?CH.liste[CH.k]:null}:null,
     det:S.det||null,
     ras:mode==="rasgueado"?selModele.value:null,
     pat:mode==="rasgueado"?{sub:P.sub,duree:P.duree,ancrage:P.ancrage,nom:P.nom,glose:P.glose,golpes:P.golpes.map(g=>({pos:g.pos,doigt:g.doigt,sens:g.sens,acc:!!g.acc}))}:null};
@@ -7834,6 +8151,7 @@ function afficheAnalyseFine(){
   let h=Analyse.htmlFaiblesses(S.afFaibles,true);
   if(m.length)h+=Analyse.htmlMain(m,S.mode==="rasgueado"?"Ta main, doigt par doigt":"Par doigté écrit");
   else if(S.mode==="rythme")h+='<p class="af-leg">Ajoute les doigtés à la partition pour avoir aussi l\'analyse doigt par doigt.</p>';
+  try{h+=htmlAccentsDoigts(l);}catch(e){}
   if(m.length)h+=Analyse.htmlEspacements(Analyse.espacements(l));
   if(S.mode==="rythme")h+=Analyse.htmlTypes(Analyse.parType(l));
   h+=Analyse.htmlFatigue(l);
@@ -7844,6 +8162,47 @@ function afficheAnalyseFine(){
   if(S.mode==="rythme"){if(seances.length>1)coloriePartition(Analyse.parFrappe(l));else corrigePartition();}
   $("#afRetour").textContent="";
   z.hidden=false;
+}
+/* ---------- accents doigt par doigt : ce qui ressort, ce qui ne ressort pas, ce qui ressort sans le vouloir ---------- */
+const NOMS_DOIGTS={p:"pouce",i:"index",m:"majeur",a:"annulaire",e:"auriculaire"};
+function accentsDoigts(l){
+  const T=l.filter(a=>a.dev!=null&&a.db!=null&&!a.sil);
+  const N=T.filter(a=>!a.d.acc),A=T.filter(a=>a.d.acc);
+  if(N.length<4)return null;
+  const moy=x=>x.reduce((s,v)=>s+v,0)/x.length,mN=moy(N.map(a=>a.db));
+  const doigts=[];
+  "pimae".split("").forEach(f=>{
+    const a=A.filter(x=>x.d.f===f),n=N.filter(x=>x.d.f===f);
+    if(!a.length&&!n.length)return;
+    doigts.push({f,nA:a.length,cA:a.length?moy(a.map(x=>x.db))-mN:null,okA:a.filter(x=>x.db>=mN+3).length,
+      nN:n.length,cN:n.length?moy(n.map(x=>x.db))-mN:null,fuite:n.filter(x=>x.db>=mN+3).length});
+  });
+  return {mN,nA:A.length,nN:N.length,contraste:A.length?moy(A.map(x=>x.db))-mN:null,ok:A.filter(x=>x.db>=mN+3).length,doigts};
+}
+function htmlAccentsDoigts(l){
+  const r=accentsDoigts(l);
+  if(!r||!r.doigts.some(d=>d.f))return "";
+  const nb=x=>(x>=0?"+":"−")+Math.abs(x).toFixed(1).replace(".",",")+" dB";
+  const nom=f=>(NOMS_DOIGTS[f]||f).replace(/^./,c=>c.toUpperCase());
+  const avec=r.nA>=3,phr=[];
+  if(avec){
+    const taux=r.ok/r.nA,bien=r.contraste>=4&&taux>=0.7;
+    phr.push({q:bien?"bon":r.contraste>=2?"moyen":"mauvais",t:"Tes accents ressortent de "+nb(r.contraste)+" ("+r.ok+" sur "+r.nA+" nets, à 3 dB ou plus)"+(bien?" : le relief est là.":r.contraste>=2?" : encore un peu timides, exagère-les.":" : on les entend à peine. Exagère franchement, quitte à durcir au début.")});
+    const faibles=r.doigts.filter(d=>d.nA>=3&&d.cA<3).sort((a,b)=>a.cA-b.cA);
+    if(faibles.length)phr.push({q:"mauvais",t:"Les accents de l'"+NOMS_DOIGTS[faibles[0].f]+" ne ressortent pas assez ("+nb(faibles[0].cA)+", "+faibles[0].okA+" sur "+faibles[0].nA+") : travaille cette ligne en ne pensant qu'à lui."});
+  }
+  const fuites=r.doigts.filter(d=>d.nN>=4&&(d.fuite/d.nN>=0.25||d.cN>=2)).sort((a,b)=>b.cN-a.cN);
+  if(fuites.length)phr.push({q:"moyen",t:nom(fuites[0].f)+" sonne plus fort que les autres même sans accent ("+nb(fuites[0].cN)+(fuites[0].fuite?", "+fuites[0].fuite+" sur "+fuites[0].nN+" ressortent comme des accents":"")+") : relâche-le, sinon "+(avec?"tes accents se noient.":"l'arpège boite.")});
+  const discret=r.doigts.filter(d=>d.nN>=4&&d.cN<=-2.5).sort((a,b)=>a.cN-b.cN);
+  if(discret.length)phr.push({q:"moyen",t:nom(discret[0].f)+" est en retrait ("+nb(discret[0].cN)+" sans accent) : laisse-le sonner autant que les autres."});
+  if(!phr.length)phr.push({q:"bon",t:"Les doigts sonnent au même niveau quand ils ne sont pas accentués : bon équilibre."});
+  const lignes=r.doigts.map(d=>"<tr><td>"+nom(d.f)+"</td>"+
+    (avec?'<td class="nb">'+(d.nA?nb(d.cA)+" · "+d.okA+"/"+d.nA:"—")+"</td>":"")+
+    '<td class="nb">'+(d.nN?nb(d.cN):"—")+'</td><td class="nb">'+(d.nN?d.fuite+"/"+d.nN:"—")+"</td></tr>").join("");
+  return '<h4 class="af-h">'+(avec?"Accents, doigt par doigt":"Équilibre des doigts")+'</h4>'+
+    '<ul class="cr-liste">'+phr.map(p=>'<li><i class="pastille q-'+p.q+'"></i><span>'+p.t+'</span></li>').join("")+'</ul>'+
+    '<div style="overflow-x:auto"><table class="af-table"><thead><tr><th>Doigt</th>'+(avec?"<th>Accentuées : relief · nettes</th>":"")+'<th>Sans accent : niveau</th><th>Ressortent sans le vouloir</th></tr></thead><tbody>'+lignes+'</tbody></table></div>'+
+    '<p class="af-leg">Volumes comparés à la moyenne des notes non accentuées. Une accentuée est « nette » à 3 dB au-dessus. Pouce et doigt joués ensemble comptent pour le doigt.</p>';
 }
 // la partition corrigée, colorée d'après plusieurs passages
 function coloriePartition(stats){
@@ -8366,6 +8725,9 @@ window.Entraineur={
   _simule:fn=>{demarre();if(!S.running)return false;const lat=parseFloat($("#latence").value)/1000;S.onsets=[];
     S.attendus.forEach((a,i)=>{const r=fn(a,i);if(r)S.onsets.push({t:a.t+r.dev/1000+lat,amp:r.amp});});
     const m=S.micro;S.micro=true;termine();S.micro=m;return true;},
+  _serie:fn=>{CH.sim=fn;try{lanceSerie();}finally{CH.sim=null;}return CH.res.slice();},
+  // une séance enchaînée réglée de l'extérieur (programme des devoirs)
+  regleSerie:o=>{if(o.type)$("#chaine").value=o.type;if(o.vise)$("#chVise").value=String(o.vise);if(o.seuil)$("#chSeuil").value=String(o.seuil);if(o.bpm)setBpmEntr(o.bpm);chMaj();chSauve();},
   // un devoir : on remet l'exercice (figure, rasgueado ou morceau) et son tempo
   travaille:s=>{
     if(s.mode==="morceau"){if(window.Vues)Vues.montre("morceaux");return;}
@@ -11188,7 +11550,7 @@ function rendTout(){
   if(!J.jour)J.jour=cleJour(Date.now());
   rendTuiles();rendCalendrier();rendJour();rendChoix();rendProgres();
   try{rendAnalyse();}catch(e){$("#jAnaCorps").innerHTML='<p class="j-vide">L\'analyse n\'a pas pu être calculée.</p>';}
-  try{if(window.Arpeges)Arpeges.rendCouverture($("#jCouvCorps"),J.seances);}catch(e){$("#jCouvCorps").innerHTML='<p class="j-vide">Le tableau n\'a pas pu être calculé.</p>';}
+  try{if(window.Arpeges){Arpeges.rendCouverture($("#jCouvCorps"),J.seances);Arpeges.rendDuJour($("#jCouvJour"),J.seances);}}catch(e){$("#jCouvCorps").innerHTML='<p class="j-vide">Le tableau n\'a pas pu être calculé.</p>';}
 }
 
 /* ---------- analyse de la technique, sur une période ---------- */
@@ -11387,7 +11749,56 @@ function serie(l){
 }
 
 /* ---- rendu ---- */
+/* ---- programme progressif : une série de combinaisons, validées au tempo visé ---- */
+function etatProg(dv,tout){
+  const A=window.Arpeges,g=A&&A.groupes.find(x=>x.id===dv.prog.g);
+  if(!g)return null;
+  const items=g.items.map(it=>{
+    const l=A.passagesDe(tout,g,it),tenus=l.filter(s=>s.r>=80&&s.bpm),tenu=tenus.length?Math.max(...tenus.map(s=>s.bpm)):null;
+    return {it,l,tenu,ok:tenu!=null&&tenu>=dv.prog.vise};
+  });
+  const toutes=[].concat(...items.map(x=>x.l)).sort((a,b)=>a.t-b.t);
+  return {g,items,valides:items.filter(x=>x.ok).length,duJour:items.filter(x=>!x.ok).slice(0,dv.prog.parJour||1),toutes,fait:faitLe(toutes,aujourdhui())};
+}
+function estFait(dv,tout,jour){
+  if(dv.prog){const e=etatProg(dv,tout);return !!e&&faitLe(e.toutes,jour);}
+  return faitLe(deCle(tout,dv.cle),jour);
+}
+function carteProg(dv,tout){
+  const e=etatProg(dv,tout),c=document.createElement("div");c.className="d-carte";
+  if(!e){c.innerHTML='<p class="d-sous">Ce programme ne peut pas s\'afficher.</p>';return c;}
+  const P=dv.prog,A=window.Arpeges,total=e.items.length,auj=aujourdhui(),sr=serie(e.toutes);
+  c.classList.toggle("fait",e.fait);
+  let jours="";
+  for(let i=13;i>=0;i--){const k=decaleJour(auj,-i),ok=faitLe(e.toutes,k);jours+='<i class="'+(ok?"ok ":"")+(i===0?"auj":"")+'" title="'+esc(dateLongue(k))+(ok?" : fait":"")+'"></i>';}
+  const fini=!e.duJour.length;
+  c.innerHTML='<div class="d-tete"><span class="d-titre">'+esc(dv.titre)+'</span><span class="d-statut '+(e.fait||fini?"fait":"afaire")+'">'+(fini?"Programme terminé ✓":e.fait?"Fait aujourd'hui ✓":"À faire aujourd'hui")+'</span></div>'+
+    '<p class="d-sous">'+e.valides+' sur '+total+' tenues à '+P.vise+' · '+(sr?sr+" jour"+(sr>1?"s":"")+" de suite":"série à relancer")+'</p>'+
+    '<div class="pg-barre" aria-hidden="true"><i style="width:'+Math.round(100*e.valides/total)+'%"></i></div>'+
+    '<div class="d-jours" aria-label="Les 14 derniers jours">'+jours+'</div>'+
+    '<div class="d-jours-leg"><span>il y a 13 jours</span><span>aujourd\'hui</span></div>'+
+    (fini?'<div class="d-bloc"><p class="d-conseil" style="margin:0">Toute la série est tenue à '+P.vise+'. Monte le tempo visé pour un nouveau tour, ou retire ce programme.</p></div>':
+    '<div class="d-bloc"><h4>Aujourd\'hui</h4><ul class="pg-items">'+e.duJour.map((x,i)=>{
+      const b=x.tenu?Math.min(P.vise,x.tenu+4):P.depart;
+      return '<li><div><b>'+esc(A.nomItem(e.g,x.it))+'</b><br><span>'+(x.tenu?"tenu à "+x.tenu+" · reprise à "+b:x.l.length?x.l.length+" passage"+(x.l.length>1?"s":"")+", pas encore à 80 · départ à "+b:"jamais joué · départ à "+b)+'</span></div><button type="button" data-i="'+i+'">Travailler</button></li>';
+    }).join("")+'</ul></div>')+
+    '<div class="j-actions"><button type="button" data-act="objectif">Changer le tempo visé</button><button type="button" data-act="retirer">Retirer des devoirs</button></div>';
+  c.querySelectorAll("[data-i]").forEach(bt=>bt.addEventListener("click",()=>{
+    const x=e.duJour[+bt.dataset.i],b=x.tenu?Math.min(P.vise,x.tenu+4):P.depart;
+    A.ouvre(e.g.id,x.it.seq,{type:"tempo",vise:P.vise,seuil:80,bpm:b});
+  }));
+  c.querySelector('[data-act="retirer"]').addEventListener("click",()=>{
+    if(!confirm("Retirer le programme « "+dv.titre+" » ? Tes passages restent dans le journal."))return;
+    D.liste=D.liste.filter(x=>x.id!==dv.id);sauve();rend();
+  });
+  c.querySelector('[data-act="objectif"]').addEventListener("click",()=>{
+    const v=prompt("Tempo visé pour « "+dv.titre+" » :",P.vise);
+    if(v===null)return;const n=parseInt(v,10);if(n>=40&&n<=240){P.vise=n;sauve();rend();}
+  });
+  return c;
+}
 function carte(dv,tout){
+  if(dv.prog)return carteProg(dv,tout);
   const l=deCle(tout,dv.cle),auj=aujourdhui(),fait=faitLe(l,auj);
   const duJour=l.filter(s=>cleJour(s.t)===auj),der=l[l.length-1]||null;
   const debut=cleJour(dv.cree||Date.now());
@@ -11490,7 +11901,7 @@ function rendChoix(tout){
   l.forEach(s=>{const o=document.createElement("option");o.value=s.cle;o.textContent=s.titre+(tempoDe(s)?" — "+tempoDe(s):"");sel.appendChild(o);});
   if([...sel.options].some(o=>o.value===v))sel.value=v;
 }
-function aFaire(tout){const auj=aujourdhui();return D.liste.filter(dv=>!faitLe(deCle(tout,dv.cle),auj));}
+function aFaire(tout){const auj=aujourdhui();return D.liste.filter(dv=>!estFait(dv,tout,auj));}
 function rendRappel(){
   const tout=seances(),n=aFaire(tout).length,b=$("#dBadge");
   b.hidden=!n;b.textContent=n;
@@ -11513,8 +11924,9 @@ function rend(){
     (reste?reste+" sur "+n+" encore à faire aujourd'hui, "+dateLongue(aujourdhui())+".":"Tous tes devoirs sont faits aujourd'hui. Bravo !");
   // à faire d'abord, puis ceux déjà faits
   const auj=aujourdhui();
-  D.liste.slice().sort((a,b)=>faitLe(deCle(tout,a.cle),auj)-faitLe(deCle(tout,b.cle),auj)).forEach(dv=>z.appendChild(carte(dv,tout)));
-  rendVeille(tout);rendChoix(tout);
+  D.liste.slice().sort((a,b)=>estFait(a,tout,auj)-estFait(b,tout,auj)).forEach(dv=>z.appendChild(carte(dv,tout)));
+  rendVeille(tout);rendChoix(tout);rendProgOptions();
+  try{if(window.Arpeges)Arpeges.rendDuJour($("#dJour"),tout);}catch(e){}
   $("#dHeure").value=D.heure;
 }
 $("#dAjouter").addEventListener("click",()=>{
@@ -11524,6 +11936,21 @@ $("#dAjouter").addEventListener("click",()=>{
   ajoute(s,(o>=30&&o<=240)?o:null);$("#dObjectif").value="";rend();
 });
 $("#dHeure").addEventListener("change",e=>{D.heure=e.target.value||"18:00";sauve();});
+function rendProgOptions(){
+  const sel=$("#pgGroupe");if(sel.options.length||!window.Arpeges)return;
+  Arpeges.groupes.slice().reverse().forEach(g=>{const o=document.createElement("option");o.value=g.id;o.textContent=g.titre+" ("+g.items.length+")";sel.appendChild(o);});
+  sel.addEventListener("change",()=>{$("#pgVise").value=sel.value==="gc"?"116":"100";});
+}
+$("#pgAjouter").addEventListener("click",()=>{
+  const gid=$("#pgGroupe").value,g=window.Arpeges&&Arpeges.groupes.find(x=>x.id===gid);if(!g)return;
+  if(D.liste.some(x=>x.cle==="prog:"+gid)){$("#pgRetour").textContent="Ce programme est déjà dans tes devoirs.";return;}
+  const vise=Math.round(Math.min(240,Math.max(40,parseInt($("#pgVise").value,10)||100)));
+  const dep=Math.round(Math.min(vise,Math.max(30,parseInt($("#pgDepart").value,10)||60)));
+  D.liste.push({id:"d-"+Date.now().toString(36)+Math.random().toString(36).slice(2,5),cle:"prog:"+gid,titre:"Programme — "+g.titre.split(" — ")[0]+(gid==="gc"?" (Great Chart)":""),mode:"rythme",
+    prog:{g:gid,vise,depart:dep,parJour:parseInt($("#pgParJour").value,10)||1},objectif:null,cree:Date.now()});
+  sauve();rend();$("#pgRetour").textContent="Programme ajouté : il apparaît en haut, avec les combinaisons du jour.";
+  window.scrollTo(0,0);
+});
 // rappel quotidien : un événement répété chaque jour, avec une alerte, à ajouter au Calendrier
 $("#dIcs").addEventListener("click",()=>{
   const [h,m]=(D.heure||"18:00").split(":").map(Number),d=new Date();
@@ -11662,7 +12089,7 @@ window.addEventListener("load",function(){
     try{
       if("serviceWorker" in navigator)await navigator.serviceWorker.register("sw.js");
       // la version en cours est celle que déclare le service worker
-      let v="compas-v31";try{const t=await (await fetch("sw.js",{cache:"no-store"})).text();const m=t.match(/VERSION = "([^"]+)"/);if(m)v=m[1];}catch(e){}
+      let v="compas-v32";try{const t=await (await fetch("sw.js",{cache:"no-store"})).text();const m=t.match(/VERSION = "([^"]+)"/);if(m)v=m[1];}catch(e){}
       const c=await caches.open(v);
       await c.addAll(["./","index.html"]);
       await Promise.all(["manifest.webmanifest","icone-180.png","icone-192.png","icone-512.png","icone-masquable-512.png","pdfjs/pdf.min.js","pdfjs/pdf.worker.min.js"]

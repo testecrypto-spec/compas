@@ -4044,7 +4044,7 @@ function countPulses(){ let n = 0; for(let k=0;k<state.seq.length;k++) if(state.
    mêmes volumes), jouée par un lecteur audio que iOS laisse tourner écran éteint. Au retour, le moteur reprend.
    ============================================================ */
 const Veille = (function(){
-  const T0 = 0.05, QUEUE = 2.5;          // départ de la boucle dans le fichier ; queue de résonance repliée au début
+  const T0 = 0.05, QUEUE = 2.5, LONGUEUR = 600;     // LONGUEUR : durée du fichier joué écran éteint (s)          // départ de la boucle dans le fichier ; queue de résonance repliée au début
   const lecteur = new Audio();
   lecteur.loop = true; lecteur.preload = "auto"; lecteur.muted = true;
   lecteur.setAttribute("playsinline", ""); lecteur.setAttribute("webkit-playsinline", "");
@@ -4061,6 +4061,19 @@ const Veille = (function(){
       return wav16(m, sr, 2);
     }
     return wav16(data, sr, 1);
+  }
+  // un long fichier mono : la boucle mixée en mono, répétée « fois » fois, écrite directement en 16 bits
+  function wavLong(g, d, sr, fois){
+    const L = g.length, n = L*fois, buf = new ArrayBuffer(44 + n*2), v = new DataView(buf);
+    const ecrit = (o, s) => { for(let i=0;i<s.length;i++) v.setUint8(o+i, s.charCodeAt(i)); };
+    ecrit(0,"RIFF"); v.setUint32(4, 36+n*2, true); ecrit(8,"WAVE"); ecrit(12,"fmt ");
+    v.setUint32(16,16,true); v.setUint16(20,1,true); v.setUint16(22,1,true); v.setUint32(24,sr,true);
+    v.setUint32(28,sr*2,true); v.setUint16(32,2,true); v.setUint16(34,16,true); ecrit(36,"data"); v.setUint32(40,n*2,true);
+    const pcm = new Int16Array(L);
+    for(let i=0;i<L;i++){ let x = d ? (g[i]+d[i])*0.5 : g[i]; x = Math.max(-1, Math.min(1, x)); pcm[i] = x < 0 ? x*0x8000 : x*0x7FFF; }
+    const dst = new Int16Array(buf, 44, n);
+    for(let k=0;k<fois;k++) dst.set(pcm, k*L);
+    return new Blob([buf], {type:"audio/wav"});
   }
   function wav16(data, sr, nc){
     const n = data.length, buf = new ArrayBuffer(44 + n*2), v = new DataView(buf);
@@ -4087,7 +4100,7 @@ const Veille = (function(){
     const pas = stepDur(), cycle = pas * state.seq.length;
     if(!(cycle > 0)) return;
     const nCompases = Math.max(2, Math.min(64, Math.ceil(24 / cycle)));
-    const total = nCompases * cycle, sr = 44100;
+    const total = nCompases * cycle, sr = 32000;
     const OAC = window.OfflineAudioContext || window.webkitOfflineAudioContext;
     const off = new OAC(2, Math.ceil((T0 + total + QUEUE) * sr), sr);
     const ctx0 = Audio_.ctx, master0 = Audio_.master, cyc0 = state.acCyc;
@@ -4119,7 +4132,10 @@ const Veille = (function(){
     };
     const G = replie(rendu_.getChannelData(0)), D = rendu_.numberOfChannels > 1 ? replie(rendu_.getChannelData(1)) : null;
     const ancienne = boucle;
-    boucle = {url: URL.createObjectURL(wav(G, sr, D)), cycle, total, cle};
+    // le fichier répète la boucle pendant une dizaine de minutes : iOS marque un micro-blanc chaque fois
+    // qu'un fichier recommence, il ne faut donc pas qu'il recommence toutes les 30 secondes
+    const fois = Math.max(1, Math.min(40, Math.floor(LONGUEUR / total)));
+    boucle = {url: URL.createObjectURL(wavLong(G, D, sr, fois)), cycle, total, cle, fois};
     charge(ancienne);
   }
 

@@ -13,6 +13,11 @@ Métronome de flamenco, entraîneur de main droite et lecteur de morceaux.
   depuis la bibliothèque avec le fichier `exercices-nunez.json`.
 - `sw.js` : le fonctionnement hors connexion
 
+Les exercices tirés de livres achetés (par exemple « The Endless Guitar Workbook » de Karim Baggili)
+ne font pas partie du dépôt : ils s'importent depuis la bibliothèque avec un fichier personnel, qui ne doit pas être publié.
+La collection « Combinaisons main droite » et le générateur d'arpèges sont, eux, des combinaisons systématiques
+écrites pour Compás.
+
 ## Licence
 
 Compás est distribué sous licence **GNU Affero General Public License v3** (voir `LICENSE`),

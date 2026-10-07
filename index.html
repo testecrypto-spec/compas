@@ -607,6 +607,27 @@ footer{color:var(--muted);font-size:.82rem;margin-top:1.6rem;max-width:70ch}
 .entraineur .palos-conseilles button[aria-pressed="true"]{background:var(--bronce);border-color:var(--bronce);color:var(--sur-oro)}
 .entraineur .palos-conseilles button[aria-pressed="true"] .etiq{color:var(--sur-oro);opacity:.85}
 .palo-autre{margin-top:12px}
+.arp-touches button{min-width:58px;font-size:1rem}
+.arp-reglages{margin-top:16px}
+.arp-mode{display:flex;flex-wrap:wrap;align-items:center;gap:6px 14px;margin-top:18px}
+.arp-mode .rapides{margin-top:0}
+.arp-mode .rapides button[aria-pressed="true"]{background:var(--bronce);color:var(--sur-oro);border-color:var(--bronce)}
+.arp-mode-lib{font-size:.86rem;color:var(--tapa-doux)}
+.arp-chaque{font-size:.86rem;color:var(--tapa-doux);display:flex;align-items:center;gap:6px}
+.arp-grille{display:flex;flex-wrap:wrap;gap:12px 14px;margin-top:14px}
+.arp-mes{display:flex;flex-direction:column;gap:4px}
+.arp-mes-n{font-size:.72rem;color:var(--tapa-doux);text-transform:uppercase;letter-spacing:.05em}
+.arp-temps{display:flex;gap:3px}
+.arp-temps+.arp-temps{margin-left:6px}
+.arp-ligne{display:flex;flex-wrap:wrap;row-gap:6px}
+.arp-n{width:38px;height:52px;padding:0;border:1px solid var(--trait);border-radius:3px;background:var(--ebano);color:var(--tapa-doux);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;font-family:"Bodoni Moda",Georgia,serif;font-size:1.15rem;line-height:1;cursor:pointer;touch-action:manipulation}
+.arp-n:hover,.arp-n:active{background:var(--ebano);color:var(--tapa)}
+.arp-n:focus-visible{outline:2px solid var(--tapa);outline-offset:1px}
+.arp-n.acc{color:var(--tapa);font-weight:700;border-bottom:3px solid var(--carmin)}
+.arp-n .arp-p{font-family:inherit;font-size:.7rem;font-weight:600;color:var(--bronce);min-height:.8em}
+.arp-n.appui{border-left:2px solid var(--bronce)}
+.arp-enreg{margin-top:20px;padding-top:14px;border-top:1px dashed var(--trait)}
 .exo-ajout{margin-top:22px;border-top:1px solid var(--trait);padding-top:14px}
 .exo-ajout summary{cursor:pointer;color:var(--bronce);font-weight:600;font-size:.95rem}
 .exo-ajout[open] summary{margin-bottom:8px}
@@ -713,6 +734,21 @@ body[data-moteur="acompas"] .layers>.layer:not(.garde-ac),body[data-moteur="acom
 
 /* ---------- analyse fine ---------- */
 .af{margin-top:24px;border-top:1px solid var(--edge);padding-top:16px;color:var(--text)}
+#jAnaCorps{overflow-x:auto;-webkit-overflow-scrolling:touch}
+.cv-total{margin:4px 0 0;font-size:.95rem;color:var(--text)}
+.cv-h{font-size:.78rem;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin:18px 0 8px;font-weight:600}
+.cv-grille{display:grid;grid-template-columns:repeat(auto-fill,minmax(76px,1fr));gap:5px}
+.cv-grille.cv-p3{grid-template-columns:repeat(auto-fill,minmax(70px,1fr))}
+.cv-grille.cv-gc{grid-template-columns:repeat(4,minmax(0,1fr))}
+.cv-case{--q:var(--edge);display:flex;flex-direction:column;align-items:flex-start;gap:2px;min-width:0;padding:6px 7px;border:1px solid var(--edge);border-left:4px solid var(--q);border-radius:4px;
+  background:color-mix(in srgb,var(--q) 10%,transparent);color:var(--text);font:inherit;text-align:left;cursor:pointer;touch-action:manipulation}
+.cv-nom{font-weight:600;font-size:.84rem;letter-spacing:.02em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+.cv-info{font-size:.72rem;color:var(--muted);font-variant-numeric:tabular-nums;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+.cv-jamais{--q:var(--edge)} .cv-case.cv-jamais{background:none;opacity:.75}
+.cv-faible{--q:var(--carmin)} .cv-moyen{--q:var(--oro)} .cv-bon{--q:var(--verde)}
+.cv-leg{font-size:.78rem;color:var(--muted);margin:12px 0 0;line-height:1.8}
+.cv-leg i{display:inline-block;width:10px;height:10px;border-radius:2px;background:var(--q);margin:0 4px 0 10px;vertical-align:-1px}
+.cv-leg i:first-child{margin-left:0}
 .af-entete{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
 .af-entete h3{margin:0;font-size:1.1rem}
 .af-portee{display:flex;border:1px solid var(--edge);border-radius:999px;overflow:hidden}
@@ -837,7 +873,7 @@ table.af-main td.af-case{min-width:104px;border:1px solid var(--edge);border-lef
 .j-legende-note{margin-left:auto}
 .j-jour{margin-top:18px}
 .j-jour h3,.j-progres h3{font-size:1rem;margin:0 0 8px;color:var(--text)}
-.j-table-cadre{overflow-x:auto;-webkit-overflow-scrolling:touch}
+.j-table-cadre{position:relative;overflow-x:auto;-webkit-overflow-scrolling:touch}
 .j-table{width:100%;border-collapse:collapse;font-size:.86rem}
 .j-table th{text-align:left;font-weight:500;color:var(--muted);font-size:.76rem;padding:6px 8px;border-bottom:1px solid var(--edge);white-space:nowrap}
 .j-table td{padding:8px;border-bottom:1px solid var(--edge);color:var(--text);vertical-align:top}
@@ -1336,6 +1372,94 @@ table.af-main td.af-case{min-width:104px;border:1px solid var(--edge);border-lef
     </div>
   </details>
   <p class="aide exo-retour" id="exoRetour" aria-live="polite"></p>
+</section>
+<section class="plateau" id="blocArpeges">
+  <h2>Générateur d'arpèges</h2>
+  <p class="aide intro">Écris une suite de doigts, choisis le rythme, puis touche les notes pour placer les accents et le pouce. La figure se charge dans la partition ou rejoint ta bibliothèque avec ses doigtés : le micro, l'analyse doigt par doigt et les devoirs la suivent comme n'importe quel exercice.</p>
+  <div class="reglages">
+    <div>
+      <label for="arpModele">Partir d'un modèle</label>
+      <select id="arpModele"></select>
+    </div>
+    <div>
+      <label for="arpSuite">Suite de doigts</label>
+      <input type="text" id="arpSuite" class="champ" value="a m i" autocomplete="off" autocapitalize="none" spellcheck="false" placeholder="p i m a m i">
+    </div>
+  </div>
+  <div class="rapides arp-touches" role="group" aria-label="Écrire la suite de doigts">
+    <button type="button" data-d="p">P<span class="etiq">pouce</span></button>
+    <button type="button" data-d="i">I<span class="etiq">index</span></button>
+    <button type="button" data-d="m">M<span class="etiq">majeur</span></button>
+    <button type="button" data-d="a">A<span class="etiq">annulaire</span></button>
+    <button type="button" data-d="-" aria-label="Retirer le dernier doigt">⌫<span class="etiq">retirer</span></button>
+    <button type="button" data-d="0">Effacer<span class="etiq">tout</span></button>
+  </div>
+  <div class="reglages arp-reglages">
+    <div>
+      <label for="arpRythme">Rythme</label>
+      <select id="arpRythme"></select>
+    </div>
+    <div>
+      <label for="arpDepart">Premier temps sur</label>
+      <select id="arpDepart"></select>
+    </div>
+    <div>
+      <label for="arpAccents">Accents</label>
+      <select id="arpAccents">
+        <option value="temps">sur les appuis de la mesure</option>
+        <option value="mesure">premier temps de la mesure</option>
+        <option value="aucun">aucun</option>
+        <option value="2">une note sur 2</option>
+        <option value="3">une note sur 3</option>
+        <option value="4">une note sur 4</option>
+        <option value="5">une note sur 5</option>
+        <option value="a">chaque A</option>
+        <option value="m">chaque M</option>
+        <option value="i">chaque I</option>
+        <option value="p">chaque P</option>
+        <option value="main" hidden>placés à la main</option>
+      </select>
+    </div>
+    <div>
+      <label for="arpPouce">Pouce ajouté</label>
+      <select id="arpPouce">
+        <option value="aucun">aucun</option>
+        <option value="temps">sur les appuis de la mesure</option>
+        <option value="mesure">premier temps de la mesure</option>
+        <option value="a">avec chaque A</option>
+        <option value="m">avec chaque M</option>
+        <option value="i">avec chaque I</option>
+        <option value="main" hidden>placé à la main</option>
+      </select>
+    </div>
+  </div>
+  <div class="arp-mode">
+    <span class="arp-mode-lib">Toucher une note place</span>
+    <div class="rapides" role="group" aria-label="Ce que fait une touche sur une note">
+      <button type="button" data-m="acc" aria-pressed="true">un accent</button>
+      <button type="button" data-m="p" aria-pressed="false">le pouce avec</button>
+    </div>
+    <label class="arp-chaque"><input type="checkbox" id="arpChaque" checked> pareil à chaque mesure</label>
+  </div>
+  <div class="arp-grille" id="arpGrille" aria-label="Les notes de la figure"></div>
+  <p class="aide" id="arpGlose"></p>
+  <div class="actions">
+    <button class="primaire" id="arpCharger" type="button">Charger dans la partition</button>
+  </div>
+  <div class="reglages arp-enreg">
+    <div>
+      <label for="arpNom">Nom</label>
+      <input type="text" id="arpNom" class="champ" autocomplete="off" placeholder="nom proposé automatiquement">
+    </div>
+    <div>
+      <label for="arpColl">Collection</label>
+      <input type="text" id="arpColl" class="champ" list="exoColls" value="Mes arpèges" autocomplete="off">
+    </div>
+  </div>
+  <div class="actions">
+    <button id="arpEnregistrer" type="button">Enregistrer dans ma bibliothèque</button>
+  </div>
+  <p class="aide exo-retour" id="arpRetour" aria-live="polite"></p>
 </section>
 <section class="plateau">
   <h2>Le cadre</h2>
@@ -2004,6 +2128,13 @@ table.af-main td.af-case{min-width:104px;border:1px solid var(--edge);border-lef
     </div>
   </div>
   <div id="jProgres"></div>
+</section>
+
+<section class="j-plateau" id="jCouverture">
+  <h2>Combinaisons de la main droite</h2>
+  <p class="j-aide">Chaque case est une combinaison de doigts. Elle se colore dès que tu l'as jouée au micro, d'où qu'elle vienne : bibliothèque, livre importé ou générateur d'arpèges. Le tempo affiché (bpm) est le plus rapide tenu avec au moins 80 de rythme ; sinon « r. » donne ta meilleure note de rythme. Les cases du Great Chart portent leur numéro de ligne et de colonne du livre. Touche une case pour l'ouvrir dans Figures rythmiques.</p>
+  <div id="jCouvCorps"></div>
+  <p class="cv-leg"><i class="cv-jamais"></i>jamais <i class="cv-faible"></i>rythme sous 60 <i class="cv-moyen"></i>60 à 79 <i class="cv-bon"></i>80 et plus</p>
 </section>
 
 <section class="j-plateau" id="jAnalyse">
@@ -6965,6 +7096,87 @@ const EXOS_NUNEZ=NZ.exos.map(e=>({id:e[0],collection:COLL_NUNEZ,titre:e[1],mesur
 const DOIGTS_NUNEZ=NZ.doigts;
 EXOS_NUNEZ.forEach(e=>{if(DOIGTS_NUNEZ[e.id])e.doigts=DOIGTS_NUNEZ[e.id];});
 
+/* ---------- arpèges : rythmes, écriture en code, catalogue des combinaisons de la main droite ---------- */
+// par : notes par temps écrit ; appuis : notes d'appui dans la mesure (accent « sur le temps »)
+const RYTHMES_ARP={
+  t44:{num:4,den:4,par:3,nom:"triolets en 4/4",appuis:[0,3,6,9]},
+  t34:{num:3,den:4,par:3,nom:"triolets en 3/4",appuis:[0,3,6]},
+  d44:{num:4,den:4,par:4,nom:"doubles croches en 4/4",appuis:[0,4,8,12]},
+  d34:{num:3,den:4,par:4,nom:"doubles croches en 3/4",appuis:[0,4,8]},
+  c44:{num:4,den:4,par:2,nom:"croches en 4/4",appuis:[0,2,4,6]},
+  c34:{num:3,den:4,par:2,nom:"croches en 3/4",appuis:[0,2,4]},
+  c68:{num:6,den:8,par:1,nom:"croches en 6/8",appuis:[0,3]},
+  c128:{num:12,den:8,par:1,nom:"croches en 12/8",appuis:[0,3,6,9]},
+  c58:{num:5,den:8,par:1,nom:"croches en 5/8 (2+3)",appuis:[0,2]},
+  c78:{num:7,den:8,par:1,nom:"croches en 7/8 (2+2+3)",appuis:[0,2,4]},
+  d78:{num:7,den:8,par:2,nom:"doubles croches en 7/8 (2+2+3)",appuis:[0,4,8]}
+};
+const parMesure=r=>r.num*r.par;
+// jetons : « a », « a/p » (pouce joué avec le doigt), « p » ; acc : ensemble des indices accentués
+function codeArpege(r,jetons,acc){
+  const pm=parMesure(r),A=acc instanceof Set?acc:new Set(acc||[]),mes=[],dg=[];
+  for(let m=0;m*pm<jetons.length;m++){
+    const cel=[],d=[];
+    for(let t=0;t<r.num;t++){
+      let motif="";
+      for(let k=0;k<r.par;k++){const i=m*pm+t*r.par+k;motif+=A.has(i)?"X":"x";d.push(jetons[i]||"·");}
+      const l=r.den===8?"c":"n";
+      cel.push(motif==="x"?l:l+":"+motif);
+    }
+    mes.push(cel.join(" "));dg.push(d.join(" "));
+  }
+  let code=r.num+"/"+r.den;
+  mes.forEach((s,i)=>{code+=(i%2===0?"\n|":" |")+" "+s;});
+  return code+" |\ndoigts: "+dg.join(" | ");
+}
+// texte lisible : majuscule = accent, « a+p » = pouce avec le doigt, « · » entre les temps
+function lisibleArpege(jetons,acc,par){
+  const A=acc instanceof Set?acc:new Set(acc||[]);
+  return jetons.map((j,i)=>{
+    let s=j.replace("/p","+p");
+    if(A.has(i))s=s.replace(/^[pima]/,c=>c.toUpperCase());
+    return (i&&i%par===0?"· ":"")+s;
+  }).join(" ");
+}
+function permutations(a){
+  if(a.length<2)return [a.slice()];
+  const out=[];
+  a.forEach((x,i)=>permutations(a.slice(0,i).concat(a.slice(i+1))).forEach(p=>out.push([x].concat(p))));
+  return out;
+}
+// une figure d'une mesure (ou plus) où la suite tourne en boucle, accentuée sur les appuis
+function figureSimple(seq,rid){
+  const r=RYTHMES_ARP[rid],pm=parMesure(r),s=seq.split("");
+  let m=1;while((m*pm)%s.length&&m<8)m++;
+  const jetons=Array.from({length:m*pm},(_,i)=>s[i%s.length]);
+  const acc=[];for(let k=0;k<m;k++)r.appuis.forEach(a=>acc.push(k*pm+a));
+  return {code:codeArpege(r,jetons,acc),doigtes:lisibleArpege(jetons,acc,r.par)};
+}
+const COLL_COMBI="Combinaisons main droite";
+const GC_LIGNES=[["ami","ma am ai mi"],["aim","ai ia am im"],["aia","mi im ia ma"],["ama","mi im ia ma"],["mia","mi im ia ma"],["mai","ma am ai mi"],
+  ["mam","ai ia am im"],["mim","ai ia am im"],["ima","mi im ia ma"],["iam","ai ia am im"],["iai","ma am ai mi"],["imi","ma am ai mi"]];
+// groupes : exact = l'ordre compte tel quel ; rotation = la même boucle, commencée sur n'importe quelle note
+const COMBI_GROUPES=[
+  {id:"3d",titre:"3 doigts — triolets",rid:"t44",cmp:"exact",
+    items:["ami","mia","iam","ima","mai","aim"].map(s=>({seq:s}))},
+  {id:"p3",titre:"Pouce + 3 doigts — doubles croches",rid:"d44",cmp:"exact",
+    items:[0,1,2,3].flatMap(pos=>permutations(["a","m","i"]).map(p=>{const q=p.slice();q.splice(pos,0,"p");return {seq:q.join(""),rang:pos};}))},
+  {id:"r4",titre:"4 notes, un doigt répété — doubles croches",rid:"d44",cmp:"rotation",
+    items:[{seq:"amim",rep:"m"},{seq:"aiam",rep:"a"},{seq:"imia",rep:"i"}]},
+  {id:"gc",titre:"Pouce + 5 notes — 6/8 (le « Great Chart »)",rid:"c68",cmp:"rotation",
+    items:GC_LIGNES.flatMap(([b,f],li)=>f.split(" ").map((x,ci)=>({seq:"p"+b+x,ligne:li+1,col:ci+1,prive:"kb-gc-"+(li+1)+"-"+(ci+1)})))}
+];
+const NOTES_COMBI={
+  "3d":"Les six ordres de trois doigts. AMI, MIA et IAM tournent dans le même sens, IMA, MAI et AIM dans l'autre : seul change le doigt qui tombe sur le temps. Accent sur chaque temps ; d'autres accents se placent dans le générateur d'arpèges.",
+  "p3":"Pouce et trois doigts, une note chacun : les 24 ordres possibles, le pouce en 1re, 2e, 3e puis 4e position. Accent sur chaque temps.",
+  "r4":"Boucle de quatre notes où un doigt revient, sans jamais jouer deux fois de suite le même doigt. Une seule boucle par doigt répété : les autres départs se règlent dans le générateur."
+};
+const EXOS_COMBI=COMBI_GROUPES.filter(g=>g.id!=="gc").flatMap(g=>g.items.map(it=>{
+  const f=figureSimple(it.seq,g.rid),nom=it.seq.toUpperCase();
+  return {id:"cm-"+g.id+"-"+it.seq,collection:COLL_COMBI,titre:nom+" — "+g.titre.split(" — ")[0].toLowerCase()+", "+RYTHMES_ARP[g.rid].nom,
+    mesures:"",code:f.code,tempo:g.rid==="t44"?60:50,doigtes:f.doigtes,depart:0,palos:[],notes:NOTES_COMBI[g.id],integre:true};
+}));
+
 const CLE_EXOS="compas-exercices";
 // perso : exercices ajoutés ; courant : exercice chargé ; depart : pulso du premier temps (0 = départ du palo) ; caler : exercice calé sur le compás
 const B={perso:[],courant:null,depart:0,caler:true};
@@ -6981,7 +7193,7 @@ function sauvePerso(){
   try{localStorage.setItem(CLE_EXOS,JSON.stringify({format:"compas-exercices",v:1,exercices:B.perso}));return true;}
   catch(e){return false;}
 }
-function tousExos(){return EXOS_NUNEZ.concat(B.perso);}
+function tousExos(){return EXOS_NUNEZ.concat(EXOS_COMBI,B.perso);}
 function exoParId(id){return tousExos().find(e=>e.id===id)||null;}
 function estPerso(id){return B.perso.some(e=>e.id===id);}
 function infosCode(code){
@@ -7040,7 +7252,7 @@ function majCollections(){
   });
   sel.value=[...sel.options].some(x=>x.value===v)?v:"*";
   const dl=$("#exoColls");dl.innerHTML="";
-  collections().filter(c=>c!==COLL_NUNEZ).concat(["Mes exercices"]).filter((c,i,a)=>a.indexOf(c)===i)
+  collections().filter(c=>c!==COLL_NUNEZ&&c!==COLL_COMBI).concat(["Mes exercices"]).filter((c,i,a)=>a.indexOf(c)===i)
     .forEach(c=>{const x=document.createElement("option");x.value=c;dl.appendChild(x);});
 }
 function metaExo(e){
@@ -7210,7 +7422,7 @@ function enregistreExo(maj){
     doigtes:$("#exoTexte").value.trim(),
     code,tempo:parseInt($("#bpm").value,10)||70,depart:B.depart||0,modifie:Date.now()
   };
-  if(champs.collection===COLL_NUNEZ)champs.collection="Mes exercices";
+  if(champs.collection===COLL_NUNEZ||champs.collection===COLL_COMBI)champs.collection="Mes exercices";
   let e;
   if(maj){
     e=B.perso.find(x=>x.id===B.courant);
@@ -7273,14 +7485,14 @@ $("#exoImporter").addEventListener("change",async e=>{
   liste.forEach(x=>{
     if(!x||typeof x.code!=="string"){refus++;return;}
     const e={
-      id:(typeof x.id==="string"&&x.id&&!EXOS_NUNEZ.some(n=>n.id===x.id))?x.id:nouvelId(),
+      id:(typeof x.id==="string"&&x.id&&!EXOS_NUNEZ.some(n=>n.id===x.id)&&!EXOS_COMBI.some(n=>n.id===x.id))?x.id:nouvelId(),
       collection:String(x.collection||"Mes exercices").slice(0,80),titre:String(x.titre||"Exercice importé").slice(0,120),
       mesures:String(x.mesures||"").slice(0,40),code:x.code,tempo:clamp(parseInt(x.tempo,10)||70,30,240),
       doigtes:String(x.doigtes||"").slice(0,2000),notes:String(x.notes||"").slice(0,2000),
       depart:Math.max(0,parseInt(x.depart,10)||0),palos:Array.isArray(x.palos)?x.palos.map(String).slice(0,12):[],
       cree:Date.now()
     };
-    if(e.collection===COLL_NUNEZ)e.collection=COLL_NUNEZ+" (importés)";
+    if(e.collection===COLL_NUNEZ||e.collection===COLL_COMBI)e.collection=e.collection+" (importés)";
     if(!exoValide(e)){refus++;return;}
     const i=B.perso.findIndex(y=>y.id===e.id);
     if(i>=0){B.perso[i]=e;maj++;}else{B.perso.push(e);ajoutes++;}
@@ -7292,6 +7504,250 @@ $("#exoImporter").addEventListener("change",async e=>{
 
 $("#exoCollection").addEventListener("change",afficheListe);
 $("#exoCherche").addEventListener("input",afficheListe);
+
+/* ---- une partition hors bibliothèque (générateur, tableau de couverture) ---- */
+function chargeCodeLibre(code,tempo,msg){
+  const r=lireCode(code);
+  if(r.erreurs.length)return false;
+  if(S.running&&window.Entraineur)Entraineur.arrete();
+  R.mesures=r.mesures;R.doigts=r.doigts&&r.doigts.some(Boolean)?r.doigts:null;R.active=0;S.celluleChoisie=null;
+  $("#num").value=String(r.num);$("#den").value=String(r.den);$("#nbMes").value=String(r.mesures.length);
+  if(tempo){const v=Math.round(clamp(tempo,30,240));$("#bpm").value=String(v);$("#tBpmVal").textContent=String(v);}
+  B.courant=null;B.depart=0;
+  $("#code").value=code;
+  majSignature();afficheCourant();afficheListe();majBiblioPalos();majPalo();sauve();
+  if(msg)retourExo(msg);
+  return true;
+}
+
+/* ---------- générateur d'arpèges ---------- */
+const G={seq:["a","m","i"],rid:"t44",dep:0,acc:new Set(),pouce:new Set(),accMode:"temps",pouceMode:"aucun",outil:"acc"};
+function arpRythme(){return RYTHMES_ARP[G.rid];}
+// nombre de mesures pour que la suite retombe juste (au plus 8) ; sinon elle repart au début de chaque mesure
+function arpMesures(){
+  const pm=parMesure(arpRythme()),n=G.seq.length;
+  if(!n)return {m:1,coupe:false};
+  for(let m=1;m<=8;m++)if((m*pm)%n===0)return {m,coupe:false};
+  return {m:1,coupe:true};
+}
+function arpBase(){
+  const r=arpRythme(),pm=parMesure(r),{m,coupe}=arpMesures(),n=G.seq.length;
+  const rot=G.seq.slice(G.dep).concat(G.seq.slice(0,G.dep));
+  return Array.from({length:m*pm},(_,i)=>n?rot[(coupe?i%pm:i)%n]:"·");
+}
+function arpSelon(mode,base){
+  const r=arpRythme(),pm=parMesure(r),s=new Set();
+  base.forEach((j,i)=>{
+    const k=i%pm;
+    if(mode==="temps"?r.appuis.indexOf(k)>=0:mode==="mesure"?k===0:/^[2-5]$/.test(mode)?i%(+mode)===0:mode===j)s.add(i);
+  });
+  return s;
+}
+function arpCalcule(){
+  const base=arpBase();
+  if(G.accMode!=="main")G.acc=arpSelon(G.accMode,base);
+  if(G.pouceMode!=="main")G.pouce=arpSelon(G.pouceMode,base);
+  [...G.acc].forEach(i=>{if(i>=base.length)G.acc.delete(i);});
+  [...G.pouce].forEach(i=>{if(i>=base.length||base[i]==="p")G.pouce.delete(i);});
+  const jetons=base.map((j,i)=>G.pouce.has(i)?j+"/p":j);
+  return {base,jetons};
+}
+function arpNomAuto(){
+  const s=G.seq.join("").toUpperCase(),rot=G.dep?" · 1er temps sur la "+(G.dep+1)+"e note":"";
+  return (s||"Arpège")+" — "+arpRythme().nom+rot+(G.pouce.size?" + pouce":"");
+}
+function arpCode(){const {jetons}=arpCalcule();return codeArpege(arpRythme(),jetons,G.acc);}
+function arpDessine(){
+  const r=arpRythme(),pm=parMesure(r),{base,jetons}=arpCalcule(),z=$("#arpGrille");
+  z.innerHTML="";
+  const nbM=base.length/pm;
+  for(let m=0;m<nbM;m++){
+    const bloc=document.createElement("div");bloc.className="arp-mes";
+    const t=document.createElement("span");t.className="arp-mes-n";t.textContent=nbM>1?"Mesure "+(m+1):"La mesure";bloc.appendChild(t);
+    const ligne=document.createElement("div");ligne.className="arp-ligne";
+    for(let tp=0;tp<r.num;tp++){
+      const g=document.createElement("div");g.className="arp-temps";
+      for(let k=0;k<r.par;k++){
+        const i=m*pm+tp*r.par+k,j=base[i];
+        const b=document.createElement("button");b.type="button";b.className="arp-n";
+        if(G.acc.has(i))b.classList.add("acc");
+        if(r.appuis.indexOf(i%pm)>=0)b.classList.add("appui");
+        b.innerHTML='<span></span><span class="arp-p"></span>';
+        b.firstChild.textContent=G.acc.has(i)?j.toUpperCase():j;
+        b.lastChild.textContent=G.pouce.has(i)?"+p":"";
+        b.setAttribute("aria-label","Note "+(i+1)+" : "+j+(G.acc.has(i)?", accentuée":"")+(G.pouce.has(i)?", avec le pouce":""));
+        b.addEventListener("click",()=>arpTouche(i));
+        g.appendChild(b);
+      }
+      ligne.appendChild(g);
+    }
+    bloc.appendChild(ligne);z.appendChild(bloc);
+  }
+  const {coupe,m}=arpMesures();
+  $("#arpGlose").textContent=!G.seq.length?"Écris au moins un doigt.":
+    coupe?"La suite de "+G.seq.length+" notes ne retombe pas juste avant 8 mesures : elle repart au début de chaque mesure.":
+    "La suite de "+G.seq.length+" note"+(G.seq.length>1?"s":"")+" retombe juste en "+m+" mesure"+(m>1?"s":"")+" de "+r.num+"/"+r.den+". Majuscule soulignée = accent ; « +p » = le pouce joue avec le doigt (au micro, une seule frappe).";
+  $("#arpNom").placeholder=arpNomAuto();
+  $("#arpAccents").value=G.accMode;$("#arpPouce").value=G.pouceMode;
+}
+function arpTouche(i){
+  const pm=parMesure(arpRythme()),base=arpBase(),tous=$("#arpChaque").checked?base.map((_,x)=>x).filter(x=>x%pm===i%pm):[i];
+  if(G.outil==="acc"){
+    const on=!G.acc.has(i);G.accMode="main";tous.forEach(x=>on?G.acc.add(x):G.acc.delete(x));
+  }else{
+    if(base[i]==="p"){$("#arpRetour").textContent="Cette note est déjà jouée par le pouce.";return;}
+    const on=!G.pouce.has(i);G.pouceMode="main";tous.forEach(x=>{if(base[x]!=="p")on?G.pouce.add(x):G.pouce.delete(x);});
+  }
+  $("#arpRetour").textContent="";
+  arpDessine();
+}
+function arpLitSuite(){
+  G.seq=$("#arpSuite").value.toLowerCase().replace(/[^pima]/g,"").split("").slice(0,24);
+  if(G.dep>=G.seq.length)G.dep=0;
+  arpDeparts();arpDessine();
+}
+function arpEcritSuite(){$("#arpSuite").value=G.seq.join(" ");}
+function arpDeparts(){
+  const sel=$("#arpDepart");sel.innerHTML="";
+  (G.seq.length?G.seq:["·"]).forEach((d,i)=>{const o=document.createElement("option");o.value=String(i);o.textContent=(i+1)+(i?"e":"re")+" note ("+d.toUpperCase()+")";sel.appendChild(o);});
+  sel.value=String(G.dep);
+}
+function arpInit(){
+  const selR=$("#arpRythme");
+  Object.entries(RYTHMES_ARP).forEach(([k,r])=>{const o=document.createElement("option");o.value=k;o.textContent=r.nom;selR.appendChild(o);});
+  selR.value=G.rid;
+  const selM=$("#arpModele"),o0=document.createElement("option");o0.value="";o0.textContent="— choisir —";selM.appendChild(o0);
+  COMBI_GROUPES.forEach(g=>{
+    const og=document.createElement("optgroup");og.label=g.titre;
+    g.items.forEach(it=>{
+      const o=document.createElement("option");o.value=g.rid+":"+it.seq;
+      o.textContent=g.id==="gc"?"Ligne "+it.ligne+"-"+it.col+" — P "+it.seq.slice(1,4).toUpperCase()+" + "+it.seq.slice(4).toUpperCase():it.seq.toUpperCase();
+      og.appendChild(o);
+    });
+    selM.appendChild(og);
+  });
+  selM.addEventListener("change",()=>{
+    if(!selM.value)return;
+    const [rid,seq]=selM.value.split(":");
+    G.rid=rid;G.seq=seq.split("");G.dep=0;G.accMode="temps";G.pouceMode="aucun";
+    selR.value=rid;arpEcritSuite();arpDeparts();arpDessine();
+  });
+  $("#arpSuite").addEventListener("input",()=>{selM.value="";arpLitSuite();});
+  document.querySelectorAll(".arp-touches button").forEach(b=>b.addEventListener("click",()=>{
+    const d=b.dataset.d;
+    if(d==="-")G.seq.pop();else if(d==="0")G.seq=[];else if(G.seq.length<24)G.seq.push(d);
+    if(G.dep>=G.seq.length)G.dep=0;
+    selM.value="";arpEcritSuite();arpDeparts();arpDessine();
+  }));
+  selR.addEventListener("change",()=>{G.rid=selR.value;if(G.accMode==="main")G.accMode="temps";if(G.pouceMode==="main")G.pouceMode="aucun";arpDessine();});
+  $("#arpDepart").addEventListener("change",e=>{G.dep=parseInt(e.target.value,10)||0;arpDessine();});
+  $("#arpAccents").addEventListener("change",e=>{G.accMode=e.target.value;arpDessine();});
+  $("#arpPouce").addEventListener("change",e=>{G.pouceMode=e.target.value;arpDessine();});
+  document.querySelectorAll(".arp-mode button").forEach(b=>b.addEventListener("click",()=>{
+    G.outil=b.dataset.m;
+    document.querySelectorAll(".arp-mode button").forEach(x=>x.setAttribute("aria-pressed",x===b?"true":"false"));
+  }));
+  $("#arpCharger").addEventListener("click",()=>{
+    if(!G.seq.length){$("#arpRetour").textContent="Écris d'abord une suite de doigts.";return;}
+    const nom=$("#arpNom").value.trim()||arpNomAuto();
+    if(chargeCodeLibre(arpCode(),null,"« "+nom+" » est dans la partition. Enregistre-la dans ta bibliothèque pour la retrouver et la suivre dans tes devoirs.")){
+      $("#arpRetour").textContent="Chargé dans la partition : lance un passage plus bas, ou enregistre-le.";
+    }
+  });
+  $("#arpEnregistrer").addEventListener("click",()=>{
+    if(!G.seq.length){$("#arpRetour").textContent="Écris d'abord une suite de doigts.";return;}
+    const {jetons}=arpCalcule(),r=arpRythme();
+    let coll=$("#arpColl").value.trim()||"Mes arpèges";
+    if(coll===COLL_NUNEZ||coll===COLL_COMBI)coll="Mes arpèges";
+    const e={id:nouvelId(),collection:coll,titre:($("#arpNom").value.trim()||arpNomAuto()).slice(0,120),mesures:"",
+      code:codeArpege(r,jetons,G.acc),tempo:parseInt($("#bpm").value,10)||60,doigtes:lisibleArpege(jetons,G.acc,r.par),
+      notes:"Créé avec le générateur d'arpèges.",depart:0,palos:[],cree:Date.now()};
+    if(!exoValide(e)){$("#arpRetour").textContent="Cette figure n'a pas pu être écrite.";return;}
+    B.perso.push(e);
+    if(!sauvePerso()){B.perso.pop();$("#arpRetour").textContent="L'appareil a refusé l'enregistrement (stockage plein ou navigation privée).";return;}
+    majCollections();$("#exoCollection").value=e.collection;
+    chargeExo(e);
+    $("#arpNom").value="";
+    $("#arpRetour").textContent="« "+e.titre+" » rejoint la collection « "+e.collection+" » et se trouve dans la partition.";
+  });
+  arpDeparts();arpDessine();
+}
+arpInit();
+
+/* ---------- couverture : quelles combinaisons ont été travaillées ---------- */
+// la boucle de doigts la plus courte d'une partition (null si ce n'est pas un arpège à un doigt par note)
+const cacheCle={};
+function cleArpege(code){
+  if(!code)return null;
+  if(code in cacheCle)return cacheCle[code];
+  let cle=null;
+  const r=lireCode(code);
+  if(!r.erreurs.length&&r.doigts&&r.doigts.length>=3){
+    const l=[];
+    for(const tk of r.doigts){
+      const j=jeton(tk),h=j.doigt.toLowerCase();
+      if(h.length===1&&"pima".indexOf(h)>=0)l.push(h);else if(!h&&j.bas==="p")l.push("p");else{l.length=0;break;}
+    }
+    if(l.length){
+      for(let p=1;p<=Math.min(12,l.length);p++){if(l.every((x,i)=>x===l[i%p])){cle=l.slice(0,p).join("");break;}}
+    }
+  }
+  cacheCle[code]=cle;
+  return cle;
+}
+const estRotation=(a,b)=>a.length===b.length&&(b+b).indexOf(a)>=0;
+function couverture(seances){
+  const res={};
+  COMBI_GROUPES.forEach(g=>g.items.forEach(it=>{res[g.id+":"+it.seq]={n:0,r:null,bpm:null,dernier:0};}));
+  seances.forEach(s=>{
+    if(s.mode!=="rythme"||!s.code)return;
+    const k=cleArpege(s.code);if(!k)return;
+    COMBI_GROUPES.forEach(g=>g.items.forEach(it=>{
+      if(!(g.cmp==="exact"?k===it.seq:estRotation(k,it.seq)))return;
+      const c=res[g.id+":"+it.seq];c.n++;c.dernier=Math.max(c.dernier,s.t||0);
+      if(s.r!=null&&(c.r==null||s.r>c.r))c.r=s.r;
+      // tempo tenu : le plus rapide joué avec au moins 80 de rythme
+      if(s.bpm&&s.r>=80&&(c.bpm==null||s.bpm>c.bpm))c.bpm=s.bpm;
+    }));
+  });
+  return res;
+}
+function rendCouverture(z,seances){
+  if(!z)return;
+  const cv=couverture(seances||[]);
+  let fait=0,total=0;
+  z.innerHTML="";
+  COMBI_GROUPES.forEach(g=>{
+    const h=document.createElement("p");h.className="cv-h";z.appendChild(h);
+    const grille=document.createElement("div");grille.className="cv-grille cv-"+g.id;
+    let f=0;
+    g.items.forEach(it=>{
+      const c=cv[g.id+":"+it.seq];total++;if(c.n){fait++;f++;}
+      const b=document.createElement("button");b.type="button";
+      b.className="cv-case "+(!c.n?"cv-jamais":c.r>=80?"cv-bon":c.r>=60?"cv-moyen":"cv-faible");
+      const nom=it.seq.toUpperCase();
+      b.innerHTML='<span class="cv-nom"></span><span class="cv-info"></span>';
+      b.firstChild.textContent=nom;
+      b.lastChild.textContent=!c.n?(g.id==="gc"?it.ligne+"-"+it.col:"—"):(c.bpm?c.bpm+" bpm":"r. "+c.r)+" ×"+c.n;
+      b.title=nom+(c.n?" : "+c.n+" passage"+(c.n>1?"s":"")+", meilleur rythme "+c.r+(c.bpm?", tenu jusqu'à "+c.bpm:"")+", dernier le "+(window.Journal?Journal.dateCourte(c.dernier):""):" : jamais travaillé")+". Toucher pour l'ouvrir.";
+      b.addEventListener("click",()=>ouvreCombinaison(g,it));
+      grille.appendChild(b);
+    });
+    h.textContent=g.titre+" · "+f+" / "+g.items.length;
+    z.appendChild(grille);
+  });
+  const t=document.createElement("p");t.className="cv-total";
+  t.textContent=fait+" combinaison"+(fait>1?"s":"")+" travaillée"+(fait>1?"s":"")+" sur "+total+".";
+  z.insertBefore(t,z.firstChild);
+}
+function ouvreCombinaison(g,it){
+  if(window.Vues)Vues.montre("rythme");
+  const e=exoParId(it.prive||"cm-"+g.id+"-"+it.seq);
+  if(e)chargeExo(e);
+  else{const f=figureSimple(it.seq,g.rid);chargeCodeLibre(f.code,90,"« P "+it.seq.slice(1).toUpperCase()+" » (ligne "+it.ligne+"-"+it.col+") est dans la partition. Importe le fichier du livre pour l'avoir avec ses notes.");}
+  const z=document.getElementById("blocBiblio");if(z)z.scrollIntoView({block:"start"});
+}
+window.Arpeges={rendCouverture,cle:cleArpege,groupes:COMBI_GROUPES};
 /* ---- journal : ce que l'on inscrit après chaque passage mesuré ---- */
 function compactMesures(num,den,mesures){
   let dernier=-1;mesures.forEach((m,i)=>{if(m.length)dernier=i;});
@@ -10732,6 +11188,7 @@ function rendTout(){
   if(!J.jour)J.jour=cleJour(Date.now());
   rendTuiles();rendCalendrier();rendJour();rendChoix();rendProgres();
   try{rendAnalyse();}catch(e){$("#jAnaCorps").innerHTML='<p class="j-vide">L\'analyse n\'a pas pu être calculée.</p>';}
+  try{if(window.Arpeges)Arpeges.rendCouverture($("#jCouvCorps"),J.seances);}catch(e){$("#jCouvCorps").innerHTML='<p class="j-vide">Le tableau n\'a pas pu être calculé.</p>';}
 }
 
 /* ---------- analyse de la technique, sur une période ---------- */
@@ -11205,7 +11662,7 @@ window.addEventListener("load",function(){
     try{
       if("serviceWorker" in navigator)await navigator.serviceWorker.register("sw.js");
       // la version en cours est celle que déclare le service worker
-      let v="compas-v30";try{const t=await (await fetch("sw.js",{cache:"no-store"})).text();const m=t.match(/VERSION = "([^"]+)"/);if(m)v=m[1];}catch(e){}
+      let v="compas-v31";try{const t=await (await fetch("sw.js",{cache:"no-store"})).text();const m=t.match(/VERSION = "([^"]+)"/);if(m)v=m[1];}catch(e){}
       const c=await caches.open(v);
       await c.addAll(["./","index.html"]);
       await Promise.all(["manifest.webmanifest","icone-180.png","icone-192.png","icone-512.png","icone-masquable-512.png","pdfjs/pdf.min.js","pdfjs/pdf.worker.min.js"]

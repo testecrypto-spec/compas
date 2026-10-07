@@ -2,6 +2,17 @@
 
 Métronome de flamenco, entraîneur de main droite et lecteur de morceaux.
 
+## Fichiers
+
+- `index.html` : l'application
+- `sons-1.js` : les sons (A Compás, et le zapateado de Compás)
+- `polices-1.css` : les polices
+- `notes-1.js` : le modèle d'écoute des notes (Basic Pitch et TensorFlow.js, licence Apache 2.0), lu seulement quand on transcrit un morceau
+- `nunez-1.js` : les exercices de Gerardo Núñez (© Encuentro Productions). Ce fichier n'est pas couvert par la licence
+  du projet ; il peut être retiré du dépôt public, l'application s'en passe, et les exercices s'importent alors
+  depuis la bibliothèque avec le fichier `exercices-nunez.json`.
+- `sw.js` : le fonctionnement hors connexion
+
 ## Licence
 
 Compás est distribué sous licence **GNU Affero General Public License v3** (voir `LICENSE`),

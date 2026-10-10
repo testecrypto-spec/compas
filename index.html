@@ -1561,6 +1561,8 @@ table.af-main td.af-case{min-width:104px;border:1px solid var(--edge);border-lef
         <option value="3">3 · petites figures avec accent</option>
         <option value="4">4 · accents du palo</option>
         <option value="m">mélange des niveaux</option>
+        <option value="p">ma partition, dans l'ordre</option>
+        <option value="ph">ma partition, au hasard</option>
       </select>
     </div>
     <div>
@@ -1573,7 +1575,7 @@ table.af-main td.af-case{min-width:104px;border:1px solid var(--edge);border-lef
     </div>
     <div>
       <label for="ciTours">Nombre de cibles</label>
-      <select id="ciTours"><option value="6">6</option><option value="8" selected>8</option><option value="12">12</option><option value="20">20</option></select>
+      <select id="ciTours"><option value="0">chaque mesure une fois</option><option value="6">6</option><option value="8" selected>8</option><option value="12">12</option><option value="20">20</option></select>
     </div>
     <div id="ciCycleBloc">
       <label for="ciCycle">Cycle au clic simple</label>
@@ -7097,7 +7099,20 @@ $("#padMesure").addEventListener("click",()=>{
 
 /* ---------- compás intérieur : des cibles à jouer pendant le silence ---------- */
 const CI={actif:false,tours:[],on:2,off:1,L:4,palo:null,niveau:"1",avant:null,tic:null,res:null};
-const NIVEAUX_CI={"1":"temps et contretemps","2":"doubles croches et triolets","3":"petites figures avec accent","4":"accents du palo","m":"mélange"};
+const NIVEAUX_CI={"1":"temps et contretemps","2":"doubles croches et triolets","3":"petites figures avec accent","4":"accents du palo","m":"mélange","p":"ta partition, dans l'ordre","ph":"ta partition, au hasard"};
+const UNITE_CI={1:"r",2:"b",4:"n",8:"c",16:"d"};
+// les cibles tirées de la partition : chaque mesure qui contient au moins une frappe
+function ciblesPartition(){
+  const ix=aDesDoigts()?indexFrappes(R.mesures).map:null;
+  return R.mesures.map((m,i)=>({m,i})).filter(x=>x.m.some(c=>c.actif!==false&&c.att.some(Boolean))).map(x=>{
+    // seulement les temps où l'on joue : « temps 3 : demi-soupir, croche »
+    let pos=0;const noms=[];
+    x.m.forEach(c=>{const bc=beatsCellule(c);if(c.actif!==false&&c.att.some(Boolean))noms.push("temps "+fmt(pos+1)+" : "+nomCellule(c.duree,c.div,c.att,c.tenu));pos+=bc;});
+    const dg=[];
+    if(ix)x.m.forEach((c,ci)=>c.att.forEach((a,k)=>{if(a)dg.push(R.doigts[ix["m"+x.i+"c"+ci+"k"+k]]||"·");}));
+    return {txt:"ta mesure "+(x.i+1)+" — "+noms.join(" · "),mes:x.m.map(codeCellule).filter(Boolean).join(" "),doigts:ix?dg:null};
+  });
+}
 const ordinal=n=>n===1?"1re":n+"e";
 const du=n=>n.replace(/^le /,"du ");
 const liste=l=>l.length<2?String(l[0]):l.slice(0,-1).join(", ")+" et "+l[l.length-1];
@@ -7135,19 +7150,30 @@ function cibleCI(niv){
   return {txt:"sur "+n+" : "+nomF+", accent sur la "+ordinal(pos.indexOf(acc)+1)+" note",cells};
 }
 function codeCibles(){
-  const L=CI.L,mes=[];
+  const L=CI.L,den=CI.den||4,u=UNITE_CI[den]||"n",mes=[],dg=[];
+  const vide=()=>Array.from({length:L},()=>u+":o").join(" ");
   CI.tours.forEach(t=>{
-    for(let i=0;i<CI.on;i++)mes.push(Array.from({length:L},()=>"n:o").join(" "));
-    for(let i=0;i<CI.off;i++)mes.push(Array.from({length:L},(_,j)=>{const c=i===0?t.cells[j]:null;if(!c)return "n:o";return "n:"+c;}).join(" "));
+    for(let i=0;i<CI.on;i++)mes.push(vide());
+    for(let i=0;i<CI.off;i++){
+      if(i>0){mes.push(vide());continue;}
+      if(t.mes!=null){mes.push(t.mes);if(t.doigts)dg.push(t.doigts.join(" "));continue;}
+      mes.push(Array.from({length:L},(_,j)=>{const c=t.cells[j];return c?"n:"+c:"n:o";}).join(" "));
+    }
   });
-  return L+"/4\n| "+mes.join(" | ")+" |";
+  return L+"/"+den+"\n| "+mes.join(" | ")+" |"+(dg.length?"\ndoigts: "+dg.join(" | "):"");
 }
 function ciMaj(){
   const pl=$("#palo").value==="metronome"?paloMetronome():null;
   const pal=pl&&typeof state!=="undefined"&&state.palo&&!state.palo.libre?state.palo:null;
   const o4=$("#ciNiveau").querySelector('option[value="4"]');o4.disabled=!pal;
   if(!pal&&$("#ciNiveau").value==="4")$("#ciNiveau").value="1";
-  $("#ciCycleBloc").hidden=!!pl;
+  const part=$("#ciNiveau").value==="p"||$("#ciNiveau").value==="ph";
+  $("#ciCycleBloc").hidden=!!pl||part;
+  if(part){
+    const n=ciblesPartition().length;
+    $("#ciGlose").textContent="Chaque mesure non vide de ta partition devient une cible ("+n+" pour l'instant). Le cycle dure une mesure de "+R.num+"/"+R.den+(pl?(pl.pulses===R.num?", calée sur le compás de "+pl.nom:" — attention : avec "+pl.nom+", la mesure doit faire "+pl.pulses+" temps"):", au clic")+". Pendant le compás, ta cible s'affiche sur la portée ; dans le silence, elle s'efface et tu la joues de mémoire. Tes doigtés sont repris : au pad en 4 zones, le doigt est vérifié aussi.";
+    return;
+  }
   $("#ciGlose").textContent=pl?"Le cycle est le compás de "+pl.nom+" ("+pl.pulses+" pulsos, au tempo réglé plus haut). Les cibles se disent en pulsos, comme on compte le palo.":
     "Sans palo, le cycle est une mesure de "+$("#ciCycle").value+" temps au clic. Choisis « Accompagnement : palo du métronome » plus bas pour travailler dans un compás (et débloquer le niveau des accents du palo).";
 }
@@ -7156,12 +7182,24 @@ function lanceCibles(){
   if(!mesure()){$("#ciRetour").textContent="Active d'abord le micro, ou choisis le pad à l'écran dans « Réglage du micro ».";return;}
   const pl=$("#palo").value==="metronome"?paloMetronome():null;
   CI.palo=pl?{nom:pl.nom,pulses:pl.pulses,depart:pl.depart,accents:(state.palo.accents||[]).slice()}:null;
-  CI.L=pl?pl.pulses:parseInt($("#ciCycle").value,10)||4;
-  if(CI.L>12){$("#ciRetour").textContent="Ce compás a plus de 12 pulsos : choisis un autre palo ou le clic simple.";return;}
-  CI.on=parseInt($("#ciJoue").value,10)||2;CI.off=parseInt($("#ciSilence").value,10)||1;CI.niveau=$("#ciNiveau").value;
-  const n=parseInt($("#ciTours").value,10)||8;
-  const niv=()=>CI.niveau==="m"?(CI.palo&&Math.random()<0.25?"4":String(1+hasard(3))):CI.niveau;
-  CI.tours=Array.from({length:n},()=>cibleCI(niv()));
+  CI.niveau=$("#ciNiveau").value;
+  CI.on=parseInt($("#ciJoue").value,10)||2;CI.off=parseInt($("#ciSilence").value,10)||1;CI.den=4;
+  const nT=parseInt($("#ciTours").value,10);
+  if(CI.niveau==="p"||CI.niveau==="ph"){
+    const l=ciblesPartition();
+    if(!l.length){$("#ciRetour").textContent="Ta partition est vide : écris une cible par mesure (une mesure = une cible), puis relance.";return;}
+    if(pl&&pl.pulses!==R.num){$("#ciRetour").textContent="Avec "+pl.nom+", chaque mesure doit faire un compás de "+pl.pulses+" temps : ta partition est en "+R.num+"/"+R.den+". Change « Temps par mesure » dans « Le cadre », ou passe au clic simple.";return;}
+    CI.L=R.num;CI.den=R.den;
+    const n=nT||l.length;
+    if(CI.niveau==="p")CI.tours=Array.from({length:n},(_,k)=>l[k%l.length]);
+    else{CI.tours=[];for(let k=0;k<n;k++){let c;do{c=l[hasard(l.length)];}while(l.length>1&&CI.tours.length&&c===CI.tours[CI.tours.length-1]);CI.tours.push(c);}}
+  }else{
+    CI.L=pl?pl.pulses:parseInt($("#ciCycle").value,10)||4;
+    if(CI.L>12){$("#ciRetour").textContent="Ce compás a plus de 12 pulsos : choisis un autre palo ou le clic simple.";return;}
+    const n=nT||8;
+    const niv=()=>CI.niveau==="m"?(CI.palo&&Math.random()<0.25?"4":String(1+hasard(3))):CI.niveau;
+    CI.tours=Array.from({length:n},()=>cibleCI(niv()));
+  }
   CI.avant={code:ecrireCode(),exo:B.courant,depart:B.depart,repet:$("#repet").value,guide:$("#guide").value,chaine:$("#chaine").value};
   $("#repet").value="1";$("#guide").value="non";$("#chaine").value="non";
   if(!chargeCodeLibre(codeCibles(),null,"")){$("#ciRetour").textContent="Les cibles n'ont pas pu être écrites.";return;}
@@ -7225,6 +7263,7 @@ function restaureCibles(){
 }
 $("#ciLancer").addEventListener("click",lanceCibles);
 ["#ciNiveau","#ciCycle"].forEach(x=>$(x).addEventListener("change",ciMaj));
+["#ciNiveau","#blocCibles"].forEach(x=>$(x).addEventListener("pointerdown",ciMaj,true));
 $("#palo").addEventListener("change",ciMaj);
 ciMaj();
 
@@ -12489,7 +12528,7 @@ window.addEventListener("load",function(){
     try{
       if("serviceWorker" in navigator)await navigator.serviceWorker.register("sw.js");
       // la version en cours est celle que déclare le service worker
-      let v="compas-v34";try{const t=await (await fetch("sw.js",{cache:"no-store"})).text();const m=t.match(/VERSION = "([^"]+)"/);if(m)v=m[1];}catch(e){}
+      let v="compas-v35";try{const t=await (await fetch("sw.js",{cache:"no-store"})).text();const m=t.match(/VERSION = "([^"]+)"/);if(m)v=m[1];}catch(e){}
       const c=await caches.open(v);
       await c.addAll(["./","index.html"]);
       await Promise.all(["manifest.webmanifest","icone-180.png","icone-192.png","icone-512.png","icone-masquable-512.png","pdfjs/pdf.min.js","pdfjs/pdf.worker.min.js"]

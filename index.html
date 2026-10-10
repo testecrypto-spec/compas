@@ -607,11 +607,33 @@ footer{color:var(--muted);font-size:.82rem;margin-top:1.6rem;max-width:70ch}
 .entraineur .palos-conseilles button[aria-pressed="true"]{background:var(--bronce);border-color:var(--bronce);color:var(--sur-oro)}
 .entraineur .palos-conseilles button[aria-pressed="true"] .etiq{color:var(--sur-oro);opacity:.85}
 .palo-autre{margin-top:12px}
+.pad{position:fixed;left:0;right:0;bottom:0;z-index:60;background:var(--panel);border-top:1px solid var(--edge);box-shadow:0 -6px 20px var(--shadow);
+  padding:6px 8px calc(8px + env(safe-area-inset-bottom,0px));touch-action:none;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
+.pad-tete{display:flex;justify-content:space-between;align-items:center;gap:10px;font-size:.78rem;color:var(--muted);padding:0 2px 6px}
+.pad-tete button{padding:5px 10px;font-size:.78rem}
+.pad-zones{display:flex;gap:6px;height:min(30vh,240px)}
+.pad-z{flex:1;position:relative;border:1px solid var(--edge);border-radius:8px;background:var(--raised);display:flex;align-items:center;justify-content:center;
+  font-family:"Bodoni Moda",Georgia,serif;font-size:2rem;color:var(--text);overflow:hidden;transition:background .05s}
+.pad-z::before{content:"fort";position:absolute;left:0;right:0;top:0;height:32%;border-bottom:1px dashed var(--edge);background:color-mix(in srgb,var(--carmin) 8%,transparent);
+  font:600 .62rem/1.9 Archivo,system-ui,sans-serif;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);text-align:center}
+.pad-z.frappe{background:color-mix(in srgb,var(--oro) 45%,var(--raised))}
+.pad-z.frappe-fort{background:color-mix(in srgb,var(--carmin) 45%,var(--raised))}
+body.pad-ouvert{padding-bottom:calc(min(30vh,240px) + 60px)}
+.source-frappes{display:flex;flex-wrap:wrap;align-items:center;gap:6px 12px;margin-bottom:14px}
+.source-frappes .rapides{margin-top:0}
+.source-frappes .rapides button[aria-pressed="true"],.pad-reglages .rapides button[aria-pressed="true"]{background:var(--bronce);color:var(--sur-oro);border-color:var(--bronce)}
+.source-lib{font-size:.86rem;color:var(--tapa-doux)}
+.pad-reglages{margin-bottom:16px}
+.pad-doigts{margin:0 0 16px;font-size:.9rem}
 .ch-bandeau{margin:0 auto 10px;max-width:520px;padding:10px 14px;border:1px solid var(--bronce);border-radius:4px;background:rgba(201,154,70,.10);text-align:center}
 .ch-bandeau b{display:block;font-family:"Bodoni Moda",Georgia,serif;font-size:2.1rem;line-height:1.1;color:var(--tapa)}
+.ch-bandeau b.long{font-size:1.35rem;line-height:1.25;margin-bottom:4px}
 .ch-bandeau span{font-size:.84rem;color:var(--tapa-doux)}
 .ch-resume{margin:18px auto 0;max-width:620px;padding:12px 14px;border:1px solid var(--trait);border-left:3px solid var(--bronce);border-radius:0 3px 3px 0;background:var(--ebano);font-size:.9rem;color:var(--tapa)}
 .ch-resume p{margin:0 0 8px}
+.ci-liste{list-style:none;margin:0;padding:0}
+.ci-liste li{display:grid;grid-template-columns:14px 1fr;column-gap:8px;align-items:baseline;padding:5px 0;border-top:1px solid var(--trait);font-size:.86rem;line-height:1.4}
+.ci-liste li:first-child{border-top:0}
 .ch-pastilles{display:flex;flex-wrap:wrap;gap:4px}
 .ch-pastilles span{min-width:44px;padding:4px 6px;border-radius:3px;border:1px solid var(--trait);font-size:.76rem;text-align:center;font-variant-numeric:tabular-nums}
 .ch-pastilles .q-bon{border-color:var(--oliva);color:var(--oliva)} .ch-pastilles .q-moyen{border-color:var(--bronce);color:var(--bronce)} .ch-pastilles .q-mauvais{border-color:var(--carmin);color:var(--carmin)}
@@ -1256,6 +1278,10 @@ table.af-main td.af-case{min-width:104px;border:1px solid var(--edge);border-lef
 
 <footer>La lumière clignote jusqu'à plusieurs fois par seconde aux tempos rapides : si tu es sensible aux lumières clignotantes, baisse l'éclat ou garde-la en petit.<br><br>Les palos de compás libre — malagueña, taranta, granaína, martinete… — se chantent sans mesure : la roue laisse place à un simple pulso de référence, à ignorer dès que le cante respire.</footer>
 </div>
+<div class="pad" id="pad" hidden aria-label="Pad de frappe">
+  <div class="pad-tete"><span id="padInfo">Tape avec tes doigts, en haut pour un accent</span><button type="button" id="padBascule">1 zone</button></div>
+  <div class="pad-zones" id="padZones"></div>
+</div>
 <div id="vueEntraineur" class="entraineur" hidden>
 <div id="avisMicro" class="avis masque"></div>
 
@@ -1499,6 +1525,41 @@ table.af-main td.af-case{min-width:104px;border:1px solid var(--edge);border-lef
   </div>
   <p class="aide exo-retour" id="arpRetour" aria-live="polite"></p>
 </section>
+<section class="plateau" id="blocCibles">
+  <h2>Compás intérieur : cibles dans le silence</h2>
+  <p class="aide intro">Le compás tourne, puis se tait. Pendant le silence, joue seulement la cible annoncée, à sa place : une croche, une double, une petite figure avec son accent, les accents du palo… Le compás revient avec une nouvelle cible, et ainsi de suite. Seules les frappes jouées dans le silence sont notées : pendant que le compás joue, fais ce que tu veux.</p>
+  <div class="reglages">
+    <div>
+      <label for="ciNiveau">Cibles</label>
+      <select id="ciNiveau">
+        <option value="1" selected>1 · temps et contretemps</option>
+        <option value="2">2 · doubles croches et triolets</option>
+        <option value="3">3 · petites figures avec accent</option>
+        <option value="4">4 · accents du palo</option>
+        <option value="m">mélange des niveaux</option>
+      </select>
+    </div>
+    <div>
+      <label for="ciJoue">Compás joué</label>
+      <select id="ciJoue"><option value="1">1 cycle</option><option value="2" selected>2 cycles</option><option value="4">4 cycles</option></select>
+    </div>
+    <div>
+      <label for="ciSilence">Puis silence</label>
+      <select id="ciSilence"><option value="1" selected>1 cycle</option><option value="2">2 cycles</option></select>
+    </div>
+    <div>
+      <label for="ciTours">Nombre de cibles</label>
+      <select id="ciTours"><option value="6">6</option><option value="8" selected>8</option><option value="12">12</option><option value="20">20</option></select>
+    </div>
+    <div id="ciCycleBloc">
+      <label for="ciCycle">Cycle au clic simple</label>
+      <select id="ciCycle"><option value="2">2 temps</option><option value="3">3 temps</option><option value="4" selected>4 temps</option><option value="6">6 temps</option></select>
+    </div>
+  </div>
+  <p class="aide" id="ciGlose"></p>
+  <div class="actions"><button class="primaire" id="ciLancer" type="button">Lancer les cibles</button></div>
+  <p class="aide exo-retour" id="ciRetour" aria-live="polite"></p>
+</section>
 <section class="plateau">
   <h2>Le cadre</h2>
   <div class="reglages">
@@ -1728,6 +1789,20 @@ table.af-main td.af-case{min-width:104px;border:1px solid var(--edge);border-lef
 <div id="ancreEntraineur" hidden></div>
 <section class="plateau" id="blocMicro">
   <h2>Réglage du micro</h2>
+  <div class="source-frappes">
+    <span class="source-lib">Frappes mesurées par</span>
+    <div class="rapides" role="group" aria-label="Ce qui mesure tes frappes">
+      <button type="button" data-src="micro" aria-pressed="true">le micro</button>
+      <button type="button" data-src="pad" aria-pressed="false">le pad à l'écran</button>
+    </div>
+  </div>
+  <div id="padReglages" class="pad-reglages" hidden>
+    <p class="aide">Pendant le passage, un pad occupe le bas de l'écran. En quatre zones (P, I, M, A), Compás vérifie aussi que tu frappes avec le bon doigt ; le bouton du pad passe à une seule grande zone. Touche le haut d'une zone pour une frappe accentuée : l'écran ne sent pas la force du doigt. Pas besoin de micro ni de casque.</p>
+    <label for="padLatence">Retard du pad — <span id="padLatVal">0</span> ms</label>
+    <input type="range" id="padLatence" min="-100" max="300" step="1" value="0">
+    <div class="actions"><button type="button" id="padMesure">Mesurer le retard du pad</button></div>
+    <p class="aide" id="padMesureInfo">Huit clics : tape-les sur le pad, en même temps que tu les entends. Compás règle le retard tout seul.</p>
+  </div>
   <div class="reglages">
     <div>
       <label for="seuil">Seuil de détection — <span id="seuilVal">−38</span> dB</label>
@@ -1812,6 +1887,7 @@ table.af-main td.af-case{min-width:104px;border:1px solid var(--edge);border-lef
     <button id="btnStop" disabled>Arrêter</button>
   </div>
 <div class="ch-resume" id="chResume" hidden></div>
+<div class="ch-resume" id="ciResume" hidden></div>
 </section>
 
 <section class="plateau masque" id="resultats">
@@ -1822,6 +1898,7 @@ table.af-main td.af-case{min-width:104px;border:1px solid var(--edge);border-lef
     <span class="reecoute-info" id="reecouteInfo" aria-live="polite"></span>
   </div>
   <div class="compte-rendu" id="compteRendu" hidden></div>
+  <p class="pad-doigts" id="padDoigts" hidden></p>
   <div class="notes">
     <div class="note"><div class="valeur" id="noteRythme">—</div><div class="intitule">précision rythmique</div></div>
     <div class="note"><div class="valeur" id="noteVolume">—</div><div class="intitule" id="intituleVolume">régularité de volume</div></div>
@@ -6161,7 +6238,7 @@ function analyse(ev){
     else if(pic>Math.max(c.bruit*4,0.02)&&t-c.dernier>0.15){c.pics.push(t);c.dernier=t;}
     return;
   }
-  if(!S.running)return;
+  if(!S.running||PAD.on)return;
   if(S.enAttente){
     if(pic>S.enAttente.amp)S.enAttente.amp=pic;
     if(t0-S.enAttente.t>0.028){S.onsets.push(S.enAttente);confronteDirect(S.enAttente);S.enAttente=null;S.dernierPic=t0;}
@@ -6334,6 +6411,7 @@ function construitRasgueado(){
         libelle:g.doigt+(g.sens==="•"?"":g.sens),
         detail:"pas "+(g.pos+1),
         cle:g.doigt+g.sens+"@"+g.pos,
+        doigt:lettresDoigt(g.doigt),
         cycle:c,
         accent:!!g.acc,
         appui:g.pos===dec
@@ -6353,6 +6431,7 @@ function construitRythme(){
   R.repet=S.infini?Math.min(2000,Math.ceil(1800/(cyc*S.dureeTemps))):R.repetChoix;
   if(!S.infini&&cal&&cal.mode==="repete")R.repet=Math.ceil(R.repet/cal.k)*cal.k;
   let tempsCumul=S.decompte;
+  const ixD=(R.doigts&&R.doigts.some(Boolean))?indexFrappes(R.mesures).map:null;
   for(let r=0;r<R.repet;r++){
     for(let m=0;m<R.nbMes;m++){
       let dansMesure=0;
@@ -6367,6 +6446,7 @@ function construitRythme(){
             libelle:"M"+(m+1)+" · temps "+fmt(dansMesure+k*part+1),
             detail:nomCellule(c.duree,c.div,c.att,c.tenu)+" ("+(k+1)+"/"+c.div+")",
             cle:"m"+m+"c"+ci+"k"+k,
+            doigt:ixD?lettresDoigt(R.doigts[ixD["m"+m+"c"+ci+"k"+k]]):"",
             cycle:r,
             accent:aAcc(c,k),
             appui:Math.abs((dansMesure+k*part)%1)<1e-6
@@ -6502,7 +6582,8 @@ function demarre(){
   $("#devLive").textContent="";$("#pointeur").style.left="50%";$("#pointeur").style.background="var(--tapa)";
   if(S.mode==="morceau")Morceaux.planifieEntrainement(S.depart+S.decompte*S.dureeTemps,S.pm.repet,S.pm.ecoute);
   S.timer=setInterval(ordonnance,25);
-  if(S.micro)debutEnregistrement();
+  if(PAD.on){padMontre(true);const z=document.getElementById("blocScene");if(z&&z.getBoundingClientRect().top<0||z&&z.getBoundingClientRect().top>innerHeight*0.4)z.scrollIntoView({block:"start"});}
+  else if(S.micro)debutEnregistrement();
   S.raf=requestAnimationFrame(rafraichitScene);
 }
 
@@ -6787,7 +6868,7 @@ function rafraichitScene(){
 }
 
 function confronteDirect(onset){
-  const lat=parseFloat($("#latence").value)/1000;
+  const lat=latS();
   const t=onset.t-lat;
   const A=S.attendus;
   while(S.curseur<A.length-1&&A[S.curseur].t<t-0.4)S.curseur++;
@@ -6807,6 +6888,7 @@ function confronteDirect(onset){
 }
 
 function arrete(){
+  if(!CH.on&&!PAD.calib)padMontre(false);
   finEnregistrement();arreteReecoute();
   if(window.Morceaux&&Morceaux.stopEntrainement)Morceaux.stopEntrainement();
   S.running=false;clearInterval(S.timer);cancelAnimationFrame(S.raf);$("#blocScene").classList.remove("en-silence");
@@ -6818,8 +6900,9 @@ function arrete(){
 function termine(){
   arrete();
   $("#gros").innerHTML="&nbsp;";$("#legendeGros").innerHTML="&nbsp;";
-  $("#etat").textContent=S.micro?"Passage terminé.":"Passage terminé — sans micro, pas de mesure.";
-  if(S.micro){S.partiel=false;calcule();}
+  $("#etat").textContent=mesure()?"Passage terminé.":"Passage terminé — sans micro, pas de mesure.";
+  if(mesure()){S.partiel=false;if(CI.actif)filtreCibles();calcule();}
+  if(CI.actif)finCibles();
   if(CH.on)suiteSerie();
 }
 $("#btnJouer").addEventListener("click",()=>{S.mode==="morceau"?demarreMorceau():lanceSerie();});
@@ -6832,14 +6915,231 @@ $("#btnStop").addEventListener("click",()=>{
   arrete();
   S.attendus=S.attendus.filter(a=>a.t<=fin-0.02);
   $("#gros").innerHTML="&nbsp;";$("#legendeGros").innerHTML="&nbsp;";
-  if(S.micro&&S.attendus.length>=3){
-    S.partiel=true;
+  if(mesure()&&S.attendus.length>=3){
+    S.partiel=true;if(CI.actif)filtreCibles();
     $("#etat").textContent="Passage interrompu — relevé sur ce qui a été joué.";
     calcule();
   }else{
     $("#etat").textContent="Passage interrompu.";
   }
+  if(CI.actif)finCibles();
 });
+
+/* ---------- pad à l'écran : les frappes tapées du doigt, avec le doigt qui frappe ---------- */
+const PAD={on:false,zones:4,lat:0,calib:null};
+const CLE_PAD="compas-pad";
+function latS(){return (PAD.on?PAD.lat:parseFloat($("#latence").value))/1000;}
+function mesure(){return S.micro||PAD.on;}
+function lettresDoigt(tk){const j=jeton(tk);return (j.doigt+j.bas).toLowerCase().replace(/e/g,"a").replace(/[^pima]/g,"");}
+function padSauve(){try{localStorage.setItem(CLE_PAD,JSON.stringify({on:PAD.on,zones:PAD.zones,lat:PAD.lat}));}catch(e){}}
+function padMajLat(){$("#padLatence").value=String(PAD.lat);$("#padLatVal").textContent=String(PAD.lat);}
+function padZones(){
+  const z=$("#padZones");z.innerHTML="";
+  (PAD.zones===4?["p","i","m","a"]:[""]).forEach(d=>{
+    const b=document.createElement("div");b.className="pad-z";b.dataset.d=d;b.textContent=d?d.toUpperCase():"Tape ici";
+    if(!d)b.style.fontSize="1.2rem";
+    b.addEventListener("pointerdown",padFrappe);
+    z.appendChild(b);
+  });
+  $("#padBascule").textContent=PAD.zones===4?"1 zone":"4 zones P I M A";
+  $("#padInfo").textContent=PAD.zones===4?"Une zone par doigt · en haut = accent":"Tape ici · en haut = accent";
+}
+function padMontre(on){$("#pad").hidden=!on;document.body.classList.toggle("pad-ouvert",on);}
+function padSource(src){
+  PAD.on=src==="pad";padSauve();
+  document.querySelectorAll(".source-frappes button").forEach(b=>b.setAttribute("aria-pressed",String(b.dataset.src===src)));
+  $("#padReglages").hidden=!PAD.on;
+  $("#btnMicro").hidden=PAD.on;$("#btnLatenceAuto").hidden=PAD.on;$("#latAutoInfo").hidden=PAD.on;
+  if(!PAD.on)padMontre(false);
+  if(!S.running)$("#etat").textContent=PAD.on?"Démarre : le pad apparaît en bas de l'écran.":(S.micro?"Micro prêt. Démarre quand tu veux.":"Active le micro, puis démarre.");
+}
+function padFrappe(e){
+  e.preventDefault();
+  const z=e.currentTarget,r=z.getBoundingClientRect(),fort=(e.clientY-r.top)<r.height*0.32,d=z.dataset.d||null;
+  z.classList.remove("frappe","frappe-fort");void z.offsetWidth;z.classList.add(fort?"frappe-fort":"frappe");
+  setTimeout(()=>z.classList.remove("frappe","frappe-fort"),110);
+  const ctx=S.ctx;if(!ctx)return;
+  // l'instant du toucher, ramené à l'horloge audio
+  const t=ctx.currentTime-Math.max(0,(performance.now()-e.timeStamp))/1000;
+  if(PAD.calib){PAD.calib.taps.push(t);return;}
+  if(!S.running)return;
+  const der=S.onsets[S.onsets.length-1];
+  // pouce et doigt ensemble : une seule frappe, avec les deux doigts
+  if(der&&der.pad&&t-der.t<0.035){if(d&&der.doigts&&der.doigts.indexOf(d)<0)der.doigts.push(d);if(fort)der.amp=0.5;return;}
+  const o={t,amp:fort?0.5:0.22,doigts:d?[d]:null,pad:true};
+  S.onsets.push(o);confronteDirect(o);
+}
+function bilanDoigtsPad(){
+  const z=$("#padDoigts");z.hidden=true;S.bilanDoigts=null;
+  if(!PAD.on||PAD.zones!==4)return;
+  const l=S.attendus.filter(a=>a.doigt&&a.dTape&&a.dTape.length);
+  if(l.length<3)return;
+  const err={};let ok=0;
+  l.forEach(a=>{
+    if(a.dTape.some(d=>a.doigt.indexOf(d)>=0))ok++;
+    else{const k=a.dTape.join("+").toUpperCase()+" au lieu de "+a.doigt.toUpperCase().split("").join(" ou ");err[k]=(err[k]||0)+1;}
+  });
+  S.bilanDoigts={ok,n:l.length};
+  const e=Object.entries(err).sort((x,y)=>y[1]-x[1]).slice(0,3);
+  z.textContent="Doigts justes : "+ok+" sur "+l.length+(e.length?" — erreurs : "+e.map(([k,n])=>k+" ("+n+"×)").join(", ")+".":" — aucune erreur de doigt.");
+  z.hidden=false;
+}
+document.querySelectorAll(".source-frappes button").forEach(b=>b.addEventListener("click",()=>padSource(b.dataset.src)));
+$("#padBascule").addEventListener("click",()=>{PAD.zones=PAD.zones===4?1:4;padZones();padSauve();});
+$("#padLatence").addEventListener("input",e=>{PAD.lat=parseInt(e.target.value,10)||0;padMajLat();padSauve();});
+// le retard du pad : huit clics à taper en même temps
+$("#padMesure").addEventListener("click",()=>{
+  if(S.running||PAD.calib)return;
+  const ctx=ctxAudio();if(state.playing)stop();
+  const t0=ctx.currentTime+1.2,pas=0.6,clics=[];
+  for(let i=0;i<8;i++){clics.push(t0+i*pas);palma(ctx,t0+i*pas,i===0?"fuerte":"clara");}
+  PAD.calib={taps:[]};padMontre(true);
+  $("#padMesureInfo").textContent="Tape les huit clics sur le pad…";
+  setTimeout(()=>{
+    const taps=PAD.calib.taps;PAD.calib=null;padMontre(false);
+    const ec=clics.map(c=>{let b=null;taps.forEach(t=>{if(Math.abs(t-c)<0.3&&(b===null||Math.abs(t-c)<Math.abs(b-c)))b=t;});return b===null?null:(b-c)*1000;}).filter(x=>x!==null).sort((a,b)=>a-b);
+    if(ec.length<5){$("#padMesureInfo").textContent="Pas assez de clics tapés ("+ec.length+" sur 8). Recommence en tapant chaque clic.";return;}
+    PAD.lat=Math.round(clamp(ec[Math.floor(ec.length/2)],-100,300));padMajLat();padSauve();
+    $("#padMesureInfo").textContent="Retard du pad réglé à "+PAD.lat+" ms ("+ec.length+" clics sur 8).";
+  },(1.2+8*pas+0.6)*1000);
+});
+(function(){
+  try{const d=JSON.parse(localStorage.getItem(CLE_PAD)||"null");if(d){PAD.zones=d.zones===1?1:4;PAD.lat=Number(d.lat)||0;if(d.on)PAD.on=true;}}catch(e){}
+  padZones();padMajLat();padSource(PAD.on?"pad":"micro");
+})();
+
+/* ---------- compás intérieur : des cibles à jouer pendant le silence ---------- */
+const CI={actif:false,tours:[],on:2,off:1,L:4,palo:null,niveau:"1",avant:null,tic:null,res:null};
+const NIVEAUX_CI={"1":"temps et contretemps","2":"doubles croches et triolets","3":"petites figures avec accent","4":"accents du palo","m":"mélange"};
+const ordinal=n=>n===1?"1re":n+"e";
+const du=n=>n.replace(/^le /,"du ");
+const liste=l=>l.length<2?String(l[0]):l.slice(0,-1).join(", ")+" et "+l[l.length-1];
+function nomTempsCI(j){
+  if(CI.palo){const p=((CI.palo.depart-1+j)%CI.palo.pulses)+1;return "le "+p;}
+  return "le temps "+(j+1);
+}
+const hasard=n=>Math.floor(Math.random()*n);
+function cibleCI(niv){
+  const L=CI.L,j=hasard(L),cells={},n=nomTempsCI(j);
+  if(niv==="4"&&CI.palo&&CI.palo.accents&&CI.palo.accents.length){
+    const acc=CI.palo.accents.slice(),idx=p=>(((p-CI.palo.depart)%CI.palo.pulses)+CI.palo.pulses)%CI.palo.pulses;
+    if(Math.random()<0.4){acc.forEach(p=>cells[idx(p)]="X");return {txt:"tous les accents du compás : "+liste(acc.sort((a,b)=>idx(a)-idx(b))),cells};}
+    const k=Math.min(acc.length,2+hasard(2)),choix=[];
+    while(choix.length<k){const p=acc[hasard(acc.length)];if(choix.indexOf(p)<0)choix.push(p);}
+    choix.sort((a,b)=>idx(a)-idx(b)).forEach(p=>cells[idx(p)]="X");
+    return {txt:"les accents "+liste(choix.sort((a,b)=>idx(a)-idx(b))),cells};
+  }
+  if(niv==="1"){
+    if(Math.random()<0.4){cells[j]="x";return {txt:n,cells};}
+    if(Math.random()<0.5||L<2){cells[j]="ox";return {txt:"le contretemps "+du(n)+" (2e croche)",cells};}
+    const j2=(j+1+hasard(L-1))%L;cells[j]="ox";cells[j2]=(cells[j2]||"x");
+    return {txt:"le contretemps "+du(n)+", puis "+nomTempsCI(j2),cells};
+  }
+  if(niv==="2"){
+    if(Math.random()<0.3){const k=1+hasard(2),m=["o","o","o"];m[k]="x";cells[j]=m.join("");return {txt:"la "+ordinal(k+1)+" note de triolet "+du(n),cells};}
+    let sel;do{sel=[0,1,2,3].filter(()=>Math.random()<0.45);}while(!sel.length||sel.length>2||(sel.length===1&&sel[0]===0));
+    cells[j]=[0,1,2,3].map(k=>sel.indexOf(k)>=0?"x":"o").join("");
+    return {txt:(sel.length===1?"la "+ordinal(sel[0]+1)+" double":"les "+sel.map(k=>ordinal(k+1)).join(" et ")+" doubles")+" "+du(n),cells};
+  }
+  // niveau 3 : une petite figure sur un temps, une note accentuée
+  const F=[["croche et deux doubles","x-xx"],["deux doubles et croche","xxx-"],["croche pointée et double","x--x"],["double, croche, double","xx-x"],["triolet","xxx"],["deux croches","x-x-"]];
+  const [nomF,motif]=F[hasard(F.length)],pos=[...motif].map((c,i)=>c==="x"?i:-1).filter(i=>i>=0),acc=pos[hasard(pos.length)];
+  cells[j]=[...motif].map((c,i)=>i===acc?"X":c).join("");
+  return {txt:"sur "+n+" : "+nomF+", accent sur la "+ordinal(pos.indexOf(acc)+1)+" note",cells};
+}
+function codeCibles(){
+  const L=CI.L,mes=[];
+  CI.tours.forEach(t=>{
+    for(let i=0;i<CI.on;i++)mes.push(Array.from({length:L},()=>"n:o").join(" "));
+    for(let i=0;i<CI.off;i++)mes.push(Array.from({length:L},(_,j)=>{const c=i===0?t.cells[j]:null;if(!c)return "n:o";return "n:"+c;}).join(" "));
+  });
+  return L+"/4\n| "+mes.join(" | ")+" |";
+}
+function ciMaj(){
+  const pl=$("#palo").value==="metronome"?paloMetronome():null;
+  const pal=pl&&typeof state!=="undefined"&&state.palo&&!state.palo.libre?state.palo:null;
+  const o4=$("#ciNiveau").querySelector('option[value="4"]');o4.disabled=!pal;
+  if(!pal&&$("#ciNiveau").value==="4")$("#ciNiveau").value="1";
+  $("#ciCycleBloc").hidden=!!pl;
+  $("#ciGlose").textContent=pl?"Le cycle est le compás de "+pl.nom+" ("+pl.pulses+" pulsos, au tempo réglé plus haut). Les cibles se disent en pulsos, comme on compte le palo.":
+    "Sans palo, le cycle est une mesure de "+$("#ciCycle").value+" temps au clic. Choisis « Accompagnement : palo du métronome » plus bas pour travailler dans un compás (et débloquer le niveau des accents du palo).";
+}
+function lanceCibles(){
+  if(S.running)return;
+  if(!mesure()){$("#ciRetour").textContent="Active d'abord le micro, ou choisis le pad à l'écran dans « Réglage du micro ».";return;}
+  const pl=$("#palo").value==="metronome"?paloMetronome():null;
+  CI.palo=pl?{nom:pl.nom,pulses:pl.pulses,depart:pl.depart,accents:(state.palo.accents||[]).slice()}:null;
+  CI.L=pl?pl.pulses:parseInt($("#ciCycle").value,10)||4;
+  if(CI.L>12){$("#ciRetour").textContent="Ce compás a plus de 12 pulsos : choisis un autre palo ou le clic simple.";return;}
+  CI.on=parseInt($("#ciJoue").value,10)||2;CI.off=parseInt($("#ciSilence").value,10)||1;CI.niveau=$("#ciNiveau").value;
+  const n=parseInt($("#ciTours").value,10)||8;
+  const niv=()=>CI.niveau==="m"?(CI.palo&&Math.random()<0.25?"4":String(1+hasard(3))):CI.niveau;
+  CI.tours=Array.from({length:n},()=>cibleCI(niv()));
+  CI.avant={code:ecrireCode(),exo:B.courant,depart:B.depart,repet:$("#repet").value,guide:$("#guide").value,chaine:$("#chaine").value};
+  $("#repet").value="1";$("#guide").value="non";$("#chaine").value="non";
+  if(!chargeCodeLibre(codeCibles(),null,"")){$("#ciRetour").textContent="Les cibles n'ont pas pu être écrites.";return;}
+  CI.actif=true;CI.res=null;$("#ciResume").hidden=true;$("#ciRetour").textContent="";
+  const z=document.getElementById("blocScene");if(z)z.scrollIntoView({block:"start",behavior:"smooth"});
+  demarre();
+  if(!S.running){restaureCibles();return;}
+  clearInterval(CI.tic);CI.tic=setInterval(ticCibles,120);ticCibles();
+}
+function ticCibles(){
+  if(!CI.actif||!S.running){clearInterval(CI.tic);return;}
+  const b=(S.ctx.currentTime-S.depart)/S.dureeTemps-S.decompte,per=(CI.on+CI.off)*CI.L;
+  if(b<0){bandeau(CI.tours[0].txt,"Tour 1 sur "+CI.tours.length+" — écoute le compás, la cible viendra dans le silence");return;}
+  const k=Math.min(CI.tours.length-1,Math.floor(b/per)),dans=b-k*per,sil=dans>=CI.on*CI.L;
+  const reste=Math.ceil(CI.on*CI.L-dans);
+  bandeau(CI.tours[k].txt,"Tour "+(k+1)+" sur "+CI.tours.length+" — "+(sil?"À toi, dans le silence !":"le compás joue · silence dans "+reste+" temps"));
+}
+// seules comptent les frappes jouées dans le silence (avec une petite marge de chaque côté)
+function filtreCibles(){
+  const lat=latS(),per=(CI.on+CI.off)*CI.L,m=0.12/S.dureeTemps;
+  S.onsets=S.onsets.filter(o=>{
+    const b=(o.t-lat-S.depart)/S.dureeTemps-S.decompte;if(b<0)return false;
+    const dans=b-Math.floor(b/per)*per;
+    return dans>=CI.on*CI.L-m||dans<m&&b>=per;
+  });
+}
+function finCibles(){
+  clearInterval(CI.tic);
+  if(!CI.actif)return;
+  const per=(CI.on+CI.off)*CI.L,lat=latS(),mt=CI.on+CI.off;
+  const res=CI.tours.map((t,k)=>{
+    const att=S.attendus.filter(a=>Math.floor(parseInt(a.cle.slice(1),10)/mt)===k);
+    const ok=att.filter(a=>a.dev!=null),n=att.length;
+    const ons=S.onsets.filter(o=>{const b=(o.t-lat-S.depart)/S.dureeTemps-S.decompte;return Math.floor((b+0.2)/per)===k;}).length;
+    const dev=ok.length?Math.round(ok.reduce((s,a)=>s+a.dev,0)/ok.length):null;
+    return {txt:t.txt,n,ok:ok.length,dev,trop:Math.max(0,ons-ok.length),joue:att.length&&att[0].t<=S.ctx.currentTime};
+  }).filter(x=>x.joue);
+  CI.res=res;
+  const z=$("#ciResume");
+  if(res.length&&mesure()){
+    const justes=res.filter(x=>x.ok===x.n&&!x.trop&&x.dev!=null&&Math.abs(x.dev)<40).length;
+    z.innerHTML="<p><b>"+justes+" cible"+(justes>1?"s":"")+" sur "+res.length+" justes</b> (toutes les notes, sans frappe en trop, à moins de 40 ms).</p><ul class=\"ci-liste\">"+
+      res.map((x,i)=>{const q=x.ok===x.n&&!x.trop&&Math.abs(x.dev)<40?"q-bon":x.ok?"q-moyen":"q-mauvais";
+        return '<li><i class="pastille '+q+'"></i><span><b>'+(i+1)+'.</b> '+x.txt.replace(/[<>&]/g,"")+' — '+(x.ok?x.ok+"/"+x.n+" note"+(x.n>1?"s":"")+", "+(Math.abs(x.dev)<5?"en place":(x.dev>0?"en retard de ":"en avance de ")+Math.abs(x.dev)+" ms"):"manquée")+(x.trop?", "+x.trop+" en trop":"")+"</span></li>";}).join("")+"</ul>";
+    z.hidden=false;
+  }
+  $("#chBandeau").hidden=true;
+  restaureCibles();
+}
+function restaureCibles(){
+  const a=CI.avant;CI.actif=false;
+  if(!a)return;CI.avant=null;
+  $("#repet").value=a.repet;$("#guide").value=a.guide;$("#chaine").value=a.chaine;
+  const r=lireCode(a.code);
+  if(!r.erreurs.length){
+    R.mesures=r.mesures;R.doigts=r.doigts&&r.doigts.some(Boolean)?r.doigts:null;R.active=0;
+    $("#num").value=String(r.num);$("#den").value=String(r.den);$("#nbMes").value=String(r.mesures.length);$("#code").value=a.code;
+  }
+  B.courant=a.exo;B.depart=a.depart;
+  majSignature();afficheCourant();afficheListe();majBiblioPalos();majPalo();sauve();
+}
+$("#ciLancer").addEventListener("click",lanceCibles);
+["#ciNiveau","#ciCycle"].forEach(x=>$(x).addEventListener("change",ciMaj));
+$("#palo").addEventListener("change",ciMaj);
+ciMaj();
 
 /* ---------- séance enchaînée : tempo qui monte, ou accord monté case par case ---------- */
 const CH={on:false,type:null,id:null,k:0,liste:[],res:[],pause:null,echecs:0,bpm0:0,vise:0,sim:null};
@@ -6866,12 +7166,12 @@ function chMaj(){
 ["chaine","chVise","chPas","chSeuil","chCaseMax","chPause","chRedescend"].forEach(k=>$("#"+k).addEventListener("change",()=>{chMaj();chSauve();}));
 $("#bpm").addEventListener("change",chMaj);
 function setBpmEntr(v){v=Math.round(clamp(v,30,240));$("#bpm").value=String(v);$("#tBpmVal").textContent=String(v);majVitesse();sauve();}
-function bandeau(gros,petit){const z=$("#chBandeau");z.hidden=false;z.innerHTML="<b></b><span></span>";z.firstChild.textContent=gros;z.lastChild.textContent=petit||"";}
+function bandeau(gros,petit){const z=$("#chBandeau");z.hidden=false;z.innerHTML="<b></b><span></span>";z.firstChild.textContent=gros;z.firstChild.classList.toggle("long",gros.length>14);z.lastChild.textContent=petit||"";}
 function lanceSerie(){
   const t=S.mode==="morceau"?"non":$("#chaine").value;
   clearTimeout(CH.pause);CH.on=false;$("#chBandeau").hidden=true;
   if(t==="non"){demarre();return;}
-  if(t==="tempo"&&!S.micro&&!CH.sim){$("#etat").textContent="Le tempo qui monte se décide sur la note de rythme : active d'abord le micro.";return;}
+  if(t==="tempo"&&!mesure()&&!CH.sim){$("#etat").textContent="Le tempo qui monte se décide sur la note de rythme : active d'abord le micro.";return;}
   // une séance enchaînée a besoin de passages qui finissent
   if(S.mode==="rythme"&&$("#repet").value==="0"){$("#repet").value="2";majSignature();}
   if(S.mode==="rasgueado"&&$("#temps").value==="0")$("#temps").value="16";
@@ -6900,7 +7200,7 @@ function passageSerie(){
   demarre();
 }
 function suiteSerie(){
-  const r=S.micro?S.derniereNote:null,bpm=parseInt($("#bpm").value,10);
+  const r=mesure()?S.derniereNote:null,bpm=parseInt($("#bpm").value,10);
   CH.res.push({n:CH.k+1,cas:CH.type==="cases"?CH.liste[CH.k]:null,bpm,r});
   if(CH.res.length>=60){finSerie("Soixante passages : la séance s'arrête là.");return;}
   let msg="";
@@ -6940,6 +7240,7 @@ function finSerie(msg,stop){
   const etait=CH.on;CH.on=false;
   if(!stop||!S.running){$("#btnJouer").disabled=false;$("#btnStop").disabled=true;}
   if(!etait)return;
+  if(!S.running)padMontre(false);
   $("#chBandeau").hidden=true;
   const res=CH.res,z=$("#chResume");
   if(!res.length){z.hidden=true;return;}
@@ -6964,9 +7265,9 @@ chLit();chMaj();
    ANALYSE
    ================================================================= */
 function calcule(){
-  const lat=parseFloat($("#latence").value)/1000;
-  S.attendus.forEach(a=>{a.dev=null;a.amp=null;});
-  const libres=S.onsets.map(o=>({t:o.t-lat,amp:o.amp,pris:false}));
+  const lat=latS();
+  S.attendus.forEach(a=>{a.dev=null;a.amp=null;a.dTape=null;});
+  const libres=S.onsets.map(o=>({t:o.t-lat,amp:o.amp,pris:false,doigts:o.doigts||null}));
   const paires=[];
   let d0=0;
   S.attendus.forEach((a,ia)=>{
@@ -6981,7 +7282,7 @@ function calcule(){
   for(const pr of paires){
     const a=S.attendus[pr.ia],o=libres[pr.io];
     if(a.dev!==null||o.pris)continue;
-    a.dev=pr.d*1000;a.amp=o.amp;o.pris=true;
+    a.dev=pr.d*1000;a.amp=o.amp;o.pris=true;a.dTape=o.doigts;
   }
   const touches=S.attendus.filter(a=>a.dev!==null);
   const parasites=libres.filter(o=>!o.pris).length;
@@ -7048,6 +7349,7 @@ function calcule(){
   $("#cParasites").textContent=parasites;
   $("#btnLatence").disabled=false;
 
+  bilanDoigtsPad();
   tableau(touches);nuage();
   diagnostic(moy,ecart,ecartV,touches,parasites);
   S.diagTexte=compteRendu();
@@ -7136,6 +7438,7 @@ function corrigePartition(){
 }
 
 $("#btnLatence").addEventListener("click",()=>{
+  if(PAD.on){PAD.lat=Math.round(clamp(PAD.lat+S.medianeDev,-100,300));padMajLat();padSauve();return;}
   const v=Math.round(clamp(parseFloat($("#latence").value)+S.medianeDev,-400,400));
   $("#latence").value=v;$("#latenceVal").textContent=v;
 });
@@ -8077,6 +8380,7 @@ function entreeJournal(x){
     const e=B.courant?exoParId(B.courant):null,cc=compactMesures(R.num,R.den,R.mesures);
     if(e&&codeCompact(e.code)===cc){exo=e.id;titre=e.titre;cle="exo:"+e.id;}
     else{titre="Partition libre — "+R.num+"/"+R.den+", "+R.nbMes+" mes.";cle="code:"+cc;}
+    if(CI.actif){titre="Compás intérieur — cibles ("+NIVEAUX_CI[CI.niveau]+")";cle="cibles:"+CI.niveau+":"+(CI.palo?CI.palo.nom:"clic");exo=null;}
   }else if(mode==="rasgueado"){
     const n=(P.nom||"patron").split(" —")[0];titre="Rasgueado — "+n;cle="ras:"+n;
   }else{titre=S.pm.nom;cle="mor:"+S.pm.nom;}
@@ -8088,7 +8392,8 @@ function entreeJournal(x){
     dur:Math.round(Math.max(0,t1-t0)+(S.dureeTemps||0)),partiel:!!S.partiel,
     diag:S.diagTexte||null,silences:S.sil?(S.sil.on+"-"+S.sil.off+" "+S.sil.quoi):null,
     pts:S.diagPoints||null,
-    regl:instantane(),
+    regl:CI.actif?null:instantane(),
+    src:PAD.on?"pad":"micro",dj:S.bilanDoigts||null,
     serie:CH.on?{id:CH.id,type:CH.type,n:CH.k+1,cas:CH.type==="cases"?CH.liste[CH.k]:null}:null,
     det:S.det||null,
     ras:mode==="rasgueado"?selModele.value:null,
@@ -8501,6 +8806,7 @@ function initBiblio(){
 /* ---------- compás intérieur : l'accompagnement se tait par moments, puis revient ---------- */
 function lireSilences(){
   if(S.mode==="morceau")return null;
+  if(CI.actif)return {on:CI.on,off:CI.off,unite:CI.L,quoi:"tout",per:(CI.on+CI.off)*CI.L};
   const v=$("#silences").value;
   if(!v||v==="0")return null;
   const [on,off]=v.split("-").map(Number);
@@ -8722,14 +9028,20 @@ window.Entraineur={
   depuisMetronome:m=>depuisMetronome(m),
   instantane:()=>instantane(),
   // pour les essais : un passage simulé, sans micro (fn donne l'écart en ms et le volume de chaque frappe, ou rien si manquée)
-  _simule:fn=>{demarre();if(!S.running)return false;const lat=parseFloat($("#latence").value)/1000;S.onsets=[];
-    S.attendus.forEach((a,i)=>{const r=fn(a,i);if(r)S.onsets.push({t:a.t+r.dev/1000+lat,amp:r.amp});});
+  _simule:fn=>{demarre();if(!S.running)return false;const lat=latS();S.onsets=[];
+    S.attendus.forEach((a,i)=>{const r=fn(a,i);if(r)S.onsets.push({t:a.t+r.dev/1000+lat,amp:r.amp,doigts:r.doigts||null});});
     const m=S.micro;S.micro=true;termine();S.micro=m;return true;},
   _serie:fn=>{CH.sim=fn;try{lanceSerie();}finally{CH.sim=null;}return CH.res.slice();},
   // une séance enchaînée réglée de l'extérieur (programme des devoirs)
   regleSerie:o=>{if(o.type)$("#chaine").value=o.type;if(o.vise)$("#chVise").value=String(o.vise);if(o.seuil)$("#chSeuil").value=String(o.seuil);if(o.bpm)setBpmEntr(o.bpm);chMaj();chSauve();},
   // un devoir : on remet l'exercice (figure, rasgueado ou morceau) et son tempo
   travaille:s=>{
+    if(s.cle&&s.cle.indexOf("cibles:")===0){
+      if(window.Vues)Vues.montre("rythme");
+      const n=s.cle.split(":")[1];if([...$("#ciNiveau").options].some(o=>o.value===n&&!o.disabled))$("#ciNiveau").value=n;
+      if(s.bpm)setBpmEntr(s.bpm);
+      const z=document.getElementById("blocCibles");if(z)z.scrollIntoView({block:"start"});return;
+    }
     if(s.mode==="morceau"){if(window.Vues)Vues.montre("morceaux");return;}
     if(s.regl&&(s.regl.mode==="rasgueado"||s.regl.mode==="rythme")){
       if(window.Vues)Vues.montre(s.regl.mode);
@@ -8754,10 +9066,11 @@ window.Entraineur={
     if(window.Vues)Vues.montre("rythme");rejoueSeance(s);
     const z=document.getElementById("blocMicro");if(z)z.scrollIntoView({block:"start"});
   },
-  rejoue:s=>{if(s.regl||s.mode==="rasgueado"){window.Entraineur.travaille(s);return;}if(window.Vues)Vues.montre("rythme");rejoueSeance(s);const b=document.getElementById("blocBiblio");if(b)b.scrollIntoView({block:"start"});},
+  rejoue:s=>{if(s.regl||s.mode==="rasgueado"||(s.cle&&s.cle.indexOf("cibles:")===0)){window.Entraineur.travaille(s);return;}if(window.Vues)Vues.montre("rythme");rejoueSeance(s);const b=document.getElementById("blocBiblio");if(b)b.scrollIntoView({block:"start"});},
   redessine:()=>{if(!$("#resultats").classList.contains("masque"))nuage();},
   // lecture seule, pour vérifier le calendrier des frappes attendues
-  attendus:()=>S.attendus.map(a=>({t:a.t,cle:a.cle,accent:!!a.accent,phase:a.phase||"avec",libelle:a.libelle,dev:a.dev,res:a.res})),
+  attendus:()=>S.attendus.map(a=>({t:a.t,cle:a.cle,accent:!!a.accent,phase:a.phase||"avec",libelle:a.libelle,dev:a.dev,res:a.res,doigt:a.doigt||""})),
+  horloge:()=>S.ctx?S.ctx.currentTime:0,
   depart:()=>({depart:S.depart,dt:S.dureeTemps,dec:S.decompte})
 };
 })();
@@ -12089,7 +12402,7 @@ window.addEventListener("load",function(){
     try{
       if("serviceWorker" in navigator)await navigator.serviceWorker.register("sw.js");
       // la version en cours est celle que déclare le service worker
-      let v="compas-v32";try{const t=await (await fetch("sw.js",{cache:"no-store"})).text();const m=t.match(/VERSION = "([^"]+)"/);if(m)v=m[1];}catch(e){}
+      let v="compas-v33";try{const t=await (await fetch("sw.js",{cache:"no-store"})).text();const m=t.match(/VERSION = "([^"]+)"/);if(m)v=m[1];}catch(e){}
       const c=await caches.open(v);
       await c.addAll(["./","index.html"]);
       await Promise.all(["manifest.webmanifest","icone-180.png","icone-192.png","icone-512.png","icone-masquable-512.png","pdfjs/pdf.min.js","pdfjs/pdf.worker.min.js"]

@@ -278,7 +278,14 @@ footer{color:var(--muted);font-size:.82rem;margin-top:1.6rem;max-width:70ch}
 
   /* partition rythmique */
   .mesure{border:1px solid var(--trait);border-left:3px solid var(--bronce);border-radius:2px;padding:10px;margin-bottom:10px;background:var(--ebano)}
-  .mesure-entete{display:flex;justify-content:space-between;align-items:baseline;font-size:.78rem;color:var(--tapa-doux);margin-bottom:8px}
+  .mesure-entete{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:4px 10px;font-size:.78rem;color:var(--tapa-doux);margin-bottom:8px}
+  .mesure-entete .m-titre{font-weight:600;color:var(--tapa);white-space:nowrap}
+  .mesure-entete .etat-mesure{flex:1 1 auto;white-space:nowrap}
+  .m-actions{display:flex;gap:6px}
+  .m-actions button{padding:3px 9px;font-size:.74rem;min-height:28px}
+  .part-outils{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 12px}
+  .part-outils button{font-size:.84rem;padding:7px 12px}
+  .part-annuler{border-color:var(--bronce);color:var(--bronce)}
   .cellules{display:flex;gap:4px;align-items:stretch;min-height:64px;flex-wrap:wrap}
   .cellule{border:1px solid var(--trait);border-radius:2px;background:var(--ebano);padding:7px 8px;cursor:pointer;min-width:52px}
   .cellule.choisie{outline:2px solid var(--tapa);outline-offset:1px}
@@ -607,6 +614,22 @@ footer{color:var(--muted);font-size:.82rem;margin-top:1.6rem;max-width:70ch}
 .entraineur .palos-conseilles button[aria-pressed="true"]{background:var(--bronce);border-color:var(--bronce);color:var(--sur-oro)}
 .entraineur .palos-conseilles button[aria-pressed="true"] .etiq{color:var(--sur-oro);opacity:.85}
 .palo-autre{margin-top:12px}
+.scene-rapide{display:grid;grid-template-columns:1fr auto;gap:10px 18px;align-items:end;max-width:620px;margin:0 auto 16px;padding-bottom:14px;border-bottom:1px solid var(--trait);text-align:left}
+.scene-rapide>div:first-child{min-width:0}
+.scene-rapide .aide{margin:4px 0 0}
+.scene-micro{display:flex;flex-direction:column;align-items:flex-end;gap:2px}
+.scene-micro .aide{font-size:.76rem;margin:0}
+@media (max-width:520px){.scene-rapide{grid-template-columns:1fr}.scene-micro{align-items:flex-start}}
+.repliable>h2{cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:0;-webkit-tap-highlight-color:transparent;user-select:none;-webkit-user-select:none}
+.repliable>h2::after{content:"";flex:none;width:9px;height:9px;border-right:2px solid currentColor;border-bottom:2px solid currentColor;transform:rotate(45deg);margin:0 4px 4px 0;opacity:.55;transition:transform .15s}
+.repliable.ferme>h2::after{transform:rotate(-45deg);margin:0 6px 0 0}
+.repliable>h2:focus-visible{outline:2px solid var(--oro);outline-offset:4px}
+.repliable>.repl-corps{margin-top:14px}
+.repliable.ferme{padding-top:14px;padding-bottom:14px}
+.repl-resume{margin:4px 0 0;font-size:.82rem;color:var(--muted)}
+.repliable:not(.ferme)>.repl-resume{display:none}
+.repl-replier{display:flex;justify-content:flex-end;margin:4px 0 -4px}
+.repl-replier button{background:none;border:0;color:var(--muted);font-size:.8rem;padding:4px 2px;cursor:pointer}
 .pad{position:fixed;left:0;right:0;bottom:0;z-index:60;background:var(--panel);border-top:1px solid var(--edge);box-shadow:0 -6px 20px var(--shadow);
   padding:6px 8px calc(8px + env(safe-area-inset-bottom,0px));touch-action:none;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
 .pad-tete{display:flex;justify-content:space-between;align-items:center;gap:10px;font-size:.78rem;color:var(--muted);padding:0 2px 6px}
@@ -771,6 +794,7 @@ body[data-moteur="acompas"] .layers>.layer:not(.garde-ac),body[data-moteur="acom
 #jAnaCorps,#afCorps{overflow-x:auto;-webkit-overflow-scrolling:touch}
 .cj{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px 16px;margin:6px 0 14px;padding:12px 14px;border:1px solid var(--edge);border-left:4px solid var(--oro);border-radius:4px}
 .cj>div{display:flex;flex-direction:column;gap:2px;min-width:0}
+#dJour .cj-sur{display:none}
 .cj-sur{font-size:.72rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
 .cj-nom{font-size:1.15rem;letter-spacing:.03em;color:var(--text)}
 .cj-raison{font-size:.8rem;color:var(--muted)}
@@ -1672,8 +1696,15 @@ table.af-main td.af-case{min-width:104px;border:1px solid var(--edge);border-lef
       <select id="mesureActive"></select>
     </div>
   </div>
+  <div class="part-outils" role="toolbar" aria-label="Outils de la partition">
+    <button type="button" id="partPlus">+ Mesure</button>
+    <button type="button" id="partRetirerCel" disabled>Retirer la cellule</button>
+    <button type="button" id="partBasculerCel" disabled>Activer / désactiver</button>
+    <button type="button" id="partVider">Vider la partition</button>
+    <button type="button" id="partAnnuler" class="part-annuler" hidden>Annuler</button>
+  </div>
   <div id="partition"></div>
-  <p class="aide">Clique une cellule pour la choisir, puis « Retirer » ou « Activer / désactiver ». Les cases en pointillés montrent la partie non écrite de la mesure, jouée comme un silence.</p>
+  <p class="aide">Touche une cellule pour la choisir : « Retirer la cellule » ou « Activer / désactiver » s'appliquent à elle. Chaque mesure a ses boutons « Vider » et « Supprimer ». Les cases en pointillés montrent la partie non écrite de la mesure, jouée comme un silence. Une suppression se rattrape avec « Annuler ».</p>
 </section>
 
 <section class="plateau">
@@ -1863,6 +1894,7 @@ table.af-main td.af-case{min-width:104px;border:1px solid var(--edge);border-lef
 </section>
 
 <section class="plateau scene" id="blocScene">
+  <div class="scene-rapide" id="sceneRapide"><div class="scene-micro"><button type="button" id="btnMicroScene">Activer le micro</button><span id="sceneSource" class="aide"></span></div></div>
   <div class="ch-bandeau" id="chBandeau" hidden></div>
   <div class="compte-temps" id="etat">Active le micro, puis démarre.</div>
   <div class="gros" id="gros">&nbsp;</div>
@@ -2239,7 +2271,6 @@ table.af-main td.af-case{min-width:104px;border:1px solid var(--edge);border-lef
 
 <section class="j-plateau">
   <h2>Combinaison du jour</h2>
-  <p class="j-aide">Une combinaison de la main droite jamais travaillée, ou celle où ta note est la plus faible. Elle change chaque jour.</p>
   <div class="cj" id="dJour" hidden></div>
 </section>
 
@@ -5612,12 +5643,8 @@ $("#btnSilence").addEventListener("click",()=>{
   ajouteCellule();
   C.div=garde.div;C.att=garde.att;C.tenu=garde.tenu;C.acc=garde.acc;
 });
-$("#btnSupprimer").addEventListener("click",()=>{
-  if(!S.celluleChoisie)return;
-  R.mesures[S.celluleChoisie.m].splice(S.celluleChoisie.c,1);
-  S.celluleChoisie=null;dessinePartition();
-});
-$("#btnViderMesure").addEventListener("click",()=>{R.mesures[R.active]=[];S.celluleChoisie=null;dessinePartition();});
+$("#btnSupprimer").addEventListener("click",()=>{if(S.celluleChoisie)$("#partRetirerCel").click();});
+$("#btnViderMesure").addEventListener("click",()=>videMesure(R.active));
 $("#btnBasculer").addEventListener("click",()=>{
   if(!S.celluleChoisie){signale("Choisis d'abord une cellule dans la partition.");return;}
   const c=R.mesures[S.celluleChoisie.m][S.celluleChoisie.c];
@@ -5673,7 +5700,10 @@ function dessinePartition(){
     const etat=Math.abs(reste)<1e-6?'<span class="etat-mesure ok">complète</span>'
       :(reste>0?'<span class="etat-mesure">reste '+fmt(reste)+' temps (silence)</span>'
                :'<span class="etat-mesure trop">dépasse de '+fmt(-reste)+' temps</span>');
-    div.innerHTML='<div class="mesure-entete"><span>Mesure '+(m+1)+' — '+R.num+'/'+R.den+'</span>'+etat+'</div>';
+    div.innerHTML='<div class="mesure-entete"><span class="m-titre">Mesure '+(m+1)+'</span>'+etat+
+      '<span class="m-actions"><button type="button" data-a="vider" aria-label="Vider la mesure '+(m+1)+'">Vider</button><button type="button" data-a="suppr" aria-label="Supprimer la mesure '+(m+1)+'">Supprimer</button></span></div>';
+    div.querySelector('[data-a="vider"]').addEventListener("click",()=>videMesure(m));
+    div.querySelector('[data-a="suppr"]').addEventListener("click",()=>supprimeMesure(m));
     const cont=document.createElement("div");cont.className="cellules";
     R.mesures[m].forEach((c,ci)=>{
       const actif=c.actif!==false;
@@ -5698,7 +5728,64 @@ function dessinePartition(){
     }
     div.appendChild(cont);z.appendChild(div);
   }
+  const ch=!!S.celluleChoisie;$("#partRetirerCel").disabled=!ch;$("#partBasculerCel").disabled=!ch;
 }
+/* ---- vider, supprimer, annuler ---- */
+// on peut revenir en arrière plusieurs fois (20 étapes)
+const annulables=[];
+function majAnnuler(){const b=$("#partAnnuler"),a=annulables[annulables.length-1];b.hidden=!a;if(a)b.textContent="Annuler ("+a.txt+")";}
+function memoAnnule(txt){
+  annulables.push({mes:JSON.parse(JSON.stringify(R.mesures)),doigts:R.doigts?R.doigts.slice():null,num:R.num,den:R.den,exo:B.courant,active:R.active,txt});
+  if(annulables.length>20)annulables.shift();
+  majAnnuler();
+}
+// les doigtés suivent l'ordre des frappes : on retire ceux de la mesure
+function retireDoigtsMesure(m){
+  if(!aDesDoigts())return;
+  const ix=indexFrappes(R.mesures).map;let premier=null,n=0;
+  R.mesures[m].forEach((c,ci)=>c.att.forEach((a,k)=>{if(a){const i=ix["m"+m+"c"+ci+"k"+k];if(premier===null)premier=i;n++;}}));
+  if(premier!==null)R.doigts.splice(premier,n);
+  if(!R.doigts.some(Boolean))R.doigts=null;
+}
+function videMesure(m){
+  if(!R.mesures[m]||!R.mesures[m].length)return;
+  memoAnnule("mesure "+(m+1)+" vidée");
+  retireDoigtsMesure(m);R.mesures[m]=[];S.celluleChoisie=null;R.active=m;$("#mesureActive").value=String(m);
+  dessinePartition();majVitesse();
+}
+function supprimeMesure(m){
+  if(R.nbMes<=1){videMesure(m);return;}
+  memoAnnule("mesure "+(m+1)+" supprimée");
+  retireDoigtsMesure(m);R.mesures.splice(m,1);
+  R.active=Math.max(0,Math.min(R.active>m?R.active-1:R.active,R.mesures.length-1));S.celluleChoisie=null;
+  $("#nbMes").value=String(R.mesures.length);majSignature();$("#mesureActive").value=String(R.active);
+}
+function videPartition(){
+  if(R.mesures.every(x=>!x.length)&&R.nbMes===1)return;
+  memoAnnule("partition vidée");
+  R.mesures=[[]];R.doigts=null;R.active=0;S.celluleChoisie=null;B.courant=null;
+  $("#nbMes").value="1";majSignature();
+  if(typeof afficheCourant==="function"){afficheCourant();afficheListe();}
+}
+$("#partVider").addEventListener("click",videPartition);
+$("#partPlus").addEventListener("click",()=>$("#nbPlus").click());
+$("#partRetirerCel").addEventListener("click",()=>{
+  if(!S.celluleChoisie)return;
+  const {m,c}=S.celluleChoisie,cel=R.mesures[m][c];
+  memoAnnule("cellule retirée");
+  // ses doigtés partent avec elle
+  if(aDesDoigts()&&cel){const ix=indexFrappes(R.mesures).map,l=[];cel.att.forEach((a,k)=>{if(a)l.push(ix["m"+m+"c"+c+"k"+k]);});if(l.length)R.doigts.splice(l[0],l.length);}
+  R.mesures[m].splice(c,1);S.celluleChoisie=null;dessinePartition();majVitesse();
+});
+$("#partBasculerCel").addEventListener("click",()=>$("#btnBasculer").click());
+$("#partAnnuler").addEventListener("click",()=>{
+  const a=annulables.pop();majAnnuler();
+  if(!a)return;
+  R.mesures=a.mes;R.doigts=a.doigts;
+  $("#num").value=String(a.num);$("#den").value=String(a.den);$("#nbMes").value=String(a.mes.length);
+  B.courant=a.exo;S.celluleChoisie=null;majSignature();R.active=Math.min(a.active,R.nbMes-1);$("#mesureActive").value=String(R.active);dessinePartition();
+  if(typeof afficheCourant==="function"){afficheCourant();afficheListe();}
+});
 
 /* =================================================================
    PARTITION SOURCE — photo ou PDF, sélection d'un passage
@@ -12315,7 +12402,7 @@ function montre(v){
   // micro, scène de lecture et relevé servent aussi aux morceaux : on les déplace avec l'onglet
   if(entr||v==="morceaux"){
     const ancre=document.getElementById(v==="morceaux"?"ancreMorceau":"ancreEntraineur");
-    ["avisMicro","blocMicro","blocScene","resultats"].forEach(function(id){const n=document.getElementById(id);if(n)ancre.parentNode.insertBefore(n,ancre);});
+    ["avisMicro","blocMicro","blocSerie","blocScene","resultats"].forEach(function(id){const n=document.getElementById(id);if(n)ancre.parentNode.insertBefore(n,ancre);});
   }
   if(entr&&window.Entraineur){Entraineur.bascule(v);Entraineur.majPalo();}
   if(v==="morceaux"){if(window.Entraineur)Entraineur.bascule("morceau");if(window.Morceaux)Morceaux.montre();}
@@ -12402,7 +12489,7 @@ window.addEventListener("load",function(){
     try{
       if("serviceWorker" in navigator)await navigator.serviceWorker.register("sw.js");
       // la version en cours est celle que déclare le service worker
-      let v="compas-v33";try{const t=await (await fetch("sw.js",{cache:"no-store"})).text();const m=t.match(/VERSION = "([^"]+)"/);if(m)v=m[1];}catch(e){}
+      let v="compas-v34";try{const t=await (await fetch("sw.js",{cache:"no-store"})).text();const m=t.match(/VERSION = "([^"]+)"/);if(m)v=m[1];}catch(e){}
       const c=await caches.open(v);
       await c.addAll(["./","index.html"]);
       await Promise.all(["manifest.webmanifest","icone-180.png","icone-192.png","icone-512.png","icone-masquable-512.png","pdfjs/pdf.min.js","pdfjs/pdf.worker.min.js"]
@@ -12413,6 +12500,118 @@ window.addEventListener("load",function(){
     maj();
   });
 });
+})();
+</script>
+<script>(function(){
+"use strict";
+/* =================================================================
+   PRÉSENTATION ALLÉGÉE — rubriques repliables, tempo et micro près du bouton Démarrer
+   ================================================================= */
+const $=q=>document.querySelector(q);
+const titre=sec=>{const h=sec.querySelector(":scope>h2");return h?h.textContent.trim():"";};
+
+// 1. tempo et micro remontent dans la scène, à côté de « Démarrer »
+const rapide=$("#sceneRapide"),bpm=$("#bpm");
+if(rapide&&bpm){rapide.insertBefore(bpm.parentElement,rapide.firstChild);}
+const bm=$("#btnMicro"),bs=$("#btnMicroScene");
+function majMicroScene(){
+  if(!bm||!bs)return;
+  const pad=bm.hidden;
+  bs.hidden=pad;bs.textContent=bm.textContent;bs.disabled=bm.disabled;
+  $("#sceneSource").textContent=pad?"Frappes au pad à l'écran":(window.S_micro&&window.S_micro()?"Micro actif":"Frappes au micro");
+}
+if(bm&&bs){
+  bs.addEventListener("click",()=>bm.click());
+  new MutationObserver(majMicroScene).observe(bm,{attributes:true,childList:true,characterData:true,subtree:true});
+  majMicroScene();
+}
+
+// 2. Figures rythmiques : la partition juste sous la bibliothèque
+const ryt=$("#voletRyt");
+if(ryt){
+  const ordre=["Bibliothèque d'exercices","La partition","La cellule à ajouter","Le cadre","Générateur d'arpèges","Compás intérieur : cibles dans le silence","La partition source","Importer ou exporter en code"];
+  const secs=[...ryt.querySelectorAll(":scope>section")];
+  ordre.forEach(t=>{const x=secs.find(z=>titre(z)===t);if(x)ryt.appendChild(x);});
+  secs.filter(z=>ordre.indexOf(titre(z))<0).forEach(z=>ryt.appendChild(z));
+}
+
+// 3. rubriques repliables
+const CLE="compas-replis";
+let etat={};try{etat=JSON.parse(localStorage.getItem(CLE)||"{}")||{};}catch(e){}
+const garde=()=>{try{localStorage.setItem(CLE,JSON.stringify(etat));}catch(e){}};
+const OUVERTS=["Bibliothèque d'exercices","La partition","Le patron","Tes morceaux","Passages","Jouer à la place du guitariste",
+  "Tes devoirs du jour","dVeilleTitre","Combinaison du jour","Ton journal de travail","Ta progression"];
+const val=q=>{const e=$(q);return e?e.value:"";};
+const txtSel=q=>{const e=$(q);return e&&e.selectedOptions&&e.selectedOptions[0]?e.selectedOptions[0].textContent.trim():"";};
+const RESUMES={
+  "Bibliothèque d'exercices":()=>{const c=$("#exoCourant");return c&&!c.hidden?"En cours : "+$("#exoTitre").textContent:"Aucun exercice chargé";},
+  "Le cadre":()=>val("#num")+"/"+val("#den")+" · "+val("#nbMes")+" mesure"+(+val("#nbMes")>1?"s":"")+" · répétitions : "+txtSel("#repet"),
+  "Le passage":()=>"Accompagnement : "+txtSel("#palo")+" · compás intérieur : "+txtSel("#silences"),
+  "Réglage du micro":()=>{const pad=$("#btnMicro")&&$("#btnMicro").hidden;return pad?"Pad à l'écran · retard "+val("#padLatence")+" ms":"Micro · seuil "+val("#seuil")+" dB · latence "+val("#latence")+" ms";},
+  "Séance enchaînée":()=>txtSel("#chaine"),
+  "Compás intérieur : cibles dans le silence":()=>"Cibles : "+txtSel("#ciNiveau"),
+  "Générateur d'arpèges":()=>"Suite : "+(val("#arpSuite")||"—")+" · "+txtSel("#arpRythme"),
+  "La partition source":()=>{const n=document.querySelectorAll("#extraits .extrait").length;return n?n+" passage"+(n>1?"s":"")+" gardé"+(n>1?"s":""):"Photo ou PDF de la partition";},
+  "La cellule à ajouter":()=>"Écrire la partition cellule par cellule",
+  "Importer ou exporter en code":()=>"Coller ou copier la partition en texte",
+  "Programme progressif":()=>"Une série de combinaisons, jour après jour",
+  "Ajouter un devoir":()=>"Parmi les exercices déjà joués",
+  "Rappel quotidien":()=>"Rappel dans le Calendrier",
+  "Combinaisons de la main droite":()=>{const t=$(".cv-total");return t?t.textContent:"";},
+  "Analyse de ta technique":()=>"Doigt par doigt, par type de frappe, par palo",
+  "Sauvegarder":()=>"Tout sauvegarder, tout restaurer, exporter",
+  "Pistes":()=>"Volume et écoute de chaque piste",
+  "Transcrire le passage":()=>"De l'audio à la partition"
+};
+const reps=[];
+function ouvre(sec,on,memo){
+  sec.classList.toggle("ferme",!on);
+  const h=sec.querySelector(":scope>h2"),c=sec.querySelector(":scope>.repl-corps");
+  if(h)h.setAttribute("aria-expanded",String(on));
+  if(c)c.hidden=!on;
+  if(memo){etat[sec.dataset.repl]=on;garde();}
+  if(on)window.dispatchEvent(new Event("resize"));
+}
+function rendRepliable(sec,vue){
+  const h=sec.querySelector(":scope>h2");if(!h||sec.classList.contains("repliable"))return;
+  const t=h.id||titre(sec),cle=vue+":"+t;
+  sec.dataset.repl=cle;sec.classList.add("repliable");
+  const resume=document.createElement("p");resume.className="repl-resume";
+  const corps=document.createElement("div");corps.className="repl-corps";
+  while(h.nextSibling)corps.appendChild(h.nextSibling);
+  sec.appendChild(resume);sec.appendChild(corps);
+  h.setAttribute("role","button");h.tabIndex=0;
+  h.addEventListener("click",e=>{if(e.target.closest("button,a,input,select,label")&&e.target!==h)return;ouvre(sec,sec.classList.contains("ferme"),true);majResumes();});
+  h.addEventListener("keydown",e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();h.click();}});
+  const fn=RESUMES[titre(sec)];
+  reps.push({sec,resume,fn});
+  const def=OUVERTS.indexOf(titre(sec))>=0||OUVERTS.indexOf(h.id)>=0;
+  ouvre(sec,cle in etat?!!etat[cle]:def,false);
+}
+const VUES={vueEntraineur:"entr",vueMorceaux:"morc",vueDevoirs:"dev",vueJournal:"jour"};
+Object.keys(VUES).forEach(id=>{
+  const v=document.getElementById(id);if(!v)return;
+  v.querySelectorAll("section.plateau,section.j-plateau").forEach(sec=>{
+    if(sec.id==="resultats"||sec.classList.contains("scene")||sec.querySelector("#jMoisTitre"))return;
+    rendRepliable(sec,VUES[id]);
+  });
+});
+let attente=null;
+function majResumes(){
+  clearTimeout(attente);
+  attente=setTimeout(()=>reps.forEach(r=>{let t="";try{t=r.fn?r.fn():"";}catch(e){}r.resume.textContent=t;r.resume.hidden=!t;}),120);
+}
+["change","input","click"].forEach(ev=>document.addEventListener(ev,majResumes,true));
+majResumes();
+
+// 4. ce qui doit se montrer ouvre sa rubrique (un exercice qu'on ouvre, un devoir qu'on travaille…)
+const voir=Element.prototype.scrollIntoView;
+Element.prototype.scrollIntoView=function(){
+  const sec=this.closest&&this.closest(".repliable.ferme");
+  if(sec)ouvre(sec,true,false);
+  return voir.apply(this,arguments);
+};
+window.Replis={ouvre:(q,on)=>{const e=typeof q==="string"?document.querySelector(q):q;const s=e&&e.closest(".repliable");if(s)ouvre(s,on!==false,false);}};
 })();
 </script>
 </body>

@@ -1872,6 +1872,7 @@ table.af-main td.af-case{min-width:104px;border:1px solid var(--edge);border-lef
       <select id="chaine">
         <option value="non" selected>non, un passage à la fois</option>
         <option value="tempo">le tempo monte quand c'est propre</option>
+        <option value="tempoBas">le tempo descend quand c'est propre</option>
         <option value="cases">monter l'accord case par case</option>
       </select>
     </div>
@@ -1880,7 +1881,7 @@ table.af-main td.af-case{min-width:104px;border:1px solid var(--edge);border-lef
       <input type="number" id="chVise" min="30" max="240" step="1" value="100" inputmode="numeric">
     </div>
     <div class="ch-tempo">
-      <label for="chPas">Monter de</label>
+      <label for="chPas" id="chPasLib">Monter de</label>
       <select id="chPas"><option value="2">2 bpm</option><option value="4" selected>4 bpm</option><option value="6">6 bpm</option><option value="8">8 bpm</option></select>
     </div>
     <div class="ch-tempo">
@@ -1894,7 +1895,7 @@ table.af-main td.af-case{min-width:104px;border:1px solid var(--edge);border-lef
     </div>
     <div>
       <label for="chPause">Pause entre deux passages</label>
-      <select id="chPause"><option value="2">2 secondes</option><option value="3" selected>3 secondes</option><option value="5">5 secondes</option><option value="8">8 secondes</option></select>
+      <select id="chPause"><option value="0">pas de pause : le clic continue</option><option value="2">2 secondes</option><option value="3" selected>3 secondes</option><option value="5">5 secondes</option><option value="8">8 secondes</option></select>
     </div>
   </div>
   <p class="aide" id="chGlose"></p>
@@ -6644,6 +6645,13 @@ function demarre(){
 
   const b=S.mode==="morceau"?construitMorceau():(S.mode==="rasgueado")?construitRasgueado():construitRythme();
   S.depart=ctx.currentTime+0.35;
+  // séance enchaînée sans pause : le décompte du passage suivant commence pile à la fin du précédent (ou à la mesure suivante)
+  if(CH.on&&CH.finPrec){
+    const mes=S.decompte*S.dureeTemps;let d=CH.finPrec;
+    while(d<ctx.currentTime+0.06)d+=mes;
+    S.depart=d;
+  }
+  CH.finPrec=null;
   S.cycles=b.cycles;S.totalTemps=b.totalTemps;
   S.attendus=b.attendus.map(a=>({...a,t:S.depart+a.dt,dev:null,amp:null,tol:0})).sort((x,y)=>x.t-y.t);
   S.aDesAccents=S.attendus.some(a=>a.accent)&&S.attendus.some(a=>!a.accent);
@@ -6709,7 +6717,13 @@ function ordonnance(){
     if((guide==="tout"||(guide==="premier"&&a.cycle===0))&&a.phase!=="silence") bois(ctx,a.t,!!a.accent,!!a.appui);
     S.prochainAttendu++;
   }
-  if(ctx.currentTime>S.depart+S.totalTemps*S.dureeTemps+0.35)termine();
+  const finP=S.depart+S.totalTemps*S.dureeTemps;
+  // sans pause, on enchaîne juste avant la fin, dès que la dernière frappe attendue ne peut plus arriver
+  if(CH.on&&$("#chPause").value==="0"&&!CH.sim&&S.mode!=="morceau"){
+    const der=S.attendus[S.attendus.length-1],pret=der?der.t+der.tol+Math.max(0,latS())+0.03:finP;
+    if(ctx.currentTime>Math.max(pret,finP-0.25)){CH.finPrec=finP;termine();return;}
+  }
+  if(ctx.currentTime>finP+0.35)termine();
 }
 
 /* ---------- portée de lecture : de vraies mesures, chaque note à sa place dans le temps ---------- */
@@ -7221,8 +7235,9 @@ function lanceCibles(){
     const niv=()=>CI.niveau==="m"?(CI.palo&&Math.random()<0.25?"4":String(1+hasard(3))):CI.niveau;
     CI.tours=Array.from({length:n},()=>cibleCI(niv()));
   }
-  CI.avant={code:ecrireCode(),exo:B.courant,depart:B.depart,repet:$("#repet").value,guide:$("#guide").value,chaine:$("#chaine").value};
-  $("#repet").value="1";$("#guide").value="non";$("#chaine").value="non";
+  CI.avant={code:ecrireCode(),exo:B.courant,depart:B.depart,repet:$("#repet").value,guide:$("#guide").value,chaine:$("#chaine").value,coupe:$("#clicDecompte").checked};
+  // le compás doit jouer entre les cibles : « couper le clic après le décompte » est suspendu le temps des cibles
+  $("#repet").value="1";$("#guide").value="non";$("#chaine").value="non";$("#clicDecompte").checked=false;
   if(!chargeCodeLibre(codeCibles(),null,"")){$("#ciRetour").textContent="Les cibles n'ont pas pu être écrites.";return;}
   CI.actif=true;CI.res=null;$("#ciResume").hidden=true;$("#ciRetour").textContent="";
   const z=document.getElementById("blocScene");if(z)z.scrollIntoView({block:"start",behavior:"smooth"});
@@ -7276,7 +7291,7 @@ function finCibles(){
 function restaureCibles(){
   const a=CI.avant;CI.actif=false;
   if(!a)return;CI.avant=null;
-  $("#repet").value=a.repet;$("#guide").value=a.guide;$("#chaine").value=a.chaine;
+  $("#repet").value=a.repet;$("#guide").value=a.guide;$("#chaine").value=a.chaine;$("#clicDecompte").checked=!!a.coupe;
   const r=lireCode(a.code);
   if(!r.erreurs.length){
     R.mesures=r.mesures;R.doigts=r.doigts&&r.doigts.some(Boolean)?r.doigts:null;R.active=0;
@@ -7306,11 +7321,15 @@ function chSauve(){
 }
 function chMaj(){
   const t=$("#chaine").value;
-  document.querySelectorAll("#blocSerie .ch-tempo").forEach(x=>x.hidden=t!=="tempo");
+  const tp=t==="tempo"||t==="tempoBas";
+  document.querySelectorAll("#blocSerie .ch-tempo").forEach(x=>x.hidden=!tp);
+  $("#chPasLib").textContent=t==="tempoBas"?"Descendre de":"Monter de";
   document.querySelectorAll("#blocSerie .ch-cases").forEach(x=>x.hidden=t!=="cases");
   const bpm=parseInt($("#bpm").value,10),vise=parseInt($("#chVise").value,10)||bpm;
-  $("#chGlose").textContent=t==="tempo"?"Départ à "+bpm+" (le tempo réglé plus haut). Chaque passage à "+$("#chSeuil").value+" de rythme ou plus fait monter de "+$("#chPas").value+" bpm, jusqu'à "+vise+". Sous le seuil, on rejoue au même tempo ; très en dessous, on redescend d'un cran. Trois passages ratés de suite arrêtent la séance. Le micro est nécessaire."
-    :t==="cases"?"Un passage par case : 1, 2, 3… jusqu'à la "+$("#chCaseMax").value+"e"+($("#chRedescend").checked?", puis retour à la 1re":"")+". La case à jouer s'affiche en grand pendant la pause, le temps de déplacer l'accord. Chaque passage entre au journal, avec sa case."
+  const sp=$("#chPause").value==="0"?" Sans pause, le clic ne s'arrête pas : une mesure de décompte au nouveau tempo, puis le passage suivant.":"";
+  $("#chGlose").textContent=t==="tempoBas"?"Départ à "+bpm+" (le tempo réglé plus haut). Chaque passage à "+$("#chSeuil").value+" de rythme ou plus fait descendre de "+$("#chPas").value+" bpm, jusqu'à "+vise+" : plus c'est lent, plus il y a d'espace entre les notes et plus il faut tenir le temps tout seul. Sous le seuil, on rejoue au même tempo ; très en dessous, on remonte d'un cran. Trois passages ratés de suite arrêtent la séance. Le micro ou le pad est nécessaire."+sp
+    :t==="tempo"?"Départ à "+bpm+" (le tempo réglé plus haut). Chaque passage à "+$("#chSeuil").value+" de rythme ou plus fait monter de "+$("#chPas").value+" bpm, jusqu'à "+vise+". Sous le seuil, on rejoue au même tempo ; très en dessous, on redescend d'un cran. Trois passages ratés de suite arrêtent la séance. Le micro ou le pad est nécessaire."+sp
+    :t==="cases"?"Un passage par case : 1, 2, 3… jusqu'à la "+$("#chCaseMax").value+"e"+($("#chRedescend").checked?", puis retour à la 1re":"")+". La case à jouer s'affiche en grand pendant la pause, le temps de déplacer l'accord. Chaque passage entre au journal, avec sa case."+sp
     :"Chaque « Démarrer » joue un seul passage.";
 }
 ["chaine","chVise","chPas","chSeuil","chCaseMax","chPause","chRedescend"].forEach(k=>$("#"+k).addEventListener("change",()=>{chMaj();chSauve();}));
@@ -7321,16 +7340,19 @@ function lanceSerie(){
   const t=S.mode==="morceau"?"non":$("#chaine").value;
   clearTimeout(CH.pause);CH.on=false;$("#chBandeau").hidden=true;
   if(t==="non"){demarre();return;}
-  if(t==="tempo"&&!mesure()&&!CH.sim){$("#etat").textContent="Le tempo qui monte se décide sur la note de rythme : active d'abord le micro.";return;}
+  if((t==="tempo"||t==="tempoBas")&&!mesure()&&!CH.sim){$("#etat").textContent="Le tempo qui change se décide sur la note de rythme : active d'abord le micro, ou choisis le pad.";return;}
   // une séance enchaînée a besoin de passages qui finissent
   if(S.mode==="rythme"&&$("#repet").value==="0"){$("#repet").value="2";majSignature();}
   if(S.mode==="rasgueado"&&$("#temps").value==="0")$("#temps").value="16";
-  Object.assign(CH,{on:true,type:t,id:"s"+Date.now().toString(36),k:0,res:[],echecs:0,bpm0:parseInt($("#bpm").value,10)});
+  Object.assign(CH,{on:true,type:t,id:"s"+Date.now().toString(36),k:0,res:[],echecs:0,bpm0:parseInt($("#bpm").value,10),finPrec:null});
   $("#chResume").hidden=true;
   if(t==="cases"){
     const h=parseInt($("#chCaseMax").value,10)||12;CH.liste=[];
     for(let c=1;c<=h;c++)CH.liste.push(c);
     if($("#chRedescend").checked)for(let c=h-1;c>=1;c--)CH.liste.push(c);
+  }else if(t==="tempoBas"){
+    CH.vise=clamp(parseInt($("#chVise").value,10)||CH.bpm0,30,240);
+    if(CH.vise>=CH.bpm0)CH.vise=Math.max(30,CH.bpm0-parseInt($("#chPas").value,10));
   }else{
     CH.vise=clamp(parseInt($("#chVise").value,10)||CH.bpm0,30,240);
     if(CH.vise<=CH.bpm0)CH.vise=Math.min(240,CH.bpm0+parseInt($("#chPas").value,10));
@@ -7360,18 +7382,23 @@ function suiteSerie(){
   }else{
     const seuil=parseInt($("#chSeuil").value,10),pas=parseInt($("#chPas").value,10);
     CH.k++;
+    const bas=CH.type==="tempoBas";
     if(r!=null&&r>=seuil){
       CH.echecs=0;
-      if(bpm>=CH.vise){finSerie("Objectif atteint : "+bpm+" tenu à "+r+" de rythme.");return;}
-      setBpmEntr(Math.min(CH.vise,bpm+pas));msg="Rythme "+r+" : on monte.";
+      if(bas?bpm<=CH.vise:bpm>=CH.vise){finSerie("Objectif atteint : "+bpm+" tenu à "+r+" de rythme.");return;}
+      setBpmEntr(bas?Math.max(CH.vise,bpm-pas):Math.min(CH.vise,bpm+pas));msg="Rythme "+r+(bas?" : on ralentit.":" : on monte.");
     }else{
       CH.echecs++;
-      if(CH.echecs>=3){finSerie("Trois passages sous "+seuil+" de suite : la séance s'arrête ici. Reprends un peu plus bas demain.");return;}
-      if(r==null||r<seuil-15){setBpmEntr(Math.max(CH.bpm0,bpm-pas));msg="Rythme "+(r==null?"non mesuré":r)+" : on redescend d'un cran.";}
+      if(CH.echecs>=3){finSerie("Trois passages sous "+seuil+" de suite : la séance s'arrête ici."+(bas?" Reprends un peu plus vite demain.":" Reprends un peu plus bas demain."));return;}
+      if(r==null||r<seuil-15){
+        if(bas){setBpmEntr(Math.min(CH.bpm0,bpm+pas));msg="Rythme "+(r==null?"non mesuré":r)+" : on remonte d'un cran.";}
+        else{setBpmEntr(Math.max(CH.bpm0,bpm-pas));msg="Rythme "+(r==null?"non mesuré":r)+" : on redescend d'un cran.";}
+      }
       else msg="Rythme "+r+" : encore une fois au même tempo.";
     }
   }
-  const pauseS=CH.sim?0:parseFloat($("#chPause").value)||3;
+  const pv=parseFloat($("#chPause").value),pauseS=CH.sim?0:(isNaN(pv)?3:pv);
+  if(pauseS===0&&!CH.sim){const [g0,p0]=texteBandeau();bandeau(g0,(msg?msg+" ":"")+p0);passageSerie();return;}
   const [g,p]=texteBandeau();
   let reste=Math.ceil(pauseS);
   const montre=()=>bandeau(g,(msg?msg+" ":"")+(reste>0?"Reprise dans "+reste+" s…":p));
@@ -7386,7 +7413,7 @@ function suiteSerie(){
   CH.pause=setTimeout(tic,1000);
 }
 function finSerie(msg,stop){
-  clearTimeout(CH.pause);
+  clearTimeout(CH.pause);CH.finPrec=null;
   const etait=CH.on;CH.on=false;
   if(!stop||!S.running){$("#btnJouer").disabled=false;$("#btnStop").disabled=true;}
   if(!etait)return;
@@ -7402,8 +7429,8 @@ function finSerie(msg,stop){
     h+="<p>"+res.length+" passage"+(res.length>1?"s":"")+(moyR!=null?", rythme moyen "+moyR:"")+(faible&&notes.length>2&&faible.r<moyR-5?". Case la plus fragile : "+faible.cas+" ("+faible.r+").":".")+"</p>";
     h+='<div class="ch-pastilles">'+res.map(x=>'<span class="'+q(x.r)+'">case '+x.cas+(x.r!=null?"<br>"+x.r:"")+"</span>").join("")+"</div>";
   }else{
-    const seuil=parseInt($("#chSeuil").value,10),tenus=notes.filter(x=>x.r>=seuil),max=tenus.length?Math.max(...tenus.map(x=>x.bpm)):null;
-    h+="<p>De "+res[0].bpm+" à "+res[res.length-1].bpm+" bpm en "+res.length+" passage"+(res.length>1?"s":"")+(max?" — tenu proprement jusqu'à "+max+".":" — aucun passage au-dessus de "+seuil+".")+"</p>";
+    const seuil=parseInt($("#chSeuil").value,10),tenus=notes.filter(x=>x.r>=seuil),max=tenus.length?(CH.type==="tempoBas"?Math.min:Math.max)(...tenus.map(x=>x.bpm)):null;
+    h+="<p>De "+res[0].bpm+" à "+res[res.length-1].bpm+" bpm en "+res.length+" passage"+(res.length>1?"s":"")+(max?" — tenu proprement jusqu'à "+max+(CH.type==="tempoBas"?" (le plus lent).":"."):" — aucun passage au-dessus de "+seuil+".")+"</p>";
     h+='<div class="ch-pastilles">'+res.map(x=>'<span class="'+q(x.r)+'">♩'+x.bpm+(x.r!=null?"<br>"+x.r:"")+"</span>").join("")+"</div>";
   }
   z.innerHTML=h;z.querySelector("b").textContent=msg;z.hidden=false;
@@ -12553,7 +12580,7 @@ window.addEventListener("load",function(){
     try{
       if("serviceWorker" in navigator)await navigator.serviceWorker.register("sw.js");
       // la version en cours est celle que déclare le service worker
-      let v="compas-v36";try{const t=await (await fetch("sw.js",{cache:"no-store"})).text();const m=t.match(/VERSION = "([^"]+)"/);if(m)v=m[1];}catch(e){}
+      let v="compas-v37";try{const t=await (await fetch("sw.js",{cache:"no-store"})).text();const m=t.match(/VERSION = "([^"]+)"/);if(m)v=m[1];}catch(e){}
       const c=await caches.open(v);
       await c.addAll(["./","index.html"]);
       await Promise.all(["manifest.webmanifest","icone-180.png","icone-192.png","icone-512.png","icone-masquable-512.png","pdfjs/pdf.min.js","pdfjs/pdf.worker.min.js"]

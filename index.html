@@ -1569,7 +1569,11 @@ table.af-main td.af-case{min-width:104px;border:1px solid var(--edge);border-lef
       <label for="ciJoue">Compás joué</label>
       <select id="ciJoue"><option value="1">1 cycle</option><option value="2" selected>2 cycles</option><option value="4">4 cycles</option></select>
     </div>
-    <div>
+    <div id="ciGroupeBloc" hidden>
+      <label for="ciGroupe">Une cible =</label>
+      <select id="ciGroupe"><option value="1" selected>1 mesure</option><option value="2">2 mesures</option><option value="3">3 mesures</option><option value="4">4 mesures</option><option value="0">toute la partition</option></select>
+    </div>
+    <div id="ciSilenceBloc">
       <label for="ciSilence">Puis silence</label>
       <select id="ciSilence"><option value="1" selected>1 cycle</option><option value="2">2 cycles</option></select>
     </div>
@@ -1582,6 +1586,7 @@ table.af-main td.af-case{min-width:104px;border:1px solid var(--edge);border-lef
       <select id="ciCycle"><option value="2">2 temps</option><option value="3">3 temps</option><option value="4" selected>4 temps</option><option value="6">6 temps</option></select>
     </div>
   </div>
+  <div class="ligne-case"><input type="checkbox" id="ciDabord"><label for="ciDabord">Silence dès la fin du décompte : la cible d'abord, puis le compás</label></div>
   <p class="aide" id="ciGlose"></p>
   <div class="actions"><button class="primaire" id="ciLancer" type="button">Lancer les cibles</button></div>
   <p class="aide exo-retour" id="ciRetour" aria-live="polite"></p>
@@ -6951,7 +6956,7 @@ function rafraichitScene(){
   if(S.sil&&e>=S.decompte){
     const bt=Math.floor(e-S.decompte),silence=phaseSil(bt)==="silence";
     $("#blocScene").classList.toggle("en-silence",silence);
-    if(silence){const p=((bt%S.sil.per)+S.sil.per)%S.sil.per;$("#etat").textContent="Silence : garde le compás — l'accompagnement revient dans "+(S.sil.per-p)+" temps";}
+    if(silence){const p=((bt%S.sil.per)+S.sil.per)%S.sil.per;$("#etat").textContent="Silence : garde le compás — l'accompagnement revient dans "+((S.sil.inv?S.sil.off*S.sil.unite:S.sil.per)-p)+" temps";}
   }
   S.raf=requestAnimationFrame(rafraichitScene);
 }
@@ -7102,17 +7107,27 @@ const CI={actif:false,tours:[],on:2,off:1,L:4,palo:null,niveau:"1",avant:null,ti
 const NIVEAUX_CI={"1":"temps et contretemps","2":"doubles croches et triolets","3":"petites figures avec accent","4":"accents du palo","m":"mélange","p":"ta partition, dans l'ordre","ph":"ta partition, au hasard"};
 const UNITE_CI={1:"r",2:"b",4:"n",8:"c",16:"d"};
 // les cibles tirées de la partition : chaque mesure qui contient au moins une frappe
-function ciblesPartition(){
+// g : mesures par cible (0 = toute la partition)
+function ciblesPartition(g){
   const ix=aDesDoigts()?indexFrappes(R.mesures).map:null;
-  return R.mesures.map((m,i)=>({m,i})).filter(x=>x.m.some(c=>c.actif!==false&&c.att.some(Boolean))).map(x=>{
-    // seulement les temps où l'on joue : « temps 3 : demi-soupir, croche »
-    let pos=0;const noms=[];
-    x.m.forEach(c=>{const bc=beatsCellule(c);if(c.actif!==false&&c.att.some(Boolean))noms.push("temps "+fmt(pos+1)+" : "+nomCellule(c.duree,c.div,c.att,c.tenu));pos+=bc;});
+  const joue=m=>m.some(c=>c.actif!==false&&c.att.some(Boolean));
+  // seulement les temps où l'on joue : « temps 3 : demi-soupir, croche »
+  const decrit=m=>{let pos=0;const l=[];m.forEach(c=>{const bc=beatsCellule(c);if(c.actif!==false&&c.att.some(Boolean))l.push("temps "+fmt(pos+1)+" : "+nomCellule(c.duree,c.div,c.att,c.tenu));pos+=bc;});return l.join(" · ");};
+  if(!g||g>R.nbMes)g=R.nbMes;
+  const out=[];
+  for(let i=0;i<R.nbMes;i+=g){
+    const idx=[];for(let j=i;j<Math.min(R.nbMes,i+g);j++)idx.push(j);
+    if(!idx.some(j=>joue(R.mesures[j])))continue;
     const dg=[];
-    if(ix)x.m.forEach((c,ci)=>c.att.forEach((a,k)=>{if(a)dg.push(R.doigts[ix["m"+x.i+"c"+ci+"k"+k]]||"·");}));
-    return {txt:"ta mesure "+(x.i+1)+" — "+noms.join(" · "),mes:x.m.map(codeCellule).filter(Boolean).join(" "),doigts:ix?dg:null};
-  });
+    if(ix)idx.forEach(j=>R.mesures[j].forEach((c,ci)=>c.att.forEach((a,k)=>{if(a)dg.push(R.doigts[ix["m"+j+"c"+ci+"k"+k]]||"·");})));
+    const txt=idx.length===1?"ta mesure "+(idx[0]+1)+" — "+decrit(R.mesures[idx[0]]):
+      "tes mesures "+(idx[0]+1)+" à "+(idx[idx.length-1]+1)+" — "+idx.filter(j=>joue(R.mesures[j])).map(j=>"M"+(j+1)+" "+decrit(R.mesures[j])).join(" | ");
+    out.push({txt,mes:idx.map(j=>R.mesures[j].map(codeCellule).filter(Boolean).join(" ")),doigts:ix?dg:null});
+  }
+  return out;
 }
+// la cible est-elle jouée à cette position du tour (en temps) ?
+const enSilenceCI=dans=>CI.inv?dans<CI.off*CI.L:dans>=CI.on*CI.L;
 const ordinal=n=>n===1?"1re":n+"e";
 const du=n=>n.replace(/^le /,"du ");
 const liste=l=>l.length<2?String(l[0]):l.slice(0,-1).join(", ")+" et "+l[l.length-1];
@@ -7153,12 +7168,15 @@ function codeCibles(){
   const L=CI.L,den=CI.den||4,u=UNITE_CI[den]||"n",mes=[],dg=[];
   const vide=()=>Array.from({length:L},()=>u+":o").join(" ");
   CI.tours.forEach(t=>{
-    for(let i=0;i<CI.on;i++)mes.push(vide());
-    for(let i=0;i<CI.off;i++){
-      if(i>0){mes.push(vide());continue;}
-      if(t.mes!=null){mes.push(t.mes);if(t.doigts)dg.push(t.doigts.join(" "));continue;}
-      mes.push(Array.from({length:L},(_,j)=>{const c=t.cells[j];return c?"n:"+c:"n:o";}).join(" "));
+    const comp=[],sil=[];
+    for(let i=0;i<CI.on;i++)comp.push(vide());
+    if(t.mes!=null){t.mes.forEach(x=>sil.push(x||vide()));if(t.doigts&&t.doigts.length)dg.push(t.doigts.join(" "));}
+    else{
+      sil.push(Array.from({length:L},(_,j)=>{const c=t.cells[j];return c?"n:"+c:"n:o";}).join(" "));
+      for(let i=1;i<CI.off;i++)sil.push(vide());
     }
+    // la cible d'abord (silence dès le décompte), ou le compás d'abord
+    (CI.inv?sil.concat(comp):comp.concat(sil)).forEach(x=>mes.push(x));
   });
   return L+"/"+den+"\n| "+mes.join(" | ")+" |"+(dg.length?"\ndoigts: "+dg.join(" | "):"");
 }
@@ -7169,9 +7187,11 @@ function ciMaj(){
   if(!pal&&$("#ciNiveau").value==="4")$("#ciNiveau").value="1";
   const part=$("#ciNiveau").value==="p"||$("#ciNiveau").value==="ph";
   $("#ciCycleBloc").hidden=!!pl||part;
+  $("#ciGroupeBloc").hidden=!part;$("#ciSilenceBloc").hidden=part;
   if(part){
-    const n=ciblesPartition().length;
-    $("#ciGlose").textContent="Chaque mesure non vide de ta partition devient une cible ("+n+" pour l'instant). Le cycle dure une mesure de "+R.num+"/"+R.den+(pl?(pl.pulses===R.num?", calée sur le compás de "+pl.nom:" — attention : avec "+pl.nom+", la mesure doit faire "+pl.pulses+" temps"):", au clic")+". Pendant le compás, ta cible s'affiche sur la portée ; dans le silence, elle s'efface et tu la joues de mémoire. Tes doigtés sont repris : au pad en 4 zones, le doigt est vérifié aussi.";
+    const g=parseInt($("#ciGroupe").value,10),n=ciblesPartition(g).length,gm=g||R.nbMes;
+    $("#ciGlose").textContent=(gm===1?"Chaque mesure non vide de ta partition devient une cible":"Ta partition est découpée en cibles de "+gm+" mesures, jouées d'un bloc dans le silence")+" ("+n+" cible"+(n>1?"s":"")+" pour l'instant). "+
+      ($("#ciDabord").checked?"Le silence commence dès la fin du décompte, puis le compás revient pendant "+$("#ciJoue").value+" cycle(s), et ainsi de suite. ":"")+"Un cycle = une mesure de "+R.num+"/"+R.den+(pl?(pl.pulses===R.num?", calée sur le compás de "+pl.nom:" — attention : avec "+pl.nom+", la mesure doit faire "+pl.pulses+" temps"):", au clic")+". Pendant le compás, ta cible s'affiche sur la portée ; dans le silence, elle s'efface et tu la joues de mémoire. Tes doigtés sont repris : au pad en 4 zones, le doigt est vérifié aussi.";
     return;
   }
   $("#ciGlose").textContent=pl?"Le cycle est le compás de "+pl.nom+" ("+pl.pulses+" pulsos, au tempo réglé plus haut). Les cibles se disent en pulsos, comme on compte le palo.":
@@ -7183,10 +7203,11 @@ function lanceCibles(){
   const pl=$("#palo").value==="metronome"?paloMetronome():null;
   CI.palo=pl?{nom:pl.nom,pulses:pl.pulses,depart:pl.depart,accents:(state.palo.accents||[]).slice()}:null;
   CI.niveau=$("#ciNiveau").value;
-  CI.on=parseInt($("#ciJoue").value,10)||2;CI.off=parseInt($("#ciSilence").value,10)||1;CI.den=4;
+  CI.on=parseInt($("#ciJoue").value,10)||2;CI.off=parseInt($("#ciSilence").value,10)||1;CI.den=4;CI.inv=$("#ciDabord").checked;
   const nT=parseInt($("#ciTours").value,10);
   if(CI.niveau==="p"||CI.niveau==="ph"){
-    const l=ciblesPartition();
+    const g=parseInt($("#ciGroupe").value,10),l=ciblesPartition(g);
+    CI.off=Math.min(R.nbMes,g||R.nbMes);
     if(!l.length){$("#ciRetour").textContent="Ta partition est vide : écris une cible par mesure (une mesure = une cible), puis relance.";return;}
     if(pl&&pl.pulses!==R.num){$("#ciRetour").textContent="Avec "+pl.nom+", chaque mesure doit faire un compás de "+pl.pulses+" temps : ta partition est en "+R.num+"/"+R.den+". Change « Temps par mesure » dans « Le cadre », ou passe au clic simple.";return;}
     CI.L=R.num;CI.den=R.den;
@@ -7212,17 +7233,20 @@ function lanceCibles(){
 function ticCibles(){
   if(!CI.actif||!S.running){clearInterval(CI.tic);return;}
   const b=(S.ctx.currentTime-S.depart)/S.dureeTemps-S.decompte,per=(CI.on+CI.off)*CI.L;
-  if(b<0){bandeau(CI.tours[0].txt,"Tour 1 sur "+CI.tours.length+" — écoute le compás, la cible viendra dans le silence");return;}
-  const k=Math.min(CI.tours.length-1,Math.floor(b/per)),dans=b-k*per,sil=dans>=CI.on*CI.L;
-  const reste=Math.ceil(CI.on*CI.L-dans);
-  bandeau(CI.tours[k].txt,"Tour "+(k+1)+" sur "+CI.tours.length+" — "+(sil?"À toi, dans le silence !":"le compás joue · silence dans "+reste+" temps"));
+  if(b<0){bandeau(CI.tours[0].txt,"Tour 1 sur "+CI.tours.length+" — "+(CI.inv?"à toi dès la fin du décompte":"écoute le compás, la cible viendra dans le silence"));return;}
+  const k=Math.min(CI.tours.length-1,Math.floor(b/per)),dans=b-k*per,sil=enSilenceCI(dans);
+  // pendant le compás, on annonce déjà la cible suivante quand le silence vient d'abord
+  const kAff=CI.inv&&!sil?Math.min(CI.tours.length-1,k+1):k;
+  const reste=Math.ceil(CI.inv?(sil?CI.off*CI.L-dans:per-dans):(sil?per-dans:CI.on*CI.L-dans));
+  bandeau(CI.tours[kAff].txt,"Tour "+(kAff+1)+" sur "+CI.tours.length+" — "+(sil?"À toi, dans le silence ! (compás dans "+reste+" temps)":"le compás joue · silence dans "+reste+" temps"));
 }
 // seules comptent les frappes jouées dans le silence (avec une petite marge de chaque côté)
 function filtreCibles(){
   const lat=latS(),per=(CI.on+CI.off)*CI.L,m=0.12/S.dureeTemps;
   S.onsets=S.onsets.filter(o=>{
-    const b=(o.t-lat-S.depart)/S.dureeTemps-S.decompte;if(b<0)return false;
+    const b=(o.t-lat-S.depart)/S.dureeTemps-S.decompte;if(b<-m)return false;
     const dans=b-Math.floor(b/per)*per;
+    if(CI.inv)return dans<CI.off*CI.L+m||dans>per-m;
     return dans>=CI.on*CI.L-m||dans<m&&b>=per;
   });
 }
@@ -7233,7 +7257,7 @@ function finCibles(){
   const res=CI.tours.map((t,k)=>{
     const att=S.attendus.filter(a=>Math.floor(parseInt(a.cle.slice(1),10)/mt)===k);
     const ok=att.filter(a=>a.dev!=null),n=att.length;
-    const ons=S.onsets.filter(o=>{const b=(o.t-lat-S.depart)/S.dureeTemps-S.decompte;return Math.floor((b+0.2)/per)===k;}).length;
+    const ons=S.onsets.filter(o=>{const b=(o.t-lat-S.depart)/S.dureeTemps-S.decompte+0.2;return Math.floor((CI.inv?b:b)/per)===k;}).length;
     const dev=ok.length?Math.round(ok.reduce((s,a)=>s+a.dev,0)/ok.length):null;
     return {txt:t.txt,n,ok:ok.length,dev,trop:Math.max(0,ons-ok.length),joue:att.length&&att[0].t<=S.ctx.currentTime};
   }).filter(x=>x.joue);
@@ -7262,7 +7286,7 @@ function restaureCibles(){
   majSignature();afficheCourant();afficheListe();majBiblioPalos();majPalo();sauve();
 }
 $("#ciLancer").addEventListener("click",lanceCibles);
-["#ciNiveau","#ciCycle"].forEach(x=>$(x).addEventListener("change",ciMaj));
+["#ciNiveau","#ciCycle","#ciGroupe","#ciDabord","#ciJoue"].forEach(x=>$(x).addEventListener("change",ciMaj));
 ["#ciNiveau","#blocCibles"].forEach(x=>$(x).addEventListener("pointerdown",ciMaj,true));
 $("#palo").addEventListener("change",ciMaj);
 ciMaj();
@@ -8932,7 +8956,7 @@ function initBiblio(){
 /* ---------- compás intérieur : l'accompagnement se tait par moments, puis revient ---------- */
 function lireSilences(){
   if(S.mode==="morceau")return null;
-  if(CI.actif)return {on:CI.on,off:CI.off,unite:CI.L,quoi:"tout",per:(CI.on+CI.off)*CI.L};
+  if(CI.actif)return {on:CI.on,off:CI.off,unite:CI.L,quoi:"tout",per:(CI.on+CI.off)*CI.L,inv:!!CI.inv};
   const v=$("#silences").value;
   if(!v||v==="0")return null;
   const [on,off]=v.split("-").map(Number);
@@ -8945,6 +8969,7 @@ function phaseSil(beat){
   const c=S.sil;
   if(!c||beat<0)return "avec";
   const p=((beat%c.per)+c.per)%c.per;
+  if(c.inv){if(p<c.off*c.unite)return "silence";if(p<(c.off+1)*c.unite)return "retour";return "avec";}
   if(p>=c.on*c.unite)return "silence";
   if(beat>=c.per&&p<c.unite)return "retour";
   return "avec";
@@ -12528,7 +12553,7 @@ window.addEventListener("load",function(){
     try{
       if("serviceWorker" in navigator)await navigator.serviceWorker.register("sw.js");
       // la version en cours est celle que déclare le service worker
-      let v="compas-v35";try{const t=await (await fetch("sw.js",{cache:"no-store"})).text();const m=t.match(/VERSION = "([^"]+)"/);if(m)v=m[1];}catch(e){}
+      let v="compas-v36";try{const t=await (await fetch("sw.js",{cache:"no-store"})).text();const m=t.match(/VERSION = "([^"]+)"/);if(m)v=m[1];}catch(e){}
       const c=await caches.open(v);
       await c.addAll(["./","index.html"]);
       await Promise.all(["manifest.webmanifest","icone-180.png","icone-192.png","icone-512.png","icone-masquable-512.png","pdfjs/pdf.min.js","pdfjs/pdf.worker.min.js"]

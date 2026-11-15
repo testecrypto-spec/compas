@@ -2,7 +2,7 @@
    - La page (index.html) passe par le réseau quand il y en a, pour recevoir les mises à jour, sinon par le cache.
    - Les gros fichiers (sons, polices, modèle d'écoute, exercices) ont un numéro dans leur nom : ils restent
      dans un cache à part d'une version à l'autre et ne se retéléchargent que lorsqu'ils changent de nom. */
-const VERSION = "compas-v37";
+const VERSION = "compas-v38";
 const FIXES = "compas-fixes";
 const PAGE = ["./", "index.html", "manifest.webmanifest", "icone-180.png", "icone-192.png", "icone-512.png",
   "icone-masquable-512.png", "pdfjs/pdf.min.js", "pdfjs/pdf.worker.min.js"];
@@ -36,6 +36,8 @@ self.addEventListener("fetch", e => {
   if (req.method !== "GET") return;
   const url = new URL(req.url);
   if (url.origin !== self.location.origin) return;
+  // la page lit sw.js pour savoir si une version plus récente est en ligne : jamais depuis le cache
+  if (url.pathname.endsWith("/sw.js")) return;
   if (req.mode === "navigate") {
     const page = new URL("index.html", self.registration.scope).href;
     e.respondWith(

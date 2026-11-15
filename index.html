@@ -614,6 +614,22 @@ footer{color:var(--muted);font-size:.82rem;margin-top:1.6rem;max-width:70ch}
 .entraineur .palos-conseilles button[aria-pressed="true"]{background:var(--bronce);border-color:var(--bronce);color:var(--sur-oro)}
 .entraineur .palos-conseilles button[aria-pressed="true"] .etiq{color:var(--sur-oro);opacity:.85}
 .palo-autre{margin-top:12px}
+.seances{max-width:620px;margin:0 auto 14px;padding-bottom:12px;border-bottom:1px solid var(--trait);text-align:left}
+.seances-lib{font-size:.78rem;text-transform:uppercase;letter-spacing:.06em;color:var(--tapa-doux)}
+.seances .rapides{margin-top:6px}
+.seances .rapides button{font-size:.84rem;padding:6px 11px}
+.seances .rapides button[aria-pressed="true"]{background:var(--bronce);color:var(--sur-oro);border-color:var(--bronce)}
+.seances .aide{margin:8px 0 0;font-size:.82rem}
+.seances .aide button{background:none;border:0;padding:0 0 0 6px;color:var(--bronce);font:inherit;text-decoration:underline;cursor:pointer}
+.avis-reglages{list-style:none;margin:0 auto 14px;padding:0;max-width:620px;text-align:left}
+.avis-reglages li{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:8px 10px;margin-top:6px;border:1px solid var(--trait);border-left:3px solid var(--bronce);border-radius:0 3px 3px 0;background:var(--ebano);font-size:.84rem;line-height:1.4;color:var(--tapa)}
+.avis-reglages button{flex:none;padding:5px 10px;font-size:.78rem}
+.avis-decalage{border-left-color:var(--carmin)}
+.avis-decalage .actions{margin-top:8px}
+.avis-cal{margin:0 0 12px;padding:8px 10px;border-left:3px solid var(--carmin);background:var(--ebano);font-size:.86rem;color:var(--tapa)}
+.pied-version{margin:28px 0 8px;text-align:center;font-size:.78rem;color:var(--muted)}
+.maj-bandeau{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px 14px;margin:0 0 14px;padding:10px 14px;border:1px solid var(--oro);border-radius:4px;background:color-mix(in srgb,var(--oro) 14%,transparent);color:var(--text);font-size:.9rem}
+.maj-bandeau button{padding:.5rem 1rem;font-size:.86rem;background:var(--oro);border-color:var(--oro);color:#1B1220;font-weight:600}
 .scene-rapide{display:grid;grid-template-columns:1fr auto;gap:10px 18px;align-items:end;max-width:620px;margin:0 auto 16px;padding-bottom:14px;border-bottom:1px solid var(--trait);text-align:left}
 .scene-rapide>div:first-child{min-width:0}
 .scene-rapide .aide{margin:4px 0 0}
@@ -654,6 +670,14 @@ body.pad-ouvert{padding-bottom:calc(min(30vh,240px) + 60px)}
 .ch-bandeau span{font-size:.84rem;color:var(--tapa-doux)}
 .ch-resume{margin:18px auto 0;max-width:620px;padding:12px 14px;border:1px solid var(--trait);border-left:3px solid var(--bronce);border-radius:0 3px 3px 0;background:var(--ebano);font-size:.9rem;color:var(--tapa)}
 .ch-resume p{margin:0 0 8px}
+.ci-series{margin-top:22px;padding-top:14px;border-top:1px dashed var(--trait)}
+.ci-series h3{margin:0 0 6px;font-size:1rem}
+.ci-series-liste{list-style:none;margin:10px 0 14px;padding:0}
+.ci-series-liste li{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:6px 10px;padding:8px 0;border-top:1px solid var(--trait)}
+.ci-series-liste li:first-child{border-top:0}
+.ci-series-liste b{font-weight:600}
+.ci-series-liste span{display:block;font-size:.78rem;color:var(--tapa-doux)}
+.ci-series-liste button{padding:5px 10px;font-size:.8rem}
 .ci-liste{list-style:none;margin:0;padding:0}
 .ci-liste li{display:grid;grid-template-columns:14px 1fr;column-gap:8px;align-items:baseline;padding:5px 0;border-top:1px solid var(--trait);font-size:.86rem;line-height:1.4}
 .ci-liste li:first-child{border-top:0}
@@ -960,6 +984,14 @@ table.af-main td.af-case{min-width:104px;border:1px solid var(--edge);border-lef
 .j-chiffres div{border-left:2px solid var(--edge);padding:2px 0 2px 10px}
 .j-chiffres b{display:block;font-size:1.15rem;color:var(--text)}
 .j-chiffres span{font-size:.76rem;color:var(--muted)}
+.j-rappel{margin:14px 0 0;padding:9px 12px;border:1px solid var(--edge);border-left:4px solid var(--oro);border-radius:4px;font-size:.86rem;color:var(--text)}
+.j-rappel button{margin-left:6px;padding:.35rem .8rem;font-size:.82rem}
+.tp-barres .barre{fill:var(--oro)} .tp-barres .barre.faible{fill:var(--carmin)}
+.tp-barres .val{fill:var(--text);font-size:11px;font-weight:600;font-family:Archivo,sans-serif}
+.tp-barres .faible-txt{fill:var(--carmin);font-size:10px;font-family:Archivo,sans-serif}
+.j-lecture{margin:0 0 14px;padding:0;list-style:none;font-size:.9rem;line-height:1.5;color:var(--text)}
+.j-lecture li{padding:4px 0 4px 14px;border-left:3px solid var(--edge);margin-bottom:6px}
+.j-lecture li.bon{border-left-color:var(--verde)} .j-lecture li.moyen{border-left-color:var(--oro)} .j-lecture li.mauvais{border-left-color:var(--carmin)}
 .j-graphe{position:relative;margin:4px 0 18px}
 .j-graphe h3{font-size:.9rem!important;font-weight:600}
 .j-graphe svg{display:block;width:100%;height:auto;overflow:visible}
@@ -1571,7 +1603,7 @@ table.af-main td.af-case{min-width:104px;border:1px solid var(--edge);border-lef
     </div>
     <div id="ciGroupeBloc" hidden>
       <label for="ciGroupe">Une cible =</label>
-      <select id="ciGroupe"><option value="1" selected>1 mesure</option><option value="2">2 mesures</option><option value="3">3 mesures</option><option value="4">4 mesures</option><option value="0">toute la partition</option></select>
+      <select id="ciGroupe"><option value="0" selected>toute la partition</option><option value="1">1 mesure</option><option value="2">2 mesures</option><option value="3">3 mesures</option><option value="4">4 mesures</option></select>
     </div>
     <div id="ciSilenceBloc">
       <label for="ciSilence">Puis silence</label>
@@ -1585,11 +1617,36 @@ table.af-main td.af-case{min-width:104px;border:1px solid var(--edge);border-lef
       <label for="ciCycle">Cycle au clic simple</label>
       <select id="ciCycle"><option value="2">2 temps</option><option value="3">3 temps</option><option value="4" selected>4 temps</option><option value="6">6 temps</option></select>
     </div>
+    <div>
+      <label for="ciTempo">Tempo</label>
+      <select id="ciTempo">
+        <option value="fixe" selected>tempo fixe</option>
+        <option value="bas">descend quand la série est réussie</option>
+        <option value="haut">monte quand la série est réussie</option>
+      </select>
+    </div>
+    <div class="ci-tempo" hidden>
+      <label for="ciVise">Tempo visé</label>
+      <input type="number" id="ciVise" min="30" max="240" step="1" value="60" inputmode="numeric">
+    </div>
+    <div class="ci-tempo" hidden>
+      <label for="ciPas">Par pas de</label>
+      <select id="ciPas"><option value="2">2 bpm</option><option value="4" selected>4 bpm</option><option value="6">6 bpm</option><option value="8">8 bpm</option><option value="10">10 bpm</option></select>
+    </div>
   </div>
   <div class="ligne-case"><input type="checkbox" id="ciDabord"><label for="ciDabord">Silence dès la fin du décompte : la cible d'abord, puis le compás</label></div>
   <p class="aide" id="ciGlose"></p>
   <div class="actions"><button class="primaire" id="ciLancer" type="button">Lancer les cibles</button></div>
   <p class="aide exo-retour" id="ciRetour" aria-live="polite"></p>
+  <div class="ci-series">
+    <h3>Mes séries de cibles</h3>
+    <p class="aide">Une série garde ta partition de cibles et tous les réglages ci-dessus, tempo compris. Tu la relances d'un geste, et elle peut devenir un devoir.</p>
+    <ul class="ci-series-liste" id="ciSeries"></ul>
+    <div class="reglages">
+      <div><label for="ciSerieNom">Nom de la série</label><input type="text" id="ciSerieNom" class="champ" autocomplete="off" placeholder="par exemple : contretemps du 3"></div>
+    </div>
+    <div class="actions"><button type="button" id="ciSerieGarder">Enregistrer la série actuelle</button></div>
+  </div>
 </section>
 <section class="plateau">
   <h2>Le cadre</h2>
@@ -1836,6 +1893,14 @@ table.af-main td.af-case{min-width:104px;border:1px solid var(--edge);border-lef
   </div>
   <div id="padReglages" class="pad-reglages" hidden>
     <p class="aide">Pendant le passage, un pad occupe le bas de l'écran. En quatre zones (P, I, M, A), Compás vérifie aussi que tu frappes avec le bon doigt ; le bouton du pad passe à une seule grande zone. Touche le haut d'une zone pour une frappe accentuée : l'écran ne sent pas la force du doigt. Pas besoin de micro ni de casque.</p>
+    <div class="source-frappes forme-pad">
+      <span class="source-lib">Forme du pad</span>
+      <div class="rapides" role="group" aria-label="Forme du pad">
+        <button type="button" data-zones="4" aria-pressed="true">4 zones P I M A</button>
+        <button type="button" data-zones="1" aria-pressed="false">1 grande zone</button>
+      </div>
+    </div>
+    <p class="avis-cal" id="padAvisCal" hidden>Le retard du pad n'a pas encore été mesuré sur cet appareil. Fais-le une fois avant de jouer : sans cela, toutes tes frappes paraîtront en avance ou en retard.</p>
     <label for="padLatence">Retard du pad — <span id="padLatVal">0</span> ms</label>
     <input type="range" id="padLatence" min="-100" max="300" step="1" value="0">
     <div class="actions"><button type="button" id="padMesure">Mesurer le retard du pad</button></div>
@@ -1903,6 +1968,18 @@ table.af-main td.af-case{min-width:104px;border:1px solid var(--edge);border-lef
 
 <section class="plateau scene" id="blocScene">
   <div class="scene-rapide" id="sceneRapide"><div class="scene-micro"><button type="button" id="btnMicroScene">Activer le micro</button><span id="sceneSource" class="aide"></span></div></div>
+  <div class="seances" id="seances">
+    <span class="seances-lib">Séance</span>
+    <div class="rapides" role="group" aria-label="Type de séance">
+      <button type="button" data-s="simple">Passage simple</button>
+      <button type="button" data-s="interieur">Compás intérieur</button>
+      <button type="button" data-s="cibles">Cibles</button>
+      <button type="button" data-s="monte">Tempo qui monte</button>
+      <button type="button" data-s="descend">Tempo qui descend</button>
+      <button type="button" data-s="cases">Case par case</button>
+    </div>
+    <p class="aide" id="seanceGlose"></p>
+  </div>
   <div class="ch-bandeau" id="chBandeau" hidden></div>
   <div class="compte-temps" id="etat">Active le micro, puis démarre.</div>
   <div class="gros" id="gros">&nbsp;</div>
@@ -1922,10 +1999,12 @@ table.af-main td.af-case{min-width:104px;border:1px solid var(--edge);border-lef
   </div>
   <div class="legende-aiguille"><span>en avance</span><span>sur le temps</span><span>en retard</span></div>
   <div class="dev-live" id="devLive">&nbsp;</div>
+  <ul class="avis-reglages" id="avisReglages" hidden aria-label="Réglages à vérifier"></ul>
   <div class="actions" style="justify-content:center">
     <button id="btnJouer" class="primaire">Démarrer</button>
     <button id="btnStop" disabled>Arrêter</button>
   </div>
+<div class="ch-resume avis-decalage" id="avisDecalage" hidden></div>
 <div class="ch-resume" id="chResume" hidden></div>
 <div class="ch-resume" id="ciResume" hidden></div>
 </section>
@@ -1982,10 +2061,12 @@ table.af-main td.af-case{min-width:104px;border:1px solid var(--edge);border-lef
     <div class="chiffre masque" id="chiffreContraste"><b id="cContraste">—</b><span>contraste des accents · <b id="cAccents" style="display:inline;font-size:inherit">—</b> ressortis</span></div>
     <div class="chiffre"><b id="cParasites">—</b><span>frappes en trop</span></div>
   </div>
+<div style="overflow-x:auto;-webkit-overflow-scrolling:touch">
   <table>
     <thead><tr><th>Frappe</th><th>Nombre</th><th>Placement</th><th>Puissance relative</th></tr></thead>
     <tbody id="tableDoigts"></tbody>
   </table>
+</div>
   <p class="aide" style="margin-top:22px">Chaque point : une frappe. Au-dessus de l'axe, en retard ; en dessous, en avance. L'échelle est la tolérance propre à chaque frappe.</p>
   <canvas id="nuage"></canvas>
   <div class="actions"><button id="btnRejouer" class="primaire">Refaire le passage</button></div>
@@ -2305,6 +2386,7 @@ table.af-main td.af-case{min-width:104px;border:1px solid var(--edge);border-lef
   <h2>Ton journal de travail</h2>
   <p class="j-aide">Chaque passage mesuré au micro s'inscrit ici : l'exercice, le jour, le tempo et tes notes. Rien ne quitte cet appareil.</p>
   <div class="j-tuiles" id="jTuiles"></div>
+  <p class="j-rappel" id="jRappelSauve" hidden><span></span> <button type="button">Sauvegarder maintenant</button></p>
 </section>
 
 <section class="j-plateau">
@@ -2342,6 +2424,28 @@ table.af-main td.af-case{min-width:104px;border:1px solid var(--edge);border-lef
   <div id="jProgres"></div>
 </section>
 
+<section class="j-plateau" id="jInterieur">
+  <h2>Ton compás intérieur</h2>
+  <p class="j-aide">Ce que tu fais quand le compás se tait : tes frappes jouées dans le silence (compás intérieur et cibles), comparées à celles jouées avec l'accompagnement.</p>
+  <div class="j-reglages">
+    <div><label for="jIntPeriode">Période</label>
+      <select id="jIntPeriode"><option value="14">14 derniers jours</option><option value="30" selected>30 derniers jours</option><option value="90">3 derniers mois</option><option value="0">depuis le début</option></select></div>
+  </div>
+  <div id="jIntCorps"></div>
+</section>
+
+<section class="j-plateau" id="jTempo">
+  <h2>Ta précision selon le tempo</h2>
+  <p class="j-aide">Ta note de rythme moyenne par tranche de tempo : pour voir à quels tempos tu es le moins précis, et donc où travailler.</p>
+  <div class="j-reglages">
+    <div><label for="jTempoPeriode">Période</label>
+      <select id="jTempoPeriode"><option value="30">30 derniers jours</option><option value="90" selected>3 derniers mois</option><option value="365">12 derniers mois</option><option value="0">depuis le début</option></select></div>
+    <div><label for="jTempoQuoi">Passages</label>
+      <select id="jTempoQuoi"><option value="tout">tous</option><option value="rythme">figures rythmiques</option><option value="rasgueado">rasgueados</option><option value="silence">compás intérieur et cibles</option></select></div>
+  </div>
+  <div id="jTempoCorps"></div>
+</section>
+
 <section class="j-plateau" id="jCouverture">
   <h2>Combinaisons de la main droite</h2>
   <p class="j-aide">Chaque case est une combinaison de doigts. Elle se colore dès que tu l'as jouée au micro, d'où qu'elle vienne : bibliothèque, livre importé ou générateur d'arpèges. Le tempo affiché (bpm) est le plus rapide tenu avec au moins 80 de rythme ; sinon « r. » donne ta meilleure note de rythme. Les cases du Great Chart portent leur numéro de ligne et de colonne du livre. Touche une case pour l'ouvrir dans Figures rythmiques.</p>
@@ -2365,7 +2469,8 @@ table.af-main td.af-case{min-width:104px;border:1px solid var(--edge);border-lef
 
 <section class="j-plateau">
   <h2>Sauvegarder</h2>
-  <p class="j-aide"><b>Tout sauvegarder</b> met dans un seul fichier ton journal, tes devoirs, tes exercices et tes rasgueados, tes favoris et tous tes réglages. Garde-le dans Fichiers ou envoie-le-toi : « Tout restaurer » le remet sur cet appareil ou sur un autre. Les morceaux chargés et tes propres sons restent à part : ce sont de gros fichiers audio, recharge-les si besoin.</p>
+  <p class="j-aide"><b>Tout sauvegarder</b> met dans un seul fichier ton journal, tes devoirs, tes exercices et tes rasgueados, tes favoris et tous tes réglages. Garde-le dans Fichiers ou envoie-le-toi : « Tout restaurer » le remet sur cet appareil ou sur un autre. Les images de partitions attachées aux exercices et tes séries de cibles en font partie. Les morceaux chargés et tes propres sons restent à part : ce sont de gros fichiers audio, recharge-les si besoin.</p>
+  <p class="j-aide" id="jDerniereSauve"></p>
   <div class="j-actions">
     <button type="button" id="toutSauver" class="j-principal">Tout sauvegarder</button>
     <label class="j-fichier">Tout restaurer<input type="file" id="toutRestaurer" accept=".json,application/json"></label>
@@ -6996,7 +7101,7 @@ function confronteDirect(onset){
 }
 
 function arrete(){
-  if(!CH.on&&!PAD.calib)padMontre(false);
+  if(!CH.on&&!PAD.calib&&!CI.boucle)padMontre(false);
   finEnregistrement();arreteReecoute();
   if(window.Morceaux&&Morceaux.stopEntrainement)Morceaux.stopEntrainement();
   S.running=false;clearInterval(S.timer);cancelAnimationFrame(S.raf);$("#blocScene").classList.remove("en-silence");
@@ -7010,15 +7115,21 @@ function termine(){
   $("#gros").innerHTML="&nbsp;";$("#legendeGros").innerHTML="&nbsp;";
   $("#etat").textContent=mesure()?"Passage terminé.":"Passage terminé — sans micro, pas de mesure.";
   if(mesure()){S.partiel=false;if(CI.actif)filtreCibles();calcule();}
-  if(CI.actif)finCibles();
+  if(CI.actif)finCibles(true);
   if(CH.on)suiteSerie();
 }
-$("#btnJouer").addEventListener("click",()=>{S.mode==="morceau"?demarreMorceau():lanceSerie();});
-$("#btnRejouer").addEventListener("click",()=>{S.mode==="morceau"?demarreMorceau():lanceSerie();});
+function lanceTout(){
+  if(S.mode==="morceau"){demarreMorceau();return;}
+  // séance « Cibles » : le bouton Démarrer lance les cibles
+  if(SE.cibles&&S.mode==="rythme"){lanceCibles();if(!S.running&&$("#ciRetour").textContent)$("#etat").textContent=$("#ciRetour").textContent;return;}
+  lanceSerie();
+}
+$("#btnJouer").addEventListener("click",lanceTout);
+$("#btnRejouer").addEventListener("click",lanceTout);
 $("#btnStop").addEventListener("click",()=>{
   const enSerie=CH.on;
   if(enSerie)finSerie("Séance arrêtée.",true);
-  if(!S.running){arrete();return;}
+  if(!S.running){if(CI.boucle)resumeBoucle("Séance de cibles arrêtée.");arrete();return;}
   const fin=S.ctx.currentTime;
   arrete();
   S.attendus=S.attendus.filter(a=>a.t<=fin-0.02);
@@ -7034,12 +7145,12 @@ $("#btnStop").addEventListener("click",()=>{
 });
 
 /* ---------- pad à l'écran : les frappes tapées du doigt, avec le doigt qui frappe ---------- */
-const PAD={on:false,zones:4,lat:0,calib:null};
+const PAD={on:false,zones:4,lat:0,calib:null,cal:false};
 const CLE_PAD="compas-pad";
 function latS(){return (PAD.on?PAD.lat:parseFloat($("#latence").value))/1000;}
 function mesure(){return S.micro||PAD.on;}
 function lettresDoigt(tk){const j=jeton(tk);return (j.doigt+j.bas).toLowerCase().replace(/e/g,"a").replace(/[^pima]/g,"");}
-function padSauve(){try{localStorage.setItem(CLE_PAD,JSON.stringify({on:PAD.on,zones:PAD.zones,lat:PAD.lat}));}catch(e){}}
+function padSauve(){try{localStorage.setItem(CLE_PAD,JSON.stringify({on:PAD.on,zones:PAD.zones,lat:PAD.lat,cal:!!PAD.cal}));}catch(e){}$("#padAvisCal").hidden=!!PAD.cal;$("#padMesure").classList.toggle("primaire",!PAD.cal);}
 function padMajLat(){$("#padLatence").value=String(PAD.lat);$("#padLatVal").textContent=String(PAD.lat);}
 function padZones(){
   const z=$("#padZones");z.innerHTML="";
@@ -7049,13 +7160,14 @@ function padZones(){
     b.addEventListener("pointerdown",padFrappe);
     z.appendChild(b);
   });
+  document.querySelectorAll("#padReglages [data-zones]").forEach(b=>b.setAttribute("aria-pressed",String(+b.dataset.zones===PAD.zones)));
   $("#padBascule").textContent=PAD.zones===4?"1 zone":"4 zones P I M A";
   $("#padInfo").textContent=PAD.zones===4?"Une zone par doigt · en haut = accent":"Tape ici · en haut = accent";
 }
 function padMontre(on){$("#pad").hidden=!on;document.body.classList.toggle("pad-ouvert",on);}
 function padSource(src){
   PAD.on=src==="pad";padSauve();
-  document.querySelectorAll(".source-frappes button").forEach(b=>b.setAttribute("aria-pressed",String(b.dataset.src===src)));
+  document.querySelectorAll(".source-frappes button[data-src]").forEach(b=>b.setAttribute("aria-pressed",String(b.dataset.src===src)));
   $("#padReglages").hidden=!PAD.on;
   $("#btnMicro").hidden=PAD.on;$("#btnLatenceAuto").hidden=PAD.on;$("#latAutoInfo").hidden=PAD.on;
   if(!PAD.on)padMontre(false);
@@ -7092,8 +7204,9 @@ function bilanDoigtsPad(){
   z.textContent="Doigts justes : "+ok+" sur "+l.length+(e.length?" — erreurs : "+e.map(([k,n])=>k+" ("+n+"×)").join(", ")+".":" — aucune erreur de doigt.");
   z.hidden=false;
 }
-document.querySelectorAll(".source-frappes button").forEach(b=>b.addEventListener("click",()=>padSource(b.dataset.src)));
+document.querySelectorAll(".source-frappes button[data-src]").forEach(b=>b.addEventListener("click",()=>padSource(b.dataset.src)));
 $("#padBascule").addEventListener("click",()=>{PAD.zones=PAD.zones===4?1:4;padZones();padSauve();});
+document.querySelectorAll("#padReglages [data-zones]").forEach(b=>b.addEventListener("click",()=>{PAD.zones=+b.dataset.zones===1?1:4;padZones();padSauve();}));
 $("#padLatence").addEventListener("input",e=>{PAD.lat=parseInt(e.target.value,10)||0;padMajLat();padSauve();});
 // le retard du pad : huit clics à taper en même temps
 $("#padMesure").addEventListener("click",()=>{
@@ -7107,12 +7220,12 @@ $("#padMesure").addEventListener("click",()=>{
     const taps=PAD.calib.taps;PAD.calib=null;padMontre(false);
     const ec=clics.map(c=>{let b=null;taps.forEach(t=>{if(Math.abs(t-c)<0.3&&(b===null||Math.abs(t-c)<Math.abs(b-c)))b=t;});return b===null?null:(b-c)*1000;}).filter(x=>x!==null).sort((a,b)=>a-b);
     if(ec.length<5){$("#padMesureInfo").textContent="Pas assez de clics tapés ("+ec.length+" sur 8). Recommence en tapant chaque clic.";return;}
-    PAD.lat=Math.round(clamp(ec[Math.floor(ec.length/2)],-100,300));padMajLat();padSauve();
+    PAD.lat=Math.round(clamp(ec[Math.floor(ec.length/2)],-100,300));PAD.cal=true;padMajLat();padSauve();majAvis();
     $("#padMesureInfo").textContent="Retard du pad réglé à "+PAD.lat+" ms ("+ec.length+" clics sur 8).";
   },(1.2+8*pas+0.6)*1000);
 });
 (function(){
-  try{const d=JSON.parse(localStorage.getItem(CLE_PAD)||"null");if(d){PAD.zones=d.zones===1?1:4;PAD.lat=Number(d.lat)||0;if(d.on)PAD.on=true;}}catch(e){}
+  try{const d=JSON.parse(localStorage.getItem(CLE_PAD)||"null");if(d){PAD.zones=d.zones===1?1:4;PAD.lat=Number(d.lat)||0;PAD.cal=!!d.cal||PAD.lat!==0;if(d.on)PAD.on=true;}}catch(e){}
   padZones();padMajLat();padSource(PAD.on?"pad":"micro");
 })();
 
@@ -7211,8 +7324,19 @@ function ciMaj(){
   $("#ciGlose").textContent=pl?"Le cycle est le compás de "+pl.nom+" ("+pl.pulses+" pulsos, au tempo réglé plus haut). Les cibles se disent en pulsos, comme on compte le palo.":
     "Sans palo, le cycle est une mesure de "+$("#ciCycle").value+" temps au clic. Choisis « Accompagnement : palo du métronome » plus bas pour travailler dans un compás (et débloquer le niveau des accents du palo).";
 }
-function lanceCibles(){
+function lanceCibles(suite){
   if(S.running)return;
+  if(suite!==true){
+    // une nouvelle séance : la boucle de tempo repart de zéro
+    clearTimeout(CI.pauseB);CI.boucle=null;
+    const sens=$("#ciTempo").value,bpm=parseInt($("#bpm").value,10)||60;
+    if(sens!=="fixe"){
+      const pas=parseInt($("#ciPas").value,10)||4;let vise=clamp(parseInt($("#ciVise").value,10)||bpm,30,240);
+      if(sens==="bas"&&vise>=bpm)vise=Math.max(30,bpm-pas);
+      if(sens==="haut"&&vise<=bpm)vise=Math.min(240,bpm+pas);
+      CI.boucle={sens,vise,pas,echecs:0,res:[],sim:!!CI.simB};
+    }
+  }
   if(!mesure()){$("#ciRetour").textContent="Active d'abord le micro, ou choisis le pad à l'écran dans « Réglage du micro ».";return;}
   const pl=$("#palo").value==="metronome"?paloMetronome():null;
   CI.palo=pl?{nom:pl.nom,pulses:pl.pulses,depart:pl.depart,accents:(state.palo.accents||[]).slice()}:null;
@@ -7240,6 +7364,7 @@ function lanceCibles(){
   $("#repet").value="1";$("#guide").value="non";$("#chaine").value="non";$("#clicDecompte").checked=false;
   if(!chargeCodeLibre(codeCibles(),null,"")){$("#ciRetour").textContent="Les cibles n'ont pas pu être écrites.";return;}
   CI.actif=true;CI.res=null;$("#ciResume").hidden=true;$("#ciRetour").textContent="";
+  CI.serie=serieCourante();
   const z=document.getElementById("blocScene");if(z)z.scrollIntoView({block:"start",behavior:"smooth"});
   demarre();
   if(!S.running){restaureCibles();return;}
@@ -7265,7 +7390,7 @@ function filtreCibles(){
     return dans>=CI.on*CI.L-m||dans<m&&b>=per;
   });
 }
-function finCibles(){
+function finCibles(naturel){
   clearInterval(CI.tic);
   if(!CI.actif)return;
   const per=(CI.on+CI.off)*CI.L,lat=latS(),mt=CI.on+CI.off;
@@ -7278,8 +7403,8 @@ function finCibles(){
   }).filter(x=>x.joue);
   CI.res=res;
   const z=$("#ciResume");
+  const justes=res.filter(x=>x.ok===x.n&&!x.trop&&x.dev!=null&&Math.abs(x.dev)<40).length;
   if(res.length&&mesure()){
-    const justes=res.filter(x=>x.ok===x.n&&!x.trop&&x.dev!=null&&Math.abs(x.dev)<40).length;
     z.innerHTML="<p><b>"+justes+" cible"+(justes>1?"s":"")+" sur "+res.length+" justes</b> (toutes les notes, sans frappe en trop, à moins de 40 ms).</p><ul class=\"ci-liste\">"+
       res.map((x,i)=>{const q=x.ok===x.n&&!x.trop&&Math.abs(x.dev)<40?"q-bon":x.ok?"q-moyen":"q-mauvais";
         return '<li><i class="pastille '+q+'"></i><span><b>'+(i+1)+'.</b> '+x.txt.replace(/[<>&]/g,"")+' — '+(x.ok?x.ok+"/"+x.n+" note"+(x.n>1?"s":"")+", "+(Math.abs(x.dev)<5?"en place":(x.dev>0?"en retard de ":"en avance de ")+Math.abs(x.dev)+" ms"):"manquée")+(x.trop?", "+x.trop+" en trop":"")+"</span></li>";}).join("")+"</ul>";
@@ -7287,6 +7412,44 @@ function finCibles(){
   }
   $("#chBandeau").hidden=true;
   restaureCibles();
+  if(CI.boucle)suiteBoucle(naturel?{justes,n:res.length}:null);
+}
+/* ---- cibles dont le tempo change : chaque série réussie (3 cibles justes sur 4) ralentit ou accélère ---- */
+function resumeBoucle(msg){
+  const B_=CI.boucle;CI.boucle=null;clearTimeout(CI.pauseB);
+  $("#chBandeau").hidden=true;$("#btnJouer").disabled=false;$("#btnStop").disabled=true;padMontre(false);
+  if(!B_||!B_.res.length)return;
+  const z=$("#ciResume"),d=document.createElement("div");
+  d.innerHTML="<p><b></b></p><div class=\"ch-pastilles\">"+B_.res.map(x=>'<span class="'+(x.ok?"q-bon":x.justes/x.n>=0.5?"q-moyen":"q-mauvais")+'">♩'+x.bpm+"<br>"+x.justes+"/"+x.n+"</span>").join("")+"</div>";
+  d.querySelector("b").textContent=msg;d.style.marginBottom="12px";
+  z.insertBefore(d,z.firstChild);z.hidden=false;$("#etat").textContent=msg;
+}
+function suiteBoucle(r){
+  const B_=CI.boucle;
+  if(!r||!r.n){resumeBoucle("Séance de cibles arrêtée.");return;}
+  const bpm=parseInt($("#bpm").value,10),ok=r.justes/r.n>=0.75,bas=B_.sens==="bas";
+  B_.res.push({bpm,justes:r.justes,n:r.n,ok});
+  let msg;
+  if(ok){
+    B_.echecs=0;
+    if(bas?bpm<=B_.vise:bpm>=B_.vise){resumeBoucle("Objectif atteint : "+r.justes+" cibles justes sur "+r.n+" à "+bpm+".");return;}
+    setBpmEntr(bas?Math.max(B_.vise,bpm-B_.pas):Math.min(B_.vise,bpm+B_.pas));
+    msg=r.justes+" sur "+r.n+" : "+(bas?"on ralentit.":"on accélère.");
+  }else{
+    B_.echecs++;
+    if(B_.echecs>=3){resumeBoucle("Trois séries manquées de suite : la séance s'arrête à "+bpm+".");return;}
+    msg=r.justes+" sur "+r.n+" : encore une série au même tempo.";
+  }
+  if(B_.res.length>=30){resumeBoucle("Trente séries : la séance s'arrête là.");return;}
+  let reste=3;
+  $("#btnStop").disabled=false;$("#btnJouer").disabled=true;
+  const tic=()=>{
+    if(CI.boucle!==B_)return;
+    if(reste<=0){lanceCibles(true);return;}
+    bandeau("♩ "+$("#bpm").value,msg+" Nouvelle série dans "+reste+" s… (visé "+B_.vise+")");
+    reste--;CI.pauseB=setTimeout(tic,B_.sim?0:1000);
+  };
+  tic();
 }
 function restaureCibles(){
   const a=CI.avant;CI.actif=false;
@@ -7300,11 +7463,187 @@ function restaureCibles(){
   B.courant=a.exo;B.depart=a.depart;
   majSignature();afficheCourant();afficheListe();majBiblioPalos();majPalo();sauve();
 }
-$("#ciLancer").addEventListener("click",lanceCibles);
+$("#ciLancer").addEventListener("click",()=>lanceCibles());
+const CHAMPS_CI=["ciNiveau","ciGroupe","ciJoue","ciSilence","ciTours","ciCycle","ciTempo","ciVise","ciPas"];
+function reglCibles(){const d={};CHAMPS_CI.forEach(k=>d[k]=$("#"+k).value);d.ciDabord=$("#ciDabord").checked;return d;}
+function appliqueCibles(d){
+  if(!d)return;
+  CHAMPS_CI.forEach(k=>{const e=$("#"+k);if(d[k]!=null&&(e.tagName!=="SELECT"||[...e.options].some(o=>o.value===String(d[k]))))e.value=String(d[k]);});
+  $("#ciDabord").checked=!!d.ciDabord;
+}
+function ciTempoMaj(){const f=$("#ciTempo").value==="fixe";document.querySelectorAll("#blocCibles .ci-tempo").forEach(x=>x.hidden=f);}
+try{appliqueCibles(JSON.parse(localStorage.getItem("compas-cibles")||"null"));}catch(e){}
+ciTempoMaj();
+$("#blocCibles").addEventListener("change",()=>{ciTempoMaj();try{localStorage.setItem("compas-cibles",JSON.stringify(reglCibles()));}catch(e){}});
+let SERIES=[];
+try{const l=JSON.parse(localStorage.getItem("compas-series-cibles")||"[]");if(Array.isArray(l))SERIES=l.filter(x=>x&&x.id&&x.nom&&x.code);}catch(e){}
+function sauveSeries(){try{localStorage.setItem("compas-series-cibles",JSON.stringify(SERIES));return true;}catch(e){return false;}}
+// la série en cours : celle dont la partition est à l'écran, avec des cibles tirées de la partition
+function serieCourante(){
+  if(CI.niveau!=="p"&&CI.niveau!=="ph")return null;
+  const c=CI.avant?CI.avant.code:ecrireCode(),cc=codeCompact(c);
+  return SERIES.find(x=>codeCompact(x.code)===cc)||null;
+}
+function chargeSerie(se){
+  if(S.running)return;
+  if(window.Vues)Vues.montre("rythme");
+  appliqueCibles(se.regl);ciTempoMaj();
+  if(se.palo&&[...$("#palo").options].some(o=>o.value===se.palo)){$("#palo").value=se.palo;$("#palo").dispatchEvent(new Event("change",{bubbles:true}));}
+  chargeCodeLibre(se.code,se.bpm||null,"« "+se.nom+" » : ta série de cibles est dans la partition.");
+  try{localStorage.setItem("compas-cibles",JSON.stringify(reglCibles()));}catch(e){}
+  choisitSeance("cibles");ciMaj();
+  $("#ciRetour").textContent="Série « "+se.nom+" » chargée : touche « Lancer les cibles » ou « Démarrer ».";
+}
+function rendSeries(){
+  const z=$("#ciSeries");z.innerHTML="";
+  if(!SERIES.length){const li=document.createElement("li");li.innerHTML="<span>Aucune série enregistrée pour l'instant.</span>";z.appendChild(li);return;}
+  SERIES.forEach(se=>{
+    const li=document.createElement("li"),d=document.createElement("div"),a=document.createElement("div");
+    d.innerHTML="<b></b><span></span>";d.firstChild.textContent=se.nom;
+    const r=se.regl||{},g=r.ciGroupe==="0"?"toute la partition":(r.ciGroupe||"1")+" mesure(s) par cible";
+    d.lastChild.textContent="♩ "+(se.bpm||"—")+(r.ciTempo==="bas"?" → "+r.ciVise+" (descend)":r.ciTempo==="haut"?" → "+r.ciVise+" (monte)":"")+" · "+g+(r.ciDabord?" · silence d'abord":"");
+    a.className="actions";a.style.margin="0";
+    const b1=document.createElement("button");b1.type="button";b1.textContent="Charger";b1.addEventListener("click",()=>chargeSerie(se));
+    const b2=document.createElement("button");b2.type="button";b2.textContent="Supprimer";b2.setAttribute("aria-label","Supprimer la série "+se.nom);
+    b2.addEventListener("click",()=>{if(!confirm("Supprimer la série « "+se.nom+" » ? Tes passages restent dans le journal."))return;SERIES=SERIES.filter(x=>x!==se);sauveSeries();rendSeries();});
+    a.append(b1,b2);li.append(d,a);z.appendChild(li);
+  });
+}
+$("#ciSerieGarder").addEventListener("click",()=>{
+  const nom=$("#ciSerieNom").value.trim().slice(0,80);
+  if(!nom){$("#ciRetour").textContent="Donne un nom à la série.";return;}
+  if(!ciblesPartition(0).length){$("#ciRetour").textContent="Ta partition est vide : écris d'abord tes cibles.";return;}
+  if($("#ciNiveau").value!=="p"&&$("#ciNiveau").value!=="ph"){$("#ciNiveau").value="p";ciMaj();}
+  const code=ecrireCode(),cc=codeCompact(code),deja=SERIES.find(x=>x.nom===nom||codeCompact(x.code)===cc);
+  const se={id:deja?deja.id:"sc"+Date.now().toString(36),nom,code,bpm:parseInt($("#bpm").value,10)||60,palo:$("#palo").value,regl:reglCibles()};
+  if(deja)SERIES[SERIES.indexOf(deja)]=se;else SERIES.push(se);
+  if(!sauveSeries()){$("#ciRetour").textContent="L'appareil a refusé l'enregistrement (stockage plein ou navigation privée).";return;}
+  $("#ciSerieNom").value="";rendSeries();
+  $("#ciRetour").textContent="Série « "+nom+" » "+(deja?"mise à jour":"enregistrée")+". Après un premier passage, tu pourras l'ajouter à tes devoirs.";
+});
+rendSeries();
 ["#ciNiveau","#ciCycle","#ciGroupe","#ciDabord","#ciJoue"].forEach(x=>$(x).addEventListener("change",ciMaj));
 ["#ciNiveau","#blocCibles"].forEach(x=>$(x).addEventListener("pointerdown",ciMaj,true));
 $("#palo").addEventListener("change",ciMaj);
 ciMaj();
+
+/* ---------- un décalage constant : c'est l'appareil, pas la main ---------- */
+// toutes les frappes décalées du même côté, de la même quantité : presque toujours un retard de pad ou de micro mal réglé
+function avisDecalage(devs){
+  const z=$("#avisDecalage");z.hidden=true;
+  if(S.partiel||devs.length<6)return;
+  const t=[...devs].sort((a,b)=>a-b),q=x=>t[Math.min(t.length-1,Math.floor(x*t.length))],med=q(0.5),iqr=q(0.75)-q(0.25);
+  if(Math.abs(med)<40||iqr>45)return;
+  const n=Math.round(Math.abs(med)),src=PAD.on?"du pad":"du micro et de la sortie son";
+  z.innerHTML="<p></p><div class=\"actions\"><button type=\"button\" class=\"primaire\" data-a=\"oui\"></button><button type=\"button\" data-a=\"non\">Non, c'était moi</button></div>";
+  z.querySelector("p").textContent="Tes frappes sont presque toutes "+(med<0?"en avance":"en retard")+" d'environ "+n+" ms, très régulièrement. Si tu jouais en place, ce n'est pas toi : c'est le retard "+src+" qui n'est pas réglé pour cet appareil.";
+  z.querySelector('[data-a="oui"]').textContent="Corriger de "+n+" ms";
+  z.querySelector('[data-a="oui"]').addEventListener("click",()=>{$("#btnLatence").disabled=false;$("#btnLatence").click();z.hidden=false;z.innerHTML="<p>Retard corrigé : les prochains passages en tiennent compte. Rejoue pour vérifier.</p>";});
+  z.querySelector('[data-a="non"]').addEventListener("click",()=>{z.hidden=true;});
+  z.hidden=false;
+}
+/* ---------- avant de démarrer : les réglages qui se contredisent ---------- */
+function listeAvis(){
+  const l=[];
+  if(S.mode==="morceau"||S.running)return l;
+  const ryt=S.mode==="rythme",bpm=parseInt($("#bpm").value,10);
+  if(!mesure())l.push({t:"Ni micro ni pad : le passage sera joué, mais rien ne sera mesuré.",a:"micro",b:"Activer le micro"});
+  if(PAD.on&&!PAD.cal)l.push({t:"Le retard du pad n'a jamais été mesuré : tes frappes paraîtront décalées.",a:"cal",b:"Mesurer"});
+  const sil=$("#silences").value!=="0";
+  if($("#clicDecompte").checked&&sil)l.push({t:"« Couper le clic après le décompte » est coché : le compás intérieur n'aura aucun accompagnement à couper puis à rendre.",a:"clic",b:"Décocher"});
+  if(parseInt($("#volClic").value,10)===0)l.push({t:"Le volume de l'accompagnement est à zéro : tu n'entendras pas le compás.",a:"vol",b:"Remettre"});
+  if(sil&&ryt&&$("#repet").value!=="0"){
+    const c=lireSilences(),tot=R.nbMes*R.num*(parseInt($("#repet").value,10)||1);
+    if(c&&tot<c.per)l.push({t:"Le passage ("+tot+" temps) est plus court qu'un tour « joué puis silence » ("+c.per+" temps) : le silence n'arrivera pas.",a:"repet",b:"En boucle"});
+  }
+  const ch=$("#chaine").value,vise=parseInt($("#chVise").value,10);
+  if(ch==="tempo"&&vise<=bpm)l.push({t:"Tempo qui monte : le tempo visé ("+vise+") n'est pas au-dessus du départ ("+bpm+").",a:"serie",b:"Régler"});
+  if(ch==="tempoBas"&&vise>=bpm)l.push({t:"Tempo qui descend : le tempo visé ("+vise+") n'est pas en dessous du départ ("+bpm+").",a:"serie",b:"Régler"});
+  if((ch==="tempo"||ch==="tempoBas")&&sil)l.push({t:"Tempo qui change et compás intérieur en même temps : la note qui décide du tempo mêlera les deux. C'est possible, mais plus dur à lire."});
+  if($("#guide").value!=="non"&&S.micro&&!PAD.on)l.push({t:"La figure de référence est audible : sans casque, le micro la comptera comme tes frappes."});
+  if(PAD.on&&PAD.zones===4&&ryt&&!aDesDoigts())l.push({t:"Pad en 4 zones, mais la partition n'a pas de doigtés : seul le placement sera vérifié.",a:"zone",b:"1 grande zone"});
+  return l;
+}
+/* ---------- séances types : un bouton règle tout ce qui va ensemble ---------- */
+const SE={cibles:false,repAvant:null};
+function horsCibles(){if(!SE.cibles)return;SE.cibles=false;try{localStorage.setItem("compas-seance-cibles","0");}catch(e){}}
+try{SE.cibles=localStorage.getItem("compas-seance-cibles")==="1";}catch(e){}
+const txtOpt=q=>{const e=$(q);return e&&e.selectedOptions[0]?e.selectedOptions[0].textContent.trim():"";};
+function seanceActuelle(){
+  if(SE.cibles&&S.mode==="rythme")return "cibles";
+  const ch=$("#chaine").value;
+  if(ch==="tempo")return "monte";if(ch==="tempoBas")return "descend";if(ch==="cases")return "cases";
+  return $("#silences").value!=="0"?"interieur":"simple";
+}
+function metSel(q,v){const e=$(q);if(e.value===v)return;e.value=v;e.dispatchEvent(new Event("change",{bubbles:true}));}
+function choisitSeance(k){
+  if(S.running)return;
+  const bpm=parseInt($("#bpm").value,10)||60,R_=window.Replis;
+  // les répétitions passées « en boucle » pour le compás intérieur reviennent comme avant
+  if(k!=="interieur"&&SE.repAvant!=null){if($("#repet").value==="0")metSel("#repet",SE.repAvant);SE.repAvant=null;}
+  SE.cibles=k==="cibles";try{localStorage.setItem("compas-seance-cibles",SE.cibles?"1":"0");}catch(e){}
+  if(k==="simple"||k==="cibles"){metSel("#silences","0");metSel("#chaine","non");}
+  if(k==="interieur"){
+    metSel("#chaine","non");if($("#silences").value==="0")metSel("#silences","2-2");
+    $("#clicDecompte").checked=false;
+    if(S.mode==="rythme"&&["1","2"].indexOf($("#repet").value)>=0){const c=lireSilences(),tot=R.nbMes*R.num*parseInt($("#repet").value,10);if(c&&tot<c.per*2){SE.repAvant=$("#repet").value;metSel("#repet","0");}}
+  }
+  if(k==="monte"){metSel("#silences","0");metSel("#chaine","tempo");if((parseInt($("#chVise").value,10)||0)<=bpm){$("#chVise").value=String(Math.min(240,bpm+20));$("#chVise").dispatchEvent(new Event("change",{bubbles:true}));}}
+  if(k==="descend"){metSel("#silences","0");metSel("#chaine","tempoBas");if((parseInt($("#chVise").value,10)||999)>=bpm){$("#chVise").value=String(Math.max(30,bpm-20));$("#chVise").dispatchEvent(new Event("change",{bubbles:true}));}}
+  if(k==="cases"){metSel("#silences","0");metSel("#chaine","cases");}
+  // on n'ouvre que la rubrique qui sert à cette séance
+  if(R_){
+    R_.ouvre("#blocSerie",["monte","descend","cases"].indexOf(k)>=0);
+    R_.ouvre("#blocCibles",k==="cibles");
+    R_.ouvre("#silences",k==="interieur");
+  }
+  sauve();majSeance();majAvis();
+}
+const OU_SEANCE={interieur:"#silences",cibles:"#blocCibles",monte:"#blocSerie",descend:"#blocSerie",cases:"#blocSerie"};
+function majSeance(){
+  const z=$("#seances");if(!z)return;
+  z.classList.toggle("masque",S.mode==="morceau");
+  const k=seanceActuelle(),bpm=$("#bpm").value;
+  z.querySelectorAll("[data-s]").forEach(b=>{b.setAttribute("aria-pressed",String(b.dataset.s===k));if(b.dataset.s==="cibles")b.hidden=S.mode!=="rythme";});
+  const pause=$("#chPause").value==="0"?"sans pause":"pause de "+$("#chPause").value+" s";
+  const t={simple:"Un passage, accompagnement continu.",
+    interieur:"Le compás se tait par moments : "+txtOpt("#silences")+", "+txtOpt("#silencesQuoi")+".",
+    cibles:"« Démarrer » lance les cibles : "+txtOpt("#ciNiveau")+", "+txtOpt("#ciTempo")+".",
+    monte:"De "+bpm+" vers "+$("#chVise").value+", + "+$("#chPas").value+" bpm à chaque passage à "+$("#chSeuil").value+" de rythme ou plus, "+pause+".",
+    descend:"De "+bpm+" vers "+$("#chVise").value+", − "+$("#chPas").value+" bpm à chaque passage à "+$("#chSeuil").value+" de rythme ou plus, "+pause+".",
+    cases:"Un passage par case, jusqu'à la "+$("#chCaseMax").value+"e"+($("#chRedescend").checked?" et retour":"")+", "+pause+"."}[k];
+  const g=$("#seanceGlose");g.textContent=t;
+  if(OU_SEANCE[k]){const b=document.createElement("button");b.type="button";b.textContent="Régler";b.addEventListener("click",()=>{const e=$(OU_SEANCE[k]);if(e)e.scrollIntoView({block:"center",behavior:"smooth"});});g.appendChild(b);}
+}
+document.querySelectorAll("#seances [data-s]").forEach(b=>b.addEventListener("click",()=>choisitSeance(b.dataset.s)));
+
+let attAvis=null;
+function majAvis(){
+  clearTimeout(attAvis);
+  attAvis=setTimeout(()=>{
+    majSeance();
+    const z=$("#avisReglages");if(!z)return;
+    const l=listeAvis();z.innerHTML="";z.hidden=!l.length;
+    l.forEach(x=>{
+      const li=document.createElement("li"),sp=document.createElement("span");sp.textContent=x.t;li.appendChild(sp);
+      if(x.a){const b=document.createElement("button");b.type="button";b.textContent=x.b;b.addEventListener("click",()=>faitAvis(x.a));li.appendChild(b);}
+      z.appendChild(li);
+    });
+  },150);
+}
+function faitAvis(a){
+  const va=q=>{const e=$(q);if(e)e.scrollIntoView({block:"start",behavior:"smooth"});};
+  if(a==="micro")$("#btnMicro").click();
+  else if(a==="cal"){va("#padReglages");}
+  else if(a==="clic"){$("#clicDecompte").checked=false;sauve();}
+  else if(a==="vol"){$("#volClic").value="55";$("#volClic").dispatchEvent(new Event("input",{bubbles:true}));sauve();}
+  else if(a==="repet"){$("#repet").value="0";$("#repet").dispatchEvent(new Event("change",{bubbles:true}));}
+  else if(a==="serie")va("#chVise");
+  else if(a==="zone"){PAD.zones=1;padZones();padSauve();}
+  majAvis();
+}
+["change","input","click"].forEach(ev=>document.addEventListener(ev,majAvis,true));
+setTimeout(majAvis,600);
 
 /* ---------- séance enchaînée : tempo qui monte, ou accord monté case par case ---------- */
 const CH={on:false,type:null,id:null,k:0,liste:[],res:[],pause:null,echecs:0,bpm0:0,vise:0,sim:null};
@@ -7481,6 +7820,7 @@ function calcule(){
   const moy=devs.reduce((s,v)=>s+v,0)/devs.length;
   const ecart=Math.sqrt(devs.reduce((s,v)=>s+(v-moy)*(v-moy),0)/devs.length);
   S.medianeDev=[...devs].sort((a,b)=>a-b)[Math.floor(devs.length/2)];
+  avisDecalage(devs);
 
   let somme=0;
   S.attendus.forEach(a=>{somme+=a.dev===null?0:Math.max(0,1-Math.abs(a.dev)/(a.tol*1000));});
@@ -7615,7 +7955,8 @@ function corrigePartition(){
 }
 
 $("#btnLatence").addEventListener("click",()=>{
-  if(PAD.on){PAD.lat=Math.round(clamp(PAD.lat+S.medianeDev,-100,300));padMajLat();padSauve();return;}
+  $("#avisDecalage").hidden=true;
+  if(PAD.on){PAD.lat=Math.round(clamp(PAD.lat+S.medianeDev,-100,300));PAD.cal=true;padMajLat();padSauve();majAvis();return;}
   const v=Math.round(clamp(parseFloat($("#latence").value)+S.medianeDev,-400,400));
   $("#latence").value=v;$("#latenceVal").textContent=v;
 });
@@ -8557,7 +8898,8 @@ function entreeJournal(x){
     const e=B.courant?exoParId(B.courant):null,cc=compactMesures(R.num,R.den,R.mesures);
     if(e&&codeCompact(e.code)===cc){exo=e.id;titre=e.titre;cle="exo:"+e.id;}
     else{titre="Partition libre — "+R.num+"/"+R.den+", "+R.nbMes+" mes.";cle="code:"+cc;}
-    if(CI.actif){titre="Compás intérieur — cibles ("+NIVEAUX_CI[CI.niveau]+")";cle="cibles:"+CI.niveau+":"+(CI.palo?CI.palo.nom:"clic");exo=null;}
+    if(CI.actif){titre="Compás intérieur — cibles ("+NIVEAUX_CI[CI.niveau]+")";cle="cibles:"+CI.niveau+":"+(CI.palo?CI.palo.nom:"clic");exo=null;
+      if(CI.serie){titre="Cibles — "+CI.serie.nom;cle="cibles:serie:"+CI.serie.id;}}
   }else if(mode==="rasgueado"){
     const n=(P.nom||"patron").split(" —")[0];titre="Rasgueado — "+n;cle="ras:"+n;
   }else{titre=S.pm.nom;cle="mor:"+S.pm.nom;}
@@ -9209,15 +9551,19 @@ window.Entraineur={
   _simule:fn=>{demarre();if(!S.running)return false;const lat=latS();S.onsets=[];
     S.attendus.forEach((a,i)=>{const r=fn(a,i);if(r)S.onsets.push({t:a.t+r.dev/1000+lat,amp:r.amp,doigts:r.doigts||null});});
     const m=S.micro;S.micro=true;termine();S.micro=m;return true;},
+  _cibles:o=>{CI.simB=true;try{lanceCibles();}finally{CI.simB=false;}return CI.boucle;},
   _serie:fn=>{CH.sim=fn;try{lanceSerie();}finally{CH.sim=null;}return CH.res.slice();},
   // une séance enchaînée réglée de l'extérieur (programme des devoirs)
-  regleSerie:o=>{if(o.type)$("#chaine").value=o.type;if(o.vise)$("#chVise").value=String(o.vise);if(o.seuil)$("#chSeuil").value=String(o.seuil);if(o.bpm)setBpmEntr(o.bpm);chMaj();chSauve();},
+  regleSerie:o=>{horsCibles();if(o.type)$("#chaine").value=o.type;if(o.vise)$("#chVise").value=String(o.vise);if(o.seuil)$("#chSeuil").value=String(o.seuil);if(o.bpm)setBpmEntr(o.bpm);chMaj();chSauve();},
   // un devoir : on remet l'exercice (figure, rasgueado ou morceau) et son tempo
   travaille:s=>{
+    horsCibles();
     if(s.cle&&s.cle.indexOf("cibles:")===0){
       if(window.Vues)Vues.montre("rythme");
-      const n=s.cle.split(":")[1];if([...$("#ciNiveau").options].some(o=>o.value===n&&!o.disabled))$("#ciNiveau").value=n;
-      if(s.bpm)setBpmEntr(s.bpm);
+      const n=s.cle.split(":")[1];
+      if(n==="serie"){const se=SERIES.find(x=>x.id===s.cle.split(":")[2]);if(se)chargeSerie(se);}
+      else{if([...$("#ciNiveau").options].some(o=>o.value===n&&!o.disabled))$("#ciNiveau").value=n;if(s.bpm)setBpmEntr(s.bpm);}
+      choisitSeance("cibles");ciMaj();
       const z=document.getElementById("blocCibles");if(z)z.scrollIntoView({block:"start"});return;
     }
     if(s.mode==="morceau"){if(window.Vues)Vues.montre("morceaux");return;}
@@ -11960,7 +12306,7 @@ function graphe(z,jours,titre,val,dom,seuil,vit){
     const d=best.d;
     bulle.innerHTML="<b></b><br><span></span>";
     bulle.firstChild.textContent=dateCourte(d.t)+" · "+d.n+" passage"+(d.n>1?"s":"");
-    bulle.lastChild.textContent=(d.tempo!=null?(vit?d.tempo+" %":"♩ "+d.tempo)+" au plus vite":"")+(d.r!=null?" · meilleur rythme "+d.r:"");
+    bulle.lastChild.textContent=d.info||(d.tempo!=null?(vit?d.tempo+" %":"♩ "+d.tempo)+" au plus vite":"")+(d.r!=null?" · meilleur rythme "+d.r:"");
     bulle.hidden=false;
     const bx=px*rc.width/W,bw=bulle.offsetWidth;
     bulle.style.left=Math.max(0,Math.min(rc.width-bw,bx-bw/2))+"px";bulle.style.top=(yOf(best.v)*rc.height/H-bulle.offsetHeight-12)+"px";
@@ -11997,12 +12343,39 @@ $("#jSauve").addEventListener("click",async()=>{
 });
 /* ---------- tout sauvegarder, tout restaurer ---------- */
 const CLES_EXCLUES=["compas-installer-vu"];
+const CLE_DSAUVE="compas-derniere-sauvegarde";
+function baseImages(){return new Promise((ok,ko)=>{try{const q=indexedDB.open("compas-images",1);q.onupgradeneeded=()=>q.result.createObjectStore("img");q.onsuccess=()=>ok(q.result);q.onerror=()=>ko(q.error);}catch(e){ko(e);}});}
+async function lisImages(){
+  try{const db=await baseImages();return await new Promise(ok=>{const o={},r=db.transaction("img").objectStore("img").openCursor();
+    r.onsuccess=()=>{const c=r.result;if(c){if(typeof c.value==="string")o[c.key]=c.value;c.continue();}else ok(o);};r.onerror=()=>ok(o);});}catch(e){return {};}
+}
+async function ecrisImages(o){
+  const ks=Object.keys(o||{}).filter(k=>typeof o[k]==="string"&&o[k].indexOf("data:image/")===0);if(!ks.length)return 0;
+  const db=await baseImages();
+  await new Promise((ok,ko)=>{const t=db.transaction("img","readwrite");ks.forEach(k=>t.objectStore("img").put(o[k],k));t.oncomplete=()=>ok();t.onerror=()=>ko(t.error);});
+  return ks.length;
+}
+function rappelSauvegarde(){
+  let d=0;try{d=parseInt(localStorage.getItem(CLE_DSAUVE)||"0",10)||0;}catch(e){}
+  const j=d?Math.floor((Date.now()-d)/864e5):null,z=$("#jRappelSauve"),t=$("#jDerniereSauve");
+  if(t)t.textContent=d?"Dernière sauvegarde complète : "+(j===0?"aujourd'hui":j===1?"hier":"il y a "+j+" jours")+".":"Aucune sauvegarde complète faite depuis cet appareil.";
+  if(!z)return;
+  const besoin=J.seances.length>=10&&(j===null||j>30);
+  z.hidden=!besoin;
+  if(besoin)z.firstChild.textContent=(j===null?"Tu n'as encore jamais sauvegardé":"Ta dernière sauvegarde date de "+j+" jours")+" : "+J.seances.length+" passages et tous tes exercices ne sont que sur cet appareil.";
+}
+$("#jRappelSauve").querySelector("button").addEventListener("click",()=>$("#toutSauver").click());
 function clesCompas(){const l=[];try{for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i);if(k&&k.indexOf("compas")===0&&CLES_EXCLUES.indexOf(k)<0)l.push(k);}}catch(e){}return l;}
 $("#toutSauver").addEventListener("click",async()=>{
   const reglages={};clesCompas().forEach(k=>{try{reglages[k]=localStorage.getItem(k);}catch(e){}});
-  const txt=JSON.stringify({format:"compas-sauvegarde",v:1,date:new Date().toISOString(),reglages,journal:J.seances});
+  const images=await lisImages(),nImg=Object.keys(images).length;
+  const txt=JSON.stringify({format:"compas-sauvegarde",v:2,date:new Date().toISOString(),reglages,journal:J.seances,images});
   const nom="compas-sauvegarde-"+cleJour(Date.now())+".json";
-  if(await donne(txt,nom,"application/json"))retour("Tout est sauvegardé dans « "+nom+" » : "+J.seances.length+" passage(s) et "+Object.keys(reglages).length+" groupe(s) de réglages.");
+  if(await donne(txt,nom,"application/json")){
+    try{localStorage.setItem(CLE_DSAUVE,String(Date.now()));}catch(e){}
+    rappelSauvegarde();
+    retour("Tout est sauvegardé dans « "+nom+" » : "+J.seances.length+" passage(s), "+Object.keys(reglages).length+" groupe(s) de réglages"+(nImg?" et "+nImg+" image(s) de partition":"")+".");
+  }
 });
 $("#toutRestaurer").addEventListener("change",async e=>{
   const f=e.target.files&&e.target.files[0];e.target.value="";if(!f)return;
@@ -12018,7 +12391,8 @@ $("#toutRestaurer").addEventListener("change",async e=>{
   }catch(err){retour("L'appareil a refusé l'enregistrement du journal.");return;}
   try{Object.keys(d.reglages||{}).forEach(k=>{if(k.indexOf("compas")===0&&typeof d.reglages[k]==="string")localStorage.setItem(k,d.reglages[k]);});}
   catch(err){retour("L'appareil a refusé l'enregistrement des réglages (stockage plein ?).");return;}
-  retour(n+" passage(s) ajouté(s) au journal. Compás redémarre pour appliquer le reste…");
+  let nImg=0;try{nImg=await ecrisImages(d.images);}catch(err){}
+  retour(n+" passage(s) ajouté(s) au journal"+(nImg?", "+nImg+" image(s) de partition remise(s)":"")+". Compás redémarre pour appliquer le reste…");
   setTimeout(()=>location.reload(),1200);
 });
 
@@ -12041,8 +12415,109 @@ function rendTout(){
   if(!J.jour)J.jour=cleJour(Date.now());
   rendTuiles();rendCalendrier();rendJour();rendChoix();rendProgres();
   try{rendAnalyse();}catch(e){$("#jAnaCorps").innerHTML='<p class="j-vide">L\'analyse n\'a pas pu être calculée.</p>';}
+  try{rendInterieur();}catch(e){$("#jIntCorps").innerHTML='<p class="j-vide">Ce suivi n\'a pas pu être calculé.</p>';}
+  try{rendTempo();}catch(e){$("#jTempoCorps").innerHTML='<p class="j-vide">Ce graphique n\'a pas pu être calculé.</p>';}
+  rappelSauvegarde();
   try{if(window.Arpeges){Arpeges.rendCouverture($("#jCouvCorps"),J.seances);Arpeges.rendDuJour($("#jCouvJour"),J.seances);}}catch(e){$("#jCouvCorps").innerHTML='<p class="j-vide">Le tableau n\'a pas pu être calculé.</p>';}
 }
+
+/* ---------- le compás intérieur : dans le silence et avec l'accompagnement ---------- */
+// une séance → ses frappes attendues dans le silence et avec le compás (note sur 100, dérive en ms)
+function partsSilence(s){
+  if(!s.det||!Array.isArray(s.det.f)||!Array.isArray(s.det.k))return null;
+  const note=l=>l.length?100*l.reduce((a,x)=>a+x.n,0)/l.length:null;
+  const rows=s.det.f.map(f=>{const tol=(s.det.k[f[0]]||{}).tol||60,dev=f[3];return {dev,sil:f[5]===1,n:dev==null?0:Math.max(0,1-Math.abs(dev)/tol)};});
+  const S1=rows.filter(x=>x.sil),S0=rows.filter(x=>!x.sil);
+  if(S1.length<2)return null;
+  // dans chaque silence assez long : la première et la seconde moitié, pour voir si la dérive grandit
+  const debut=[],fin=[];
+  if(!(s.cle||"").startsWith("cibles:")){
+    let run=[];const clos=()=>{const j=run.filter(x=>x.dev!=null);if(j.length>=4){const m=Math.floor(j.length/2);j.slice(0,m).forEach(x=>debut.push(x.dev));j.slice(-m).forEach(x=>fin.push(x.dev));}run=[];};
+    rows.forEach(x=>{if(x.sil)run.push(x);else clos();});clos();
+  }
+  return {S1,S0,sil:note(S1),avec:note(S0),devs:S1.filter(x=>x.dev!=null).map(x=>x.dev),manq:S1.filter(x=>x.dev==null).length,debut,fin};
+}
+const moyL=l=>l.length?l.reduce((a,b)=>a+b,0)/l.length:null;
+function rendInterieur(){
+  const z=$("#jIntCorps");if(!z)return;z.innerHTML="";
+  const per=parseInt($("#jIntPeriode").value,10),depuis=per?Date.now()-per*864e5:0;
+  const l=J.seances.filter(s=>s.t>=depuis&&s.mode!=="morceau").map(s=>({s,p:partsSilence(s)})).filter(x=>x.p).sort((a,b)=>a.s.t-b.s.t);
+  if(!l.length){const p=document.createElement("p");p.className="j-vide";p.textContent="Aucun passage avec silence sur cette période. Lance une séance « Compás intérieur » ou « Cibles » dans Figures rythmiques.";z.appendChild(p);return;}
+  const tous1=[].concat(...l.map(x=>x.p.S1)),tous0=[].concat(...l.map(x=>x.p.S0));
+  const nSil=Math.round(100*tous1.reduce((a,x)=>a+x.n,0)/tous1.length),nAvec=tous0.length>=4?Math.round(100*tous0.reduce((a,x)=>a+x.n,0)/tous0.length):null;
+  const devs=[].concat(...l.map(x=>x.p.devs)),der=moyL(devs),manq=Math.round(100*l.reduce((a,x)=>a+x.p.manq,0)/tous1.length);
+  const deb=moyL([].concat(...l.map(x=>x.p.debut))),fin=moyL([].concat(...l.map(x=>x.p.fin)));
+  const sens=v=>Math.abs(v)<5?"en place":(v<0?"en avance de ":"en retard de ")+Math.abs(Math.round(v))+" ms";
+  const chiffres=[[String(nSil),"note dans le silence (sur 100)"],[nAvec==null?"—":String(nAvec),"note avec le compás"],
+    [der==null?"—":(der>0?"+":"")+Math.round(der)+" ms","dérive moyenne dans le silence"],[manq+" %","frappes manquées dans le silence"]];
+  const c=document.createElement("div");c.className="j-chiffres";
+  chiffres.forEach(([v,t])=>{const d=document.createElement("div");d.innerHTML="<b></b><span></span>";d.firstChild.textContent=v;d.lastChild.textContent=t;c.appendChild(d);});
+  z.appendChild(c);
+  const ul=document.createElement("ul");ul.className="j-lecture";
+  const dit=(q,t)=>{const li=document.createElement("li");li.className=q;li.textContent=t;ul.appendChild(li);};
+  if(nAvec!=null){const d=nAvec-nSil;dit(d>=15?"mauvais":d>=7?"moyen":"bon",d>=7?"Tu perds "+d+" points quand le compás se tait : c'est là qu'il faut travailler.":d<=-7?"Tu es plus précis dans le silence qu'avec l'accompagnement : ton compás intérieur est solide, c'est l'écoute du clic qui te gêne.":"Tu tiens presque aussi bien sans le compás qu'avec lui ("+nSil+" contre "+nAvec+").");}
+  if(der!=null)dit(Math.abs(der)>=20?"mauvais":Math.abs(der)>=10?"moyen":"bon",Math.abs(der)<10?"Pas de dérive nette dans le silence : tes frappes tombent "+sens(der)+" en moyenne.":"Dans le silence, tu "+(der<0?"presses":"traînes")+" : tes frappes tombent "+sens(der)+" en moyenne."+(der<0?" Laisse le temps se finir avant de frapper.":" Anticipe un peu plus le geste."));
+  if(deb!=null&&fin!=null&&Math.abs(fin-deb)>=8)dit(Math.abs(fin)>Math.abs(deb)?"moyen":"bon","Du début à la fin d'un silence, tu passes de "+sens(deb)+" à "+sens(fin)+" : "+(Math.abs(fin)>Math.abs(deb)?"la dérive grandit avec la durée, allonge les silences progressivement.":"tu te recales en cours de silence."));
+  if(manq>=15)dit("moyen","Tu manques "+manq+" % des frappes dans le silence : ralentis ou raccourcis les silences avant de viser la précision.");
+  z.appendChild(ul);
+  const jours=new Map();
+  l.forEach(x=>{const k=cleJour(x.s.t);if(!jours.has(k))jours.set(k,[]);jours.get(k).push(x);});
+  const pj=[...jours.values()].map(ls=>{
+    const a=[].concat(...ls.map(x=>x.p.S1)),dv=[].concat(...ls.map(x=>x.p.devs)),d=moyL(dv);
+    const sil=Math.round(100*a.reduce((q,x)=>q+x.n,0)/a.length);
+    return {t:debutJour(ls[0].s.t).getTime(),n:ls.length,sil,drift:d==null?null:Math.round(d),info:"silence "+sil+(d==null?"":" · "+sens(d))};
+  });
+  graphe(z,pj,"Note dans le silence, par jour (sur 100)",d=>d.sil,[0,100],80);
+  const mx=Math.max(40,...pj.map(d=>Math.abs(d.drift||0))),b=Math.ceil(mx/20)*20;
+  graphe(z,pj,"Dérive dans le silence, par jour (ms · négatif = en avance)",d=>d.drift,[-b,b],null);
+}
+$("#jIntPeriode").addEventListener("change",()=>rendInterieur());
+
+/* ---------- la précision selon le tempo ---------- */
+function rendTempo(){
+  const z=$("#jTempoCorps");if(!z)return;z.innerHTML="";
+  const per=parseInt($("#jTempoPeriode").value,10),depuis=per?Date.now()-per*864e5:0,quoi=$("#jTempoQuoi").value;
+  const l=J.seances.filter(s=>s.t>=depuis&&s.mode!=="morceau"&&s.bpm&&s.r!=null&&!s.partiel&&
+    (quoi==="tout"||(quoi==="silence"?!!(s.silences||(s.cle||"").startsWith("cibles:")):s.mode===quoi&&!(s.cle||"").startsWith("cibles:"))));
+  if(l.length<3){const p=document.createElement("p");p.className="j-vide";p.textContent="Pas encore assez de passages sur cette période (il en faut au moins 3).";z.appendChild(p);return;}
+  const tr=new Map();
+  l.forEach(s=>{const k=Math.floor(s.bpm/10)*10;if(!tr.has(k))tr.set(k,[]);tr.get(k).push(s);});
+  const T=[...tr.entries()].sort((a,b)=>a[0]-b[0]).map(([k,ls])=>({k,n:ls.length,r:Math.round(moyL(ls.map(s=>s.r))),jit:Math.round(moyL(ls.map(s=>s.jit).filter(v=>v!=null))||0)}));
+  const solides=T.filter(x=>x.n>=3),faible=solides.length>1?solides.reduce((a,b)=>b.r<a.r?b:a):null,fort=solides.length>1?solides.reduce((a,b)=>b.r>a.r?b:a):null;
+  // lien entre tempo et précision (corrélation simple)
+  const mb=moyL(l.map(s=>s.bpm)),mr=moyL(l.map(s=>s.r));let sxy=0,sxx=0,syy=0;
+  l.forEach(s=>{sxy+=(s.bpm-mb)*(s.r-mr);sxx+=(s.bpm-mb)**2;syy+=(s.r-mr)**2;});
+  const cor=sxx&&syy?sxy/Math.sqrt(sxx*syy):0;
+  const ul=document.createElement("ul");ul.className="j-lecture";
+  const dit=(q,t)=>{const li=document.createElement("li");li.className=q;li.textContent=t;ul.appendChild(li);};
+  if(faible&&fort&&fort.r-faible.r>=5)dit("moyen","Tu es le moins précis entre "+faible.k+" et "+(faible.k+9)+" ("+faible.r+" en moyenne sur "+faible.n+" passages) et le plus précis entre "+fort.k+" et "+(fort.k+9)+" ("+fort.r+"). Travaille en priorité la tranche "+faible.k+"–"+(faible.k+9)+".");
+  else if(solides.length>1)dit("bon","Ta précision est à peu près la même à tous les tempos travaillés.");
+  if(l.length>=8&&T.length>=2)dit(Math.abs(cor)<0.25?"bon":"moyen",cor>=0.25?"Plus le tempo est lent, moins tu es précis : le vide entre les notes te coûte. Les séances « Tempo qui descend » sont faites pour ça.":cor<=-0.25?"Plus le tempo est rapide, moins tu es précis : monte par petits pas avec « Tempo qui monte ».":"Pas de lien net entre le tempo et ta précision sur cette période.");
+  if(solides.length<T.length)dit("","Les tranches de moins de 3 passages sont indicatives.");
+  z.appendChild(ul);
+  // barres : une par tranche de 10
+  const bloc=document.createElement("div");bloc.className="j-graphe tp-barres";
+  const h=document.createElement("h3");h.textContent="Note de rythme moyenne par tranche de tempo (sur 100)";bloc.appendChild(h);z.appendChild(bloc);
+  const W=Math.max(280,bloc.clientWidth||600),H=170,mg={g:30,d:8,h:18,b:38},pl=(W-mg.g-mg.d)/T.length,lb=Math.min(46,pl*0.7);
+  const yOf=v=>mg.h+(1-v/100)*(H-mg.h-mg.b);
+  let g='<svg viewBox="0 0 '+W+' '+H+'" role="img" aria-label="Note de rythme moyenne par tranche de tempo">';
+  [0,50,100].forEach(v=>{g+='<line class="grille" x1="'+mg.g+'" x2="'+(W-mg.d)+'" y1="'+yOf(v)+'" y2="'+yOf(v)+'" stroke-opacity="'+(v?0.5:1)+'"/><text class="axe" x="'+(mg.g-6)+'" y="'+(yOf(v)+3)+'" text-anchor="end">'+v+'</text>';});
+  g+='<line class="seuil" x1="'+mg.g+'" x2="'+(W-mg.d)+'" y1="'+yOf(80)+'" y2="'+yOf(80)+'"/>';
+  T.forEach((x,i)=>{
+    const cx=mg.g+pl*(i+0.5),y=yOf(x.r),f=x===faible&&fort&&fort.r-faible.r>=5;
+    g+='<rect class="barre'+(f?" faible":"")+'" x="'+(cx-lb/2).toFixed(1)+'" y="'+y.toFixed(1)+'" width="'+lb.toFixed(1)+'" height="'+Math.max(1,yOf(0)-y).toFixed(1)+'" rx="2" opacity="'+(x.n>=3?1:0.45)+'"><title>'+x.k+" à "+(x.k+9)+" : "+x.r+" sur "+x.n+" passage(s)</title></rect>";
+    g+='<text class="val" x="'+cx.toFixed(1)+'" y="'+(y-5).toFixed(1)+'" text-anchor="middle">'+x.r+'</text>';
+    g+='<text class="axe" x="'+cx.toFixed(1)+'" y="'+(H-22)+'" text-anchor="middle">'+x.k+(pl>44?"–"+(x.k+9):"")+'</text>';
+    g+='<text class="'+(f?"faible-txt":"axe")+'" x="'+cx.toFixed(1)+'" y="'+(H-8)+'" text-anchor="middle">'+(f&&pl>52?"à travailler":x.n+" pass.")+'</text>';
+  });
+  g+='</svg>';
+  const cont=document.createElement("div");cont.innerHTML=g;bloc.appendChild(cont);
+  const tb=document.createElement("div");tb.className="j-table-cadre";
+  tb.innerHTML='<table class="j-table"><thead><tr><th>Tempo</th><th>Passages</th><th>Note moyenne</th><th>Irrégularité</th></tr></thead><tbody>'+
+    T.map(x=>"<tr><td>"+x.k+" à "+(x.k+9)+"</td><td>"+x.n+"</td><td>"+x.r+"</td><td>"+x.jit+" ms</td></tr>").join("")+"</tbody></table>";
+  z.appendChild(tb);
+}
+["#jTempoPeriode","#jTempoQuoi"].forEach(q=>$(q).addEventListener("change",()=>rendTempo()));
 
 /* ---------- analyse de la technique, sur une période ---------- */
 function sparkline(vals){
@@ -12555,6 +13030,41 @@ if(ios&&!installee&&!vu&&/^https?:$/.test(location.protocol)){
   if(h)h.after(b);b.hidden=false;
   document.getElementById("installerFermer").addEventListener("click",function(){b.hidden=true;try{localStorage.setItem("compas-installer-vu","1");}catch(e){}});
 }
+// la version : toujours visible, et un bandeau dès qu'une plus récente est en ligne
+const V_APP=38;
+window.COMPAS_VERSION=V_APP;
+const pied=document.createElement("p");pied.className="pied-version";pied.id="piedVersion";pied.textContent="Compás v"+V_APP;
+const majB=document.createElement("div");majB.className="maj-bandeau";majB.id="majBandeau";majB.hidden=true;majB.setAttribute("role","status");
+majB.innerHTML="<span></span><button type=\"button\">Mettre à jour</button>";
+window.addEventListener("load",function(){
+  const w=document.querySelector(".wrap")||document.body,h=document.querySelector(".wrap header");
+  w.appendChild(pied);if(h)h.after(majB);else w.insertBefore(majB,w.firstChild);
+  verifieVersion();
+});
+async function versionEnLigne(){
+  const t=await (await fetch("sw.js?maj="+Date.now(),{cache:"no-store"})).text();
+  const m=t.match(/VERSION = "compas-v(\d+)"/);return m?parseInt(m[1],10):null;
+}
+let derniereVerif=0;
+async function verifieVersion(){
+  if(!/^https?:$/.test(location.protocol)){pied.textContent="Compás v"+V_APP;return;}
+  if(Date.now()-derniereVerif<60000)return;derniereVerif=Date.now();
+  try{
+    const n=await versionEnLigne();
+    if(n&&n>V_APP){
+      majB.firstChild.textContent="Une version plus récente de Compás est en ligne (v"+n+"). Tu utilises la v"+V_APP+".";
+      majB.hidden=false;pied.textContent="Compás v"+V_APP+" · la v"+n+" est disponible";
+    }else{majB.hidden=true;pied.textContent="Compás v"+V_APP+" · à jour";}
+  }catch(e){pied.textContent="Compás v"+V_APP+" · hors connexion, version non vérifiée";}
+}
+// une app installée reste des jours en mémoire : on revérifie à chaque retour au premier plan
+document.addEventListener("visibilitychange",function(){if(!document.hidden)verifieVersion();});
+majB.lastChild.addEventListener("click",async function(){
+  majB.firstChild.textContent="Mise à jour…";
+  try{const r=await navigator.serviceWorker.getRegistration();if(r)await r.update();}catch(e){}
+  try{const c=await caches.open("compas-v"+V_APP);await c.delete("index.html",{ignoreSearch:true});await c.delete("./",{ignoreSearch:true});}catch(e){}
+  location.reload();
+});
 // état du hors connexion : prêt ou non, avec un bouton pour le préparer
 async function etatHL(){
   if(!("serviceWorker" in navigator)||!/^https?:$/.test(location.protocol))
@@ -12580,7 +13090,7 @@ window.addEventListener("load",function(){
     try{
       if("serviceWorker" in navigator)await navigator.serviceWorker.register("sw.js");
       // la version en cours est celle que déclare le service worker
-      let v="compas-v37";try{const t=await (await fetch("sw.js",{cache:"no-store"})).text();const m=t.match(/VERSION = "([^"]+)"/);if(m)v=m[1];}catch(e){}
+      let v="compas-v"+V_APP;try{const t=await (await fetch("sw.js",{cache:"no-store"})).text();const m=t.match(/VERSION = "([^"]+)"/);if(m)v=m[1];}catch(e){}
       const c=await caches.open(v);
       await c.addAll(["./","index.html"]);
       await Promise.all(["manifest.webmanifest","icone-180.png","icone-192.png","icone-512.png","icone-masquable-512.png","pdfjs/pdf.min.js","pdfjs/pdf.worker.min.js"]
@@ -12649,6 +13159,8 @@ const RESUMES={
   "Ajouter un devoir":()=>"Parmi les exercices déjà joués",
   "Rappel quotidien":()=>"Rappel dans le Calendrier",
   "Combinaisons de la main droite":()=>{const t=$(".cv-total");return t?t.textContent:"";},
+  "Ton compás intérieur":()=>"Précision et dérive quand le compás se tait",
+  "Ta précision selon le tempo":()=>"À quels tempos tu es le moins précis",
   "Analyse de ta technique":()=>"Doigt par doigt, par type de frappe, par palo",
   "Sauvegarder":()=>"Tout sauvegarder, tout restaurer, exporter",
   "Pistes":()=>"Volume et écoute de chaque piste",
